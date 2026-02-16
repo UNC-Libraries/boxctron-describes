@@ -1,33 +1,33 @@
 """
-Request models for the API endpoints.
+Request model for the describe/uri endpoint.
 """
 from typing import Optional
-from pydantic import BaseModel, Field, field_validator
-from fastapi import UploadFile
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
-class DescribeRequest(BaseModel):
+class DescribeUriRequest(BaseModel):
     """
-    Request model for the describe endpoint.
+    Request model for the describe/uri endpoint.
     
-    Either file_uri or an uploaded file must be provided.
+    Contains all information needed to process an image from a URI.
     """
     
-    file_uri: Optional[str] = Field(
-        None,
-        description="URI to an image file to process"
+    uri: str = Field(
+        ...,
+        description="URI to an image file to process",
+        max_length=2048
     )
     
     context: Optional[str] = Field(
         None,
         description="Optional context string to help guide the description generation",
-        max_length=2000
+        max_length=5000
     )
     
     filename: str = Field(
         ...,
-        description="Filename of the uploaded file",
-        max_length=255
+        description="Filename of the image",
+        max_length=1024
     )
     
     mimetype: str = Field(
@@ -44,12 +44,13 @@ class DescribeRequest(BaseModel):
             raise ValueError("MIME type must be for an image")
         return v
     
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
-                "file_uri": "https://example.com/images/photo.jpg",
+                "uri": "https://example.com/images/photo.jpg",
                 "context": "This is a product photo for an e-commerce listing",
                 "filename": "photo.jpg",
                 "mimetype": "image/jpeg"
             }
         }
+    )

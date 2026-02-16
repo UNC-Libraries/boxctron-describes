@@ -1,44 +1,37 @@
 """
 Describe endpoint - processes images and returns descriptive information.
 """
-from typing import Optional
-from fastapi import APIRouter, File, UploadFile, Form, HTTPException, status
-from fastapi.responses import JSONResponse
+from typing import Annotated
+from fastapi import APIRouter, File, UploadFile, Form, HTTPException, status, Depends
 
-from app.models import DescribeResponse, DescriptionResult
+from app.models import DescribeUploadRequest, DescribeUriRequest, DescribeResponse, DescriptionResult
 from app.config import settings
 
 router = APIRouter(prefix="/api/v1", tags=["describe"])
 
 
 @router.post(
-    "/describe",
+    "/describe/upload",
     response_model=DescribeResponse,
     status_code=status.HTTP_200_OK,
-    summary="Describe an image",
+    summary="Describe an uploaded image",
     description="""
-    Process an image and return descriptive information.
+    Process an uploaded image file and return descriptive information.
     
-    The endpoint accepts either:
-    - An uploaded file via multipart/form-data
-    - A file URI pointing to an image
-    
-    At least one of these must be provided.
+    Submit the image as multipart/form-data along with metadata fields.
     """
 )
-async def describe_image(
-    file: Optional[UploadFile] = File(None, description="Image file to process"),
-    file_uri: Optional[str] = Form(None, description="URI to an image file"),
-    context: Optional[str] = Form(None, description="Optional context for description"),
-    filename: str = Form(..., description="Filename of the image"),
-    mimetype: str = Form(..., description="MIME type of the image")
+async def describe_uploaded_image(
+    file: UploadFile = File(..., description="Image file to process"),
+    context: Annotated[str | None, Form()] = None,
+    filename: Annotated[str, Form()] = ...,
+    mimetype: Annotated[str, Form()] = ...
 ) -> DescribeResponse:
     """
-    Describe an image using AI vision models.
+    Describe an uploaded image using AI vision models.
     
     Args:
-        file: Uploaded image file (optional if file_uri is provided)
-        file_uri: URI to an image file (optional if file is provided)
+        file: Uploaded image file
         context: Optional context string to guide description generation
         filename: Name of the file being processed
         mimetype: MIME type of the image
@@ -47,15 +40,8 @@ async def describe_image(
         DescribeResponse with description results or error information
         
     Raises:
-        HTTPException: If validation fails or neither file nor file_uri is provided
+        HTTPException: If validation fails
     """
-    
-    # Validate that at least one input method is provided
-    if not file and not file_uri:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Either 'file' or 'file_uri' must be provided"
-        )
     
     # Validate MIME type
     if not mimetype.startswith("image/"):
@@ -71,17 +57,15 @@ async def describe_image(
             detail=f"MIME type '{mimetype}' is not supported. Allowed types: {settings.allowed_mime_types}"
         )
     
-    # Validate uploaded file if provided
-    if file:
-        # Check file size
-        file_content = await file.read()
-        if len(file_content) > settings.max_upload_size:
-            raise HTTPException(
-                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-                detail=f"File size exceeds maximum allowed size of {settings.max_upload_size} bytes"
-            )
-        # Reset file pointer for future processing
-        await file.seek(0)
+    # Validate uploaded file
+    file_content = await file.read()
+    if len(file_content) > settings.max_upload_size:
+        raise HTTPException(
+            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+            detail=f"File size exceeds maximum allowed size of {settings.max_upload_size} bytes"
+        )
+    # Reset file pointer for future processing
+    await file.seek(0)
     
     # TODO: Implement actual image processing logic
     # For now, return a placeholder response
@@ -94,7 +78,65 @@ async def describe_image(
             tags=None,
             metadata={
                 "status": "not_implemented",
-                "note": "Actual implementation pending"
+                "note": "Actual implementation pending",
+                "source": "upload"
+            }
+        ),
+        processing_time_ms=0.0
+    )
+
+
+@router.post(
+    "/describe/uri",
+    response_model=DescribeResponse,
+    status_code=status.HTTP_200_OK,
+    summary="Describe an image from URI",
+    description="""
+    Process an image from a URI and return descriptive information.
+    
+    Provide the URI to an accessible image along with metadata in JSON format.
+    """
+)
+async def describe_image_from_uri(
+    request: DescribeUriRequest
+) -> DescribeResponse:
+    """
+    Describe an image from a URI using AI vision models.
+    
+    Args:
+        request: Request containing URI and metadata
+        
+    Returns:
+        DescribeResponse with description results or error information
+        
+    Raises:
+        HTTPException: If validation fails
+    """
+    
+    # Validate MIME type against allowed types
+    if request.mimetype not in settings.allowed_mime_types:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"MIME type '{request.mimetype}' is not supported. Allowed types: {settings.allowed_mime_types}"
+        )
+    
+    # TODO: Implement actual image processing logic
+    # - Download image from URI
+    # - Validate image content
+    # - Process with LLM
+    # For now, return a placeholder response
+    return DescribeResponse(
+        success=True,
+        filename=request.filename,
+        result=DescriptionResult(
+            description="[Placeholder] Image description will be generated here",
+            confidence=None,
+            tags=None,
+            metadata={
+                "status": "not_implemented",
+                "note": "Actual implementation pending",
+                "source": "uri",
+                "uri": request.uri
             }
         ),
         processing_time_ms=0.0

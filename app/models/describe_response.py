@@ -2,7 +2,7 @@
 Response models for the API endpoints.
 """
 from typing import Optional, Dict, Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class DescriptionResult(BaseModel):
@@ -61,8 +61,8 @@ class DescribeResponse(BaseModel):
         description="Time taken to process the request in milliseconds"
     )
     
-    class Config:
-        json_schema_extra = {
+    model_config = ConfigDict(
+        json_schema_extra={
             "example": {
                 "success": True,
                 "filename": "photo.jpg",
@@ -78,3 +78,4 @@ class DescribeResponse(BaseModel):
                 "processing_time_ms": 1250.5
             }
         }
+    )
