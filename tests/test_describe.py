@@ -40,7 +40,7 @@ def test_describe_upload_without_file(client):
     }
     
     response = client.post("/api/v1/describe/upload", data=data)
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 def test_describe_upload_with_invalid_mimetype(client, sample_image_data):
@@ -95,7 +95,7 @@ def test_describe_uri_without_uri(client):
     }
     
     response = client.post("/api/v1/describe/uri", json=payload)
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 def test_describe_uri_with_invalid_mimetype(client):
@@ -107,7 +107,7 @@ def test_describe_uri_with_invalid_mimetype(client):
     }
     
     response = client.post("/api/v1/describe/uri", json=payload)
-    assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
+    assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
 def test_describe_uri_with_unsupported_mimetype(client):
