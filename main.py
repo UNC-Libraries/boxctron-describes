@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.logging_config import setup_logging
-from app.api.routes import describe_router
+from app.api.routes import describe_router, health_router
 
 # Initialize logging
 setup_logging(settings)
@@ -58,16 +58,7 @@ def create_app() -> FastAPI:
 
     # Register routers
     app.include_router(describe_router)
-
-    # Health check endpoint
-    @app.get("/health", tags=["health"])
-    async def health_check():
-        """Health check endpoint."""
-        return {
-            "status": "healthy",
-            "service": settings.app_name,
-            "version": settings.app_version
-        }
+    app.include_router(health_router)
 
     return app
 
