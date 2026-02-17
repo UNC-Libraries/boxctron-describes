@@ -2,7 +2,6 @@
 Response models for the API endpoints.
 """
 from typing import Optional, List, Literal
-from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
 
 

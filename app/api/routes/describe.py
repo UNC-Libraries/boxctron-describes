@@ -3,6 +3,7 @@ Describe endpoint - processes images and returns descriptive information.
 """
 from typing import Annotated
 from datetime import datetime, timezone
+from urllib.parse import urlparse
 from fastapi import APIRouter, File, UploadFile, Form, HTTPException, status, Depends
 
 from app.models import (
@@ -154,6 +155,43 @@ async def describe_image_from_uri(
     Raises:
         HTTPException: If validation fails
     """
+
+    # Validate URI format
+    try:
+        parsed_uri = urlparse(request.uri)
+        # Check that the URI has a scheme and it's one we support
+        if not parsed_uri.scheme:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="URI must include a scheme (e.g., file://, http://, https://)"
+            )
+
+        # Validate supported schemes
+        allowed_schemes = ["file", "http", "https"]
+        if parsed_uri.scheme not in allowed_schemes:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"URI scheme must be one of: {', '.join(allowed_schemes)}"
+            )
+
+        # Ensure there's a path
+        if not parsed_uri.path or parsed_uri.path == "/":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="URI must include a path"
+            )
+
+        # For http/https URIs, ensure there's a netloc (domain)
+        if parsed_uri.scheme in ["http", "https"] and not parsed_uri.netloc:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="HTTP/HTTPS URI must include a domain"
+            )
+    except ValueError:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid URI format"
+        )
 
     # TODO: Implement actual image processing logic
     # - Download image from URI

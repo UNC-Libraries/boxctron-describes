@@ -188,3 +188,135 @@ def test_describe_uri_without_context(client):
 
     response = client.post("/api/v1/describe/uri", json=payload)
     assert response.status_code == status.HTTP_200_OK
+
+
+def test_describe_uri_without_scheme(client):
+    """Test describe/uri endpoint with URI missing scheme."""
+    payload = {
+        "uri": "example.com/image.jpg",
+        "filename": "image.jpg",
+        "mimetype": "image/jpeg"
+    }
+
+    response = client.post("/api/v1/describe/uri", json=payload)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    data = response.json()
+    assert "scheme" in data["detail"].lower()
+
+
+def test_describe_uri_with_unsupported_scheme(client):
+    """Test describe/uri endpoint with unsupported URI scheme."""
+    payload = {
+        "uri": "ftp://example.com/image.jpg",
+        "filename": "image.jpg",
+        "mimetype": "image/jpeg"
+    }
+
+    response = client.post("/api/v1/describe/uri", json=payload)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    data = response.json()
+    assert "scheme" in data["detail"].lower()
+
+
+def test_describe_uri_without_path(client):
+    """Test describe/uri endpoint with URI missing path."""
+    payload = {
+        "uri": "https://example.com",
+        "filename": "image.jpg",
+        "mimetype": "image/jpeg"
+    }
+
+    response = client.post("/api/v1/describe/uri", json=payload)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    data = response.json()
+    assert "path" in data["detail"].lower()
+
+def test_describe_uri_with_slash_path(client):
+    """Test describe/uri endpoint with URI missing path."""
+    payload = {
+        "uri": "https://example.com/",
+        "filename": "image.jpg",
+        "mimetype": "image/jpeg"
+    }
+
+    response = client.post("/api/v1/describe/uri", json=payload)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    data = response.json()
+    assert "path" in data["detail"].lower()
+
+
+def test_describe_uri_http_without_domain(client):
+    """Test describe/uri endpoint with http URI missing domain."""
+    payload = {
+        "uri": "http:///image.jpg",
+        "filename": "image.jpg",
+        "mimetype": "image/jpeg"
+    }
+
+    response = client.post("/api/v1/describe/uri", json=payload)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    data = response.json()
+    assert "domain" in data["detail"].lower()
+
+
+def test_describe_uri_https_without_domain(client):
+    """Test describe/uri endpoint with https URI missing domain."""
+    payload = {
+        "uri": "https:///image.jpg",
+        "filename": "image.jpg",
+        "mimetype": "image/jpeg"
+    }
+
+    response = client.post("/api/v1/describe/uri", json=payload)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    data = response.json()
+    assert "domain" in data["detail"].lower()
+
+
+def test_describe_uri_with_file_scheme(client):
+    """Test describe/uri endpoint with file URI scheme."""
+    payload = {
+        "uri": "file:///path/to/image.jpg",
+        "filename": "image.jpg",
+        "mimetype": "image/jpeg"
+    }
+
+    response = client.post("/api/v1/describe/uri", json=payload)
+    assert response.status_code == status.HTTP_200_OK
+
+def test_describe_uri_with_file_scheme_with_no_path(client):
+    """Test describe/uri endpoint with file URI scheme."""
+    payload = {
+        "uri": "file:///",
+        "filename": "image.jpg",
+        "mimetype": "image/jpeg"
+    }
+
+    response = client.post("/api/v1/describe/uri", json=payload)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    data = response.json()
+    assert "path" in data["detail"].lower()
+
+def test_describe_uri_with_file_scheme_with_only_protocol(client):
+    """Test describe/uri endpoint with file URI scheme."""
+    payload = {
+        "uri": "file:/",
+        "filename": "image.jpg",
+        "mimetype": "image/jpeg"
+    }
+
+    response = client.post("/api/v1/describe/uri", json=payload)
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    data = response.json()
+    assert "path" in data["detail"].lower()
+
+def test_describe_uri_with_http_scheme(client):
+    """Test describe/uri endpoint with http URI scheme."""
+    payload = {
+        "uri": "http://example.com/image.jpg",
+        "filename": "image.jpg",
+        "mimetype": "image/jpeg"
+    }
+
+    response = client.post("/api/v1/describe/uri", json=payload)
+    assert response.status_code == status.HTTP_200_OK
