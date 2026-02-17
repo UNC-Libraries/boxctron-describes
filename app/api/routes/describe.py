@@ -60,13 +60,6 @@ async def describe_uploaded_image(
             detail="MIME type must be for an image"
         )
 
-    # Validate MIME type against allowed types
-    if mimetype not in settings.allowed_mime_types:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"MIME type '{mimetype}' is not supported. Allowed types: {settings.allowed_mime_types}"
-        )
-
     # Validate uploaded file
     file_content = await file.read()
     if len(file_content) > settings.max_upload_size:
@@ -161,13 +154,6 @@ async def describe_image_from_uri(
     Raises:
         HTTPException: If validation fails
     """
-
-    # Validate MIME type against allowed types
-    if request.mimetype not in settings.allowed_mime_types:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"MIME type '{request.mimetype}' is not supported. Allowed types: {settings.allowed_mime_types}"
-        )
 
     # TODO: Implement actual image processing logic
     # - Download image from URI

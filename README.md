@@ -1,15 +1,6 @@
 # boxctron-describes
 
-A FastAPI microservice for generating descriptive information from images using AI vision models.
-
-## Features
-
-- 🖼️ Process images via file upload or URI
-- 🤖 Integration with multiple LLM providers (Azure OpenAI, Google Gemini, Anthropic Claude)
-- ⚡ Fast and lightweight using FastAPI
-- 🧪 Comprehensive test coverage with pytest
-- 🔒 Secure API key management with environment variables
-- 📝 Full OpenAPI/Swagger documentation
+A FastAPI microservice for generating descriptive information from images using AI vision models. Images can either be supplied as file URIs or as file uploads.
 
 ## Requirements
 
@@ -21,7 +12,7 @@ A FastAPI microservice for generating descriptive information from images using 
 ### 1. Clone the repository
 
 ```bash
-cd /Users/bbpennel/git/boxctron-describes
+cd boxctron-describes
 ```
 
 ### 2. Create and activate virtual environment
@@ -108,7 +99,7 @@ Process an image and return descriptive information.
 **Example with cURL (file upload):**
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/describe" \
+curl -X POST "http://localhost:8000/api/v1/describe/upload" \
   -F "file=@/path/to/image.jpg" \
   -F "filename=image.jpg" \
   -F "mimetype=image/jpeg" \
@@ -118,11 +109,14 @@ curl -X POST "http://localhost:8000/api/v1/describe" \
 **Example with cURL (file URI):**
 
 ```bash
-curl -X POST "http://localhost:8000/api/v1/describe" \
-  -F "file_uri=https://example.com/image.jpg" \
-  -F "filename=image.jpg" \
-  -F "mimetype=image/jpeg" \
-  -F "context=Product photo"
+curl -X POST "http://localhost:8000/api/v1/describe/uri" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "uri": "https://example.com/image.jpg",
+    "filename": "image.jpg",
+    "mimetype": "image/jpeg",
+    "context": "Product photo"
+  }'
 ```
 
 ## Running Tests
@@ -142,35 +136,6 @@ pytest -v
 ```
 
 Test coverage report will be generated in `htmlcov/index.html`.
-
-## Project Structure
-
-```
-boxctron-describes/
-├── app/
-│   ├── __init__.py
-│   ├── config.py              # Application configuration
-│   ├── api/
-│   │   ├── __init__.py
-│   │   └── routes/
-│   │       ├── __init__.py
-│   │       └── describe.py    # Describe endpoint
-│   └── models/
-│       ├── __init__.py
-│       ├── request.py         # Request models
-│       └── response.py        # Response models
-├── tests/
-│   ├── __init__.py
-│   ├── conftest.py           # Test fixtures
-│   ├── test_config.py        # Config tests
-│   └── test_describe.py      # Endpoint tests
-├── .env.example              # Example environment variables
-├── .gitignore
-├── main.py                   # Application entry point
-├── pytest.ini                # Pytest configuration
-├── requirements.txt          # Python dependencies
-└── README.md
-```
 
 ## Configuration
 

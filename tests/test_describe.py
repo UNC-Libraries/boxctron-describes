@@ -89,19 +89,6 @@ def test_describe_upload_with_invalid_mimetype(client, sample_image_data):
     response = client.post("/api/v1/describe/upload", files=files, data=data)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-
-def test_describe_upload_with_unsupported_mimetype(client, sample_image_data):
-    """Test describe/upload endpoint with unsupported image MIME type."""
-    files = {"file": ("image.svg", io.BytesIO(sample_image_data), "image/svg+xml")}
-    data = {
-        "filename": "image.svg",
-        "mimetype": "image/svg+xml"
-    }
-
-    response = client.post("/api/v1/describe/upload", files=files, data=data)
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
-
-
 def test_describe_uri_with_valid_request(client):
     """Test describe/uri endpoint with valid JSON request."""
     payload = {
@@ -177,18 +164,6 @@ def test_describe_uri_with_invalid_mimetype(client):
 
     response = client.post("/api/v1/describe/uri", json=payload)
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
-
-
-def test_describe_uri_with_unsupported_mimetype(client):
-    """Test describe/uri endpoint with unsupported image MIME type."""
-    payload = {
-        "uri": "https://example.com/image.svg",
-        "filename": "image.svg",
-        "mimetype": "image/svg+xml"
-    }
-
-    response = client.post("/api/v1/describe/uri", json=payload)
-    assert response.status_code == status.HTTP_400_BAD_REQUEST
 
 
 def test_describe_upload_without_context(client, sample_image_data):
