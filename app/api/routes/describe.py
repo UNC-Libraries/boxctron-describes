@@ -4,7 +4,15 @@ Describe endpoint - processes images and returns descriptive information.
 from typing import Annotated
 from fastapi import APIRouter, File, UploadFile, Form, HTTPException, status, Depends
 
-from app.models import DescribeUploadRequest, DescribeUriRequest, DescribeResponse, DescriptionResult
+from app.models import (
+    DescribeUriRequest, 
+    DescribeResponse, 
+    DescriptionResult,
+    SafetyAssessment,
+    ReviewAssessment,
+    SymbolsPresent,
+    TextCharacteristics
+)
 from app.config import settings
 
 router = APIRouter(prefix="/api/v1", tags=["describe"])
@@ -73,14 +81,49 @@ async def describe_uploaded_image(
         success=True,
         filename=filename,
         result=DescriptionResult(
-            description="[Placeholder] Image description will be generated here",
-            confidence=None,
-            tags=None,
-            metadata={
-                "status": "not_implemented",
-                "note": "Actual implementation pending",
-                "source": "upload"
-            }
+            full_description="[Placeholder] Full description will be generated here",
+            alt_text="[Placeholder] Alt text will be generated here",
+            transcript="",
+            safety_assessment=SafetyAssessment(
+                people_visible="NO",
+                demographics_described="NO",
+                misidentification_risk_people="LOW",
+                minors_present="NO",
+                named_individuals_claimed="NO",
+                violent_content="NONE",
+                racial_violence_oppression="NONE",
+                nudity="NONE",
+                sexual_content="NONE",
+                symbols_present=SymbolsPresent(
+                    types=["NONE"],
+                    names=[],
+                    misidentification_risk="LOW"
+                ),
+                stereotyping_present="NO",
+                atrocities_depicted="NO",
+                text_characteristics=TextCharacteristics(
+                    text_present="NO",
+                    text_type="N/A",
+                    legibility="N/A"
+                ),
+                confidence="LOW",
+                reasoning="Placeholder response - actual implementation pending"
+            ),
+            review_assessment=ReviewAssessment(
+                biased_language="NO",
+                stereotyping="NO",
+                value_judgments="NO",
+                contradictions_between_texts="NO",
+                contradictions_within_description="NO",
+                offensive_language="NO",
+                inconsistent_demographics="NO",
+                euphemistic_language="NO",
+                people_first_language="N/A",
+                unsupported_inferential_claims="NO",
+                safety_assessment_consistency="CONSISTENT",
+                concerns_for_review=[]
+            ),
+            version="placeholder-v0.1.0"
         ),
         processing_time_ms=0.0
     )
@@ -129,15 +172,49 @@ async def describe_image_from_uri(
         success=True,
         filename=request.filename,
         result=DescriptionResult(
-            description="[Placeholder] Image description will be generated here",
-            confidence=None,
-            tags=None,
-            metadata={
-                "status": "not_implemented",
-                "note": "Actual implementation pending",
-                "source": "uri",
-                "uri": request.uri
-            }
+            full_description="[Placeholder] Full description will be generated here",
+            alt_text="[Placeholder] Alt text will be generated here",
+            transcript="",
+            safety_assessment=SafetyAssessment(
+                people_visible="NO",
+                demographics_described="NO",
+                misidentification_risk_people="LOW",
+                minors_present="NO",
+                named_individuals_claimed="NO",
+                violent_content="NONE",
+                racial_violence_oppression="NONE",
+                nudity="NONE",
+                sexual_content="NONE",
+                symbols_present=SymbolsPresent(
+                    types=["NONE"],
+                    names=[],
+                    misidentification_risk="LOW"
+                ),
+                stereotyping_present="NO",
+                atrocities_depicted="NO",
+                text_characteristics=TextCharacteristics(
+                    text_present="NO",
+                    text_type="N/A",
+                    legibility="N/A"
+                ),
+                confidence="LOW",
+                reasoning="Placeholder response - actual implementation pending"
+            ),
+            review_assessment=ReviewAssessment(
+                biased_language="NO",
+                stereotyping="NO",
+                value_judgments="NO",
+                contradictions_between_texts="NO",
+                contradictions_within_description="NO",
+                offensive_language="NO",
+                inconsistent_demographics="NO",
+                euphemistic_language="NO",
+                people_first_language="N/A",
+                unsupported_inferential_claims="NO",
+                safety_assessment_consistency="CONSISTENT",
+                concerns_for_review=[]
+            ),
+            version="placeholder-v0.1.0"
         ),
         processing_time_ms=0.0
     )
