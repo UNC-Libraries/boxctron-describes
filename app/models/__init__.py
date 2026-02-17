@@ -6,7 +6,8 @@ from app.models.describe_response import (
     SafetyAssessment,
     ReviewAssessment,
     SymbolsPresent,
-    TextCharacteristics
+    TextCharacteristics,
+    VersionInfo
 )
 
 __all__ = [
@@ -16,5 +17,6 @@ __all__ = [
     "SafetyAssessment",
     "ReviewAssessment",
     "SymbolsPresent",
-    "TextCharacteristics"
+    "TextCharacteristics",
+    "VersionInfo"
 ]

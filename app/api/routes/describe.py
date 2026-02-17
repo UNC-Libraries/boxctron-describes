@@ -2,16 +2,18 @@
 Describe endpoint - processes images and returns descriptive information.
 """
 from typing import Annotated
+from datetime import datetime, timezone
 from fastapi import APIRouter, File, UploadFile, Form, HTTPException, status, Depends
 
 from app.models import (
-    DescribeUriRequest, 
-    DescribeResponse, 
+    DescribeUriRequest,
+    DescribeResponse,
     DescriptionResult,
     SafetyAssessment,
     ReviewAssessment,
     SymbolsPresent,
-    TextCharacteristics
+    TextCharacteristics,
+    VersionInfo
 )
 from app.config import settings
 
@@ -25,7 +27,7 @@ router = APIRouter(prefix="/api/v1", tags=["describe"])
     summary="Describe an uploaded image",
     description="""
     Process an uploaded image file and return descriptive information.
-    
+
     Submit the image as multipart/form-data along with metadata fields.
     """
 )
@@ -37,34 +39,34 @@ async def describe_uploaded_image(
 ) -> DescribeResponse:
     """
     Describe an uploaded image using AI vision models.
-    
+
     Args:
         file: Uploaded image file
         context: Optional context string to guide description generation
         filename: Name of the file being processed
         mimetype: MIME type of the image
-        
+
     Returns:
         DescribeResponse with description results or error information
-        
+
     Raises:
         HTTPException: If validation fails
     """
-    
+
     # Validate MIME type
     if not mimetype.startswith("image/"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="MIME type must be for an image"
         )
-    
+
     # Validate MIME type against allowed types
     if mimetype not in settings.allowed_mime_types:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"MIME type '{mimetype}' is not supported. Allowed types: {settings.allowed_mime_types}"
         )
-    
+
     # Validate uploaded file
     file_content = await file.read()
     if len(file_content) > settings.max_upload_size:
@@ -74,7 +76,7 @@ async def describe_uploaded_image(
         )
     # Reset file pointer for future processing
     await file.seek(0)
-    
+
     # TODO: Implement actual image processing logic
     # For now, return a placeholder response
     return DescribeResponse(
@@ -123,7 +125,11 @@ async def describe_uploaded_image(
                 safety_assessment_consistency="CONSISTENT",
                 concerns_for_review=[]
             ),
-            version="placeholder-v0.1.0"
+            version=VersionInfo(
+                version=settings.app_version,
+                models=["placeholder"],
+                timestamp=datetime.now(timezone.utc).isoformat()
+            )
         ),
         processing_time_ms=0.0
     )
@@ -136,7 +142,7 @@ async def describe_uploaded_image(
     summary="Describe an image from URI",
     description="""
     Process an image from a URI and return descriptive information.
-    
+
     Provide the URI to an accessible image along with metadata in JSON format.
     """
 )
@@ -145,24 +151,24 @@ async def describe_image_from_uri(
 ) -> DescribeResponse:
     """
     Describe an image from a URI using AI vision models.
-    
+
     Args:
         request: Request containing URI and metadata
-        
+
     Returns:
         DescribeResponse with description results or error information
-        
+
     Raises:
         HTTPException: If validation fails
     """
-    
+
     # Validate MIME type against allowed types
     if request.mimetype not in settings.allowed_mime_types:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=f"MIME type '{request.mimetype}' is not supported. Allowed types: {settings.allowed_mime_types}"
         )
-    
+
     # TODO: Implement actual image processing logic
     # - Download image from URI
     # - Validate image content
@@ -214,7 +220,11 @@ async def describe_image_from_uri(
                 safety_assessment_consistency="CONSISTENT",
                 concerns_for_review=[]
             ),
-            version="placeholder-v0.1.0"
+            version=VersionInfo(
+                version=settings.app_version,
+                models=["placeholder"],
+                timestamp=datetime.now(timezone.utc).isoformat()
+            )
         ),
         processing_time_ms=0.0
     )

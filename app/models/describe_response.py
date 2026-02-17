@@ -2,6 +2,7 @@
 Response models for the API endpoints.
 """
 from typing import Optional, List, Literal
+from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -186,6 +187,25 @@ class ReviewAssessment(BaseModel):
     )
 
 
+class VersionInfo(BaseModel):
+    """Version information about the processing."""
+
+    version: str = Field(
+        ...,
+        description="Version of the application"
+    )
+
+    models: List[str] = Field(
+        ...,
+        description="List of models used for processing"
+    )
+
+    timestamp: str = Field(
+        ...,
+        description="ISO8601 timestamp when the response was generated"
+    )
+
+
 class DescriptionResult(BaseModel):
     """Contains the generated description and assessment data."""
 
@@ -214,7 +234,7 @@ class DescriptionResult(BaseModel):
         description="Analysis for determining if the image needs human review"
     )
 
-    version: str = Field(
+    version: VersionInfo = Field(
         ...,
         description="Version information about models used and generation timestamp"
     )
@@ -298,7 +318,11 @@ class DescribeResponse(BaseModel):
                         "safety_assessment_consistency": "CONSISTENT",
                         "concerns_for_review": []
                     },
-                    "version": "gpt-4o-2024-08-06"
+                    "version": {
+                        "version": "0.1.0",
+                        "models": ["gpt-4o-2024-08-06"],
+                        "timestamp": "2024-08-15T10:30:00Z"
+                    }
                 },
                 "processing_time_ms": 1250.5
             }
