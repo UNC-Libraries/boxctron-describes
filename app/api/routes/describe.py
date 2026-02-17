@@ -4,6 +4,7 @@ Describe endpoint - processes images and returns descriptive information.
 from typing import Annotated
 from datetime import datetime, timezone
 from urllib.parse import urlparse
+import logging
 from pathlib import Path
 from fastapi import APIRouter, File, UploadFile, Form, HTTPException, status, Depends
 from fastapi.responses import HTMLResponse
@@ -22,8 +23,9 @@ from app.models import (
 )
 from app.config import settings
 
-router = APIRouter(prefix="/api/v1", tags=["describe"])
+logger = logging.getLogger(__name__)
 
+router = APIRouter(prefix="/api/v1", tags=["describe"])
 
 @router.get("/describe/upload/form", response_class=HTMLResponse, tags=["describe"])
 async def upload_form():
@@ -69,6 +71,7 @@ async def describe_uploaded_image(
     Raises:
         HTTPException: If validation fails
     """
+    logger.info(f"Received request to describe uploaded file {filename}")
 
     # Validate MIME type
     if not mimetype.startswith("image/"):
@@ -175,6 +178,7 @@ async def describe_image_from_uri(
     Raises:
         HTTPException: If validation fails
     """
+    logger.info(f"Received request to describe file URI {request.filename}")
 
     # Validate URI format
     try:

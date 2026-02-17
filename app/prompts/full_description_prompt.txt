@@ -1,0 +1,236 @@
+Analyze this image and provide a comprehensive response with the following components:
+  1. FULL_DESCRIPTION - Provide a detailed and comprehensive description of what you can see in this image, incorporating the REFERENCE INFORMATION when applicable. Your description will be processed further, so include all relevant visual information. Aim for concise descriptions (1-2 paragraphs for simple images, 3-5 for complex ones). You do not need to address each point in the list individually, but make sure to cover all the points in your description:
+    1. The main subject and its characteristics, focused on what is clearly visible in the image
+       - Include foreground and background elements, noting their spatial relationships
+       - Note significant colors and visual elements that contribute to understanding the image
+       - Prioritize details that would help someone who cannot see the image understand its content and significance, especially for alt text generation.
+    2. In the FULL_DESCRIPTION, if the image contains visible text or writing:
+       - Note the presence, type (such as handwritten, typed, printed), general purpose or location of the text
+       - For important short phrases (less than 8 words), you may directly quote IF you are confident in the reading.
+       - For longer text or uncertain readings, describe general content without quoting
+       - Describe legibility: "clearly legible," "partially legible," "illegible," "difficult cursive handwriting"
+       - CRITICAL: When text contains sensitive language, be specific about WHO or WHAT the text refers to
+         * Identify which specific people, groups, or subjects the text describes or labels
+         * Do NOT generalize descriptions to apply to all people or elements in the image if the text does not support this
+         * Example - GOOD: "The text uses derogatory terms specifically referring to the overseer"
+         * Example - BAD: "The text uses derogatory terms to describe the people in the image" (when it only refers to one person)
+       - For handwritten content, only transcribe text that is clearly legible.
+       - CRITICAL for cursive handwriting: Note the difficulty and your confidence level
+            * "The letter appears to reference an organization, but the cursive handwriting is difficult to read with certainty"
+            * "Includes a signature in cursive that is not clearly legible"
+       - Never guess at cursive words that could significantly change meaning (names, organizations, places, dates)
+       - If there is a handwritten signature, note that a handwritten signature is included but do not attempt transcribe it unless it is very clear or supported by reference information. Note uncertainity if transcribed.
+    3. The type of document or artifact this appears to be.
+    4. Historical context if apparent. Do NOT make assumptions about dates, names, or other specific details unless they are explicitly visible or provided in the REFERENCE INFORMATION.
+    5. Physical characteristics (condition, color, style, medium, size indicators if present)
+    6. Any notable details that would help understand the significance of this item
+       - Name visible symbols or brand logos, using qualifying terms like "appears to be" to express uncertainty
+    7. For objects, structures, and installations:
+       - Describe what you observe using concrete, factual terms for materials, forms, and construction
+       - Focus on physical characteristics before inferring purpose or function
+       - For unusual or unfamiliar objects, describe components systematically:
+         * Materials (wood, metal, fabric, stone, etc.)
+         * Form and structure (vertical elements, horizontal supports, surface textures)
+         * Visible construction methods (woven, stacked, welded, carved)
+         * Scale indicators if apparent (relative to people, surroundings)
+       - Use qualifying language for functional interpretations: "appears to serve as," "possibly used for," "suggests"
+       - Avoid categorical assumptions about origin, purpose, or cultural significance unless clearly supported by visible text, reference information, or widely recognized characteristics
+       - When uncertain about an object's identity or purpose, it's better to describe what you see than to speculate
+    8. Do not attempt to provide counts of people or objects. Instead, use estimation terminology like the following: 
+       - Small numbers (1-4): Use terms like "a few", or specific counts if certain
+       - Medium groups (5-20): Use terms like "several," "a small group," "approximately"
+       - Large groups (20+): Use terms like "a crowd," "many," "numerous," "dozens"
+       - Very large (100+): Use "a large crowd," "hundreds," "a mass gathering"
+       - When precise counts matter (e.g., official photographs), note this uncertainty
+    9. If there are people in the image:
+       - Describe their appearance, clothing, activities, and visible expressions or gestures.
+       - Include the names of the people if:
+           a) visible within text in the image, OR
+           b) explicitly identified in the reference information AND the image clearly depicts a recognizable likeness of a person, OR
+           c) the individual is a well known and clearly recognizable public figure.
+       - Do not mention that faces are obscured in the images, due to technical constraints almost all faces will be obscured.
+       - Demographic descriptors (age range, gender presentation, race/ethnicity):
+        - INCLUDE demographic descriptors for all main subjects - they help users understand who is depicted and provide important historical context
+          - OMIT demographic descriptors only when:
+             - People are so distant or obscured that characteristics aren't visible
+             - The context makes demographics genuinely irrelevant (e.g., completely silhouetted figures)
+             - NOT because someone is white - white is a demographic descriptor like any other
+          - In the case of ambiguity
+            - Describe visible characteristics instead of categories: clothing style, hair, skin tone, body type, context
+            - Use qualifying language and note uncertainty: "appears to be," "presents as"
+        - CRITICAL: Apply demographics consistently across ALL people at the same level of detail in the image. If you mention one person's race, mention everyone's race (including white). If you mention age for one person, mention it for all.
+          - Examples:
+            * CORRECT (consistent): "Two people are prominently featured: a middle-aged white man and a young Black man."
+            * INCORRECT (inconsistent - only notes race for person of color): "An older man in a suit stands next to a young Black man in uniform."
+            * INCORRECT (inconsistent - selective age description): "A elderly person and another person stand together."
+        - Use respectful, contemporary terminology.
+        - Acceptable contemporary demographic terminology examples include:
+          - Race/ethnicity: Black (capitalized), white (lowercase unless starting a sentence), Asian, Latino/Latina/Latinx, Indigenous, Middle Eastern, multiracial, biracial, Pacific Islander
+            * Note: Use "Black" (capitalized) and "white" (lowercase) when describing people in your descriptions
+            * This capitalization applies only to the FULL_DESCRIPTION, not to the TRANSCRIPT (which should preserve text exactly as written)
+          - Gender: man, woman, person (when gender presentation is ambiguous)
+          - Age: child, teenager, young adult, middle-aged adult, older adult, elderly
+          - Disability: Use person-first language when describing visible disabilities or assistive devices
+            * Examples: "person using a wheelchair," "individual with a visible prosthetic limb," "person using a white cane," "individual with crutches"
+            * Describe what you observe (assistive devices, mobility aids) rather than inferring medical conditions
+          - When REFERENCE INFORMATION provides specific ethnic, cultural, or national identity (e.g., "Burmese family," "Cherokee delegation," "Irish immigrants"), use that specific terminology instead of broader categories (e.g., "Burmese" rather than "Asian," "Cherokee" rather than "Indigenous"). Only use such specific identifiers when they appear in provided reference material and the terminology is contemporary and respectful.
+        - Gender description policy:
+            * Due to technical limitations that obscure facial features, gender descriptors are unlikely to be reliable.
+
+            Include gender terms ONLY when:
+            1. The individual is identified by name in the image text or provided metadata, AND
+            2. You can reference external knowledge about that named person's gender, such as in the case of a public figure
+
+            Otherwise, use gender-neutral language regardless of clothing, styling, or activities.
+
+            When named individuals are present:
+            - Use their name primarily: "Rosa Parks sits on a bus"
+            - May use gendered pronouns if referring back: "Rosa Parks sits on a bus. She wears a dark coat."
+
+            When individuals are not identified:
+            - Use: person, people, individual, adult, child
+            - Gender neutral pronouns: they, them, their
+            - Describe clothing/styling without gendering: "person in a suit," "individual in a dress"
+
+            Do NOT:
+            ✗ Assume gender from only clothing, hair, activities
+            ✗ Use masculine/feminine as descriptors
+
+            Examples:
+            ✓ GOOD: "Person in formal Victorian attire with top hat and tails"
+            ✓ GOOD: "Individual in elaborate wedding dress with long train, as they face to the left"
+            ✓ GOOD: "Two people in period costume: one in knickerbockers, one in a floor-length gown"
+            ✓ GOOD: "Martin Luther King Jr. addresses a crowd from a podium, lifting his hand" (named, can use "he" if needed)
+
+            ✗ BAD: "Two people presenting as women in period attire"
+            ✗ BAD: "Person in masculine-coded business attire"
+        - For main subjects (1-4 prominent people): Include age range, AND race/ethnicity for each person, or describe visible characteristics. Do not attempt to guess if you are not reasonably confident.
+        - For background figures: May use general descriptions ("additional people visible in background") without detailed demographics
+        - For large groups (5+ equally prominent people): Describe group composition ("a diverse group including Black, white, and Asian adults") rather than itemizing individuals
+        - For historical images containing sensitive depictions:
+           - DO describe who is depicted using contemporary demographic terminology
+           - DO NOT use outdated or offensive terms (replace with modern equivalents)
+           - DO NOT romanticize or minimize oppression, slavery, segregation, or violence
+           - DO provide factual description of what is visible
+           - Example: "photograph showing enslaved individuals working in a field" not "workers in a field" (which erases historical reality)
+        - When names and images of people appear together:
+            - If a name appears as a label or caption directly on/around a portrait, statue, or depiction, state the connection explicitly
+                * GOOD: "portrait of Dorothy Vaughan with her name printed above"
+                * BAD: "portrait of a person... text reading 'DOROTHY VAUGHEN'"
+            - Context matters:
+                * Commemorative items (badges, medals, plaques): Name + portrait = identification
+                * Artwork labels: "Painting of [subject]" when the subject is visible
+                * Captioned photographs: Connect the caption to the people when appropriate
+            - Only separate name from image when they're clearly unrelated:
+                * Person standing in front of a building with someone else's name on it
+                * Photograph of crowd at "Martin Luther King Jr. Elementary" (name is place, not people)
+    10. Distinguish clearly between what you can actually see and what you might infer, for example:
+        OBSERVABLE (state definitively):
+         - "Two people standing close together"
+         - "Person with raised hand"
+         - "Smiling facial expression"
+         - "Formal attire including suit and tie"
+        INFERENTIAL (use qualifying language):
+         - "appear to be a family" (not "a family")
+         - "suggests a celebration" (not "celebrating")
+         - "possibly from the 1950s based on clothing style" (not "from the 1950s")
+         - "may be preparing to eat" (not "about to eat")
+        AVOID claiming to know:
+         - Emotions beyond visible expression ("appears joyful" not "is happy")
+         - Relationships ("two people in close proximity" not "a couple")
+         - Intent ("holding a tool" not "about to repair")
+         - Off-camera context ("photograph" not "taken during a family reunion")
+        EXCEPTION for relationships: When REFERENCE INFORMATION or clearly visible text explicitly states relationships between people (e.g., "John and Mary Smith, husband and wife," "the Trang family"), you may incorporate this relationship information into your description, making clear it comes from reference material (e.g., "two people identified in reference material as husband and wife").
+    11. For historical images that may contain outdated terminology or sensitive depictions, describe what is visible while using contemporary respectful language.
+    12. When uncertain about any element:
+      - Use qualifying language: "appears to be", "possibly", "suggests"
+      - Note your uncertainty in SAFETY_ASSESSMENT_REASONING for elements important to the image
+      - Err on the side of observable facts over speculation
+      - It's better to say "unable to determine" than to guess
+
+2. TRANSCRIPT - A transcript of the text contained within the image.
+  - If there is legible text, record ONLY a verbatim text exactly as it appears
+  - Use [illegible] or [partially legible] for unclear portions
+  - Maintain original formatting (line breaks) where possible
+  - No commentary, explanation, or interpretation here
+  - If there is no text or no legible text, leave this section empty
+
+  -Special guidance for handwritten and cursive text:
+    - Handwritten cursive is often difficult to read accurately, especially historical cursive styles
+    - CRITICAL: Only transcribe words you can read with high confidence
+    - For cursive text where individual letters are unclear, use [illegible] or [partially legible] rather than guessing
+    - DO NOT substitute words based on historical context or what "makes sense" or fill in gaps with assumptions
+    - For words split across lines with hyphens (e.g., "Eleva-tion"), preserve the line break and hyphen:
+        "Eleva-
+        tion"
+    - When uncertain about cursive text, err on the side of marking it [partially legible] or [illegible]
+    - If you can read some words in a handwritten passage but not others, transcribe what you can and mark the rest:
+        "Dear [illegible], I hope this letter finds you well..."
+
+3. SAFETY_ASSESSMENT_FORM - Assess the content of this image for later evaluation by humans or agents to help determine if the image itself contains unsafe content or is likely to produce a description that may be unreliable or subjective. This will be provided as a structured object with specific fields.
+
+  Notes on field values:
+    - If people_visible is "NO", set demographics_described to "NO", 
+      misidentification_risk_people to "LOW", minors_present to "NO", and named_individuals_claimed to "NO"
+    - symbols_present.types: Use ["NONE"] only if no symbols present, otherwise list all applicable types.
+    - symbols_present.names: Empty array [] ONLY if types is ["NONE"]
+    - symbols_present.types and symbols_present.names MUST MATCH
+      - If you identify a symbol type other than NONE, you MUST list the specific symbol(s) in names
+      - If you cannot identify what the symbol is, do NOT list it in types
+      - Every type listed requires at least one corresponding named symbol
+      - Every named symbol must have a corresponding type
+      - Examples:
+        - Correct: {"types": ["NONE"], "names": [], "misidentification_risk": "LOW"}
+        - Correct: {"types": ["BRAND", "POLITICAL"], "names": ["Coca-Cola logo", "Nike swoosh", "American flag"], "misidentification_risk": "LOW"}
+        - Incorrect: {"types": ["CULTURAL"], "names": [], ...} // Since a type is listed, but there is no name
+        - Incorrect: {"types": ["NONE"], "names": ["some symbol"], ...} // Since type is NONE but a symbol is named
+    - "demographics_described": Mark as "YES" only if the description includes race/ethnicity, gender, age descriptors beyond simple categories, disability status, or other demographic characteristics. 
+        - Examples of YES: "middle-aged men", "an elderly Asian woman", "young adults of diverse backgrounds", "a white boy", "person using a wheelchair", "individual with a visible prosthetic limb"
+        - Examples of NO: "three adults", "a person", "two people", "children", "a group of adults of diverse backgrounds"
+    - "misidentification_risk_people":
+        - LOW: No specific identity claims, only general demographics you are confident about. For example, "a boy", "adult women", "African american"
+        - MEDIUM: Specific demographics described but there is uncertainty about, or names are claimed based on text directly in the image or in the reference information
+        - HIGH: Names claimed only due to context or facial recognition, or specific identity assertions made without supporting reference or textual information.
+    - "named_individuals_claimed": Mark "YES" if the description identifies a specific person by name as being visually depicted in the image (not just mentioned in text).
+        - Examples of YES:
+            - "portrait of Martin Luther King Jr"
+            - "statue depicts Abraham Lincoln"
+        - Mark NO when:
+            - Names appear only in visible text/captions but are not connected to depicted people
+            - People are visible but not identified by name
+            - Names are mentioned in historical context but those people aren't visually present
+                * "A letter discussing Ada Lovelace" (no image of Ada Lovelace)
+    - If text_characteristics.text_present is NO, then text_type and legibility should both be "N/A"
+    - sexual_content - Medical/anatomical images would be NONE. Historical/ethnographic documentation would be NONE. Fine art would be NONE unless the pose or context is explicitly sexual.
+    - confidence - Provide an overall confidence assessment using the following values:
+      - HIGH: Clear, well-preserved image with easily identifiable subjects and context
+      - MEDIUM: Generally clear image but with some uncertain elements (partial text legibility, ambiguous objects, uncertain demographics, approximate dating)
+      - LOW: Poor image quality, unusual/unfamiliar subjects, or significant ambiguity requiring substantial inference
+      
+      Some factors that would impact the confidence rating negatively:
+      - Image quality issues: [e.g., "low resolution," "poor lighting," "significant damage/deterioration"]
+      - Text legibility: [e.g., "cursive handwriting difficult to read," "faded text," "partially obscured"]
+      - Object/subject identification: [e.g., "unfamiliar artifact type," "unclear purpose," "ambiguous materials"]
+      - Demographic assessment: [e.g., "distant figures," "obscured features," "ambiguous age range"]
+      - Historical context: [e.g., "uncertain time period," "unfamiliar clothing style," "unclear location"]
+      - Identity claims: [e.g., "based only on reference information," "uncertain name transcription"]
+      - When you note uncertainty in SAFETY_ASSESSMENT_REASONING
+
+4. SAFETY_ASSESSMENT_REASONING - Explain ONLY the reasons for positive identifications, elevated risks, or uncertain assessments.
+  - Address only fields marked with concerning values:
+    - Why specific fields were marked (e.g., why "POSSIBLY" for stereotyping, why "MEDIUM" or "HIGH" risk)
+    - What elements created uncertainty
+    - Any contextual factors that influenced the assessment
+    - Specific concerns for human reviewers to verify
+    - text_characteristics.legibility is "DIFFICULT" or "ILLEGIBLE"
+  - DO NOT mention:
+    - Fields marked as "NO", "NONE", or "LOW", or "CLEAR" or "PARTIALLY CLEAR"
+    - The absence of issues
+    - General reassurances
+  - If ALL assessments are negative/low-risk/clear, state only: "No elevated risks identified." Do not state this if you generated any other text for the SAFETY_ASSESSMENT_REASONING.
+  - Examples:
+    - Good reasoning (violent content depicted): "The image shows an explosion and ship destruction, qualifying as depicted violent content."
+    - Good reasoning (misidentification risk): "Three individuals are described with demographic details. Names are claimed based on reference information, creating medium misidentification risk that should be verified against archival records."
+    - Bad reasoning (reports negatives): "The image depicts violence. No people are visible, so identity risks are minimal. No other significant concerns." 
+    - Good reasoning (all low risk): "No elevated risks identified."
+  

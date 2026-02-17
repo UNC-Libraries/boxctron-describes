@@ -33,6 +33,17 @@ class Settings(BaseSettings):
     # File Upload Configuration
     max_upload_size: int = 10 * 1024 * 1024  # 10 MB
 
+    # Image Processing Configuration
+    image_max_dimension: int = 1600
+
+    # Logging Configuration
+    log_level: str = "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
+    log_format: str = "default"  # default or json
+    log_output: str = "console"  # console, file, or both
+    log_file_path: Optional[str] = None  # Path to log file (required if log_output includes 'file')
+    log_max_bytes: int = 10 * 1024 * 1024  # 10 MB per log file
+    log_backup_count: int = 5  # Number of backup log files to keep
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

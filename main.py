@@ -3,12 +3,18 @@ Main application entry point for boxctron-describes.
 
 A FastAPI microservice for generating descriptive information from images.
 """
+import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
+from app.logging_config import setup_logging
 from app.api.routes import describe_router
+
+# Initialize logging
+setup_logging(settings)
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -17,19 +23,19 @@ async def lifespan(app: FastAPI):
     Application lifespan manager for startup and shutdown events.
     """
     # Startup
-    print(f"Starting {settings.app_name} v{settings.app_version}")
-    print(f"Debug mode: {settings.debug}")
-    
+    logger.info(f"Starting {settings.app_name} v{settings.app_version}")
+    logger.info(f"Debug mode: {settings.debug}")
+
     yield
-    
+
     # Shutdown
-    print(f"Shutting down {settings.app_name}")
+    logger.info(f"Shutting down {settings.app_name}")
 
 
 def create_app() -> FastAPI:
     """
     Create and configure the FastAPI application.
-    
+
     Returns:
         FastAPI: Configured application instance
     """
@@ -40,7 +46,7 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
         debug=settings.debug
     )
-    
+
     # Configure CORS
     app.add_middleware(
         CORSMiddleware,
@@ -49,10 +55,10 @@ def create_app() -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
-    
+
     # Register routers
     app.include_router(describe_router)
-    
+
     # Health check endpoint
     @app.get("/health", tags=["health"])
     async def health_check():
@@ -62,7 +68,7 @@ def create_app() -> FastAPI:
             "service": settings.app_name,
             "version": settings.app_version
         }
-    
+
     return app
 
 
@@ -72,7 +78,7 @@ app = create_app()
 
 if __name__ == "__main__":
     import uvicorn
-    
+
     uvicorn.run(
         "main:app",
         host=settings.host,

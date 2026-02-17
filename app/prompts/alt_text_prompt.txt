@@ -1,0 +1,132 @@
+Based on the detailed image description provided below, generate concise alt text that captures the most important characteristics or text to help visually impaired users understand the image.
+IMPORTANT CONTEXT: You are creating alt text for historical archival materials that may contain offensive, racist, or otherwise harmful content. Your role is to provide accurate, factual descriptions that document this historical content for accessibility purposes. Describing offensive historical materials is not endorsing them - it is necessary for understanding history and providing equal access to cultural heritage materials.
+
+Target length: 
+- Simple images: 1 sentence (15-25 words)
+- Moderately complex images: 2 sentences (25-40 words)
+- Highly complex/information-dense images: 2-3 sentences (40-60 words maximum)
+
+Prioritize what the image is fundamentally about - the core subject and action - rather than including every detail from the description.
+
+Content guidelines:
+- Lead with the main subject and primary action
+- Use natural, concise, and flowing language while maintaining accuracy about the main subject and key details.
+- Apply demographic descriptors consistently - if you mention one person's race, age, or gender, mention these for all people at similar prominence.
+- Demographic descriptors:
+    - Include demographic information (race, ethnicity, age, gender, names) exactly as presented in the full description when it is important to the understanding of the image
+    - Apply consistently across all people at similar prominence
+    - Do not add demographics not mentioned in the full description
+    - Do not remove demographics that are mentioned
+    - For named individuals you do not need to include race or ethnicity descriptors directly to their names, although you can describe them separately
+      - Examples:
+        ✓ GOOD: "An elderly Frederick Douglass"
+        ✗ BAD: "An elderly Black Frederick Douglass"
+        ✓ GOOD: "A portait of Frederick Douglass, an elderly black man"
+    - You may simplify cautious qualifiers (e.g., "appears to be Black" → "Black") when the demographic information is clear
+    - Examples:
+        Full description: "A white woman and two white children stand at a doorway"
+        ✓ GOOD: "A white woman and two white children at a doorway"
+        ✗ BAD: "Three people at a doorway" (removes demographics)
+
+        Full description: "Two people in period attire, one in a suit and one in a dress"
+        ✓ GOOD: "Two people in period attire"
+        ✗ BAD: "A man and a woman in period attire" (adds gender not in description)
+
+        Full description: "person who appears to be middle-aged"
+        ✓ GOOD: "middle-aged person in formal attire"
+        ✓ GOOD: "adult in formal attire" (simplified when not essential)
+        ✗ BAD: "elderly person" (changed the age descriptor)
+
+        Full description: "Rosa Parks sits on a bus"
+        ✓ GOOD: "Rosa Parks sits on a bus"
+- Include personal names when present in the description.
+- Include symbol names only if significant to understanding the image.
+    - Include symbols/logos/brands when:
+        - They identify the primary subject: "UNC basketball player" when the uniform is central
+        - They provide essential context: "Coca-Cola advertisement" when that's what the image is
+        - They are historically significant: "Confederate flag visible in parade" 
+        - They are the focus: "close-up of Nike swoosh on shoe"
+    - Omit symbols/logos/brands when:
+        - They are incidental details on clothing/objects that aren't the focus
+        - The brand doesn't add meaning: "person wearing a Columbia jacket" → "person wearing a jacket"
+        - They are background elements: logos on passing cars, signs in distance
+        - Multiple minor brands visible: don't catalog every visible logo
+    - Examples:
+        * GOOD: "UNC player in uniform" (uniform identifies the subject)
+        * GOOD: "Protesters hold signs outside McDonald's" (location is relevant)
+        * BAD: "Man in Nike shoes and Columbia jacket holds Starbucks cup" (brand catalog adds no meaning)
+        * BAD: "Woman standing on the sidewalk as a car with a Ford logo passes behind her" (incidental detail)
+- Include spatial relationships (foreground/background, beside/behind)
+- Handling text and quotations:
+    - When TRANSCRIPT is provided, it contains the EXACT text from the image
+    - Distinguish the source of text to convey different meanings:
+        * Printed captions/titles (e.g., "Photo titled...")
+        * Handwritten annotations (e.g., "Photo with handwritten note...")
+        * Text embedded in the scene (e.g., "storefront sign reading...", "protest sign stating...")
+        * Text on objects (e.g., "book cover titled...", "banner reading...")
+    - When quoting text from TRANSCRIPT:
+        * Use quotation marks ONLY when presenting exact, verbatim text
+        * For short, significant text (titles, captions, signs): quote verbatim
+        * For longer text: paraphrase or summarize WITHOUT quotation marks
+        * NEVER alter quoted text - if you cannot quote exactly, paraphrase without quotes
+
+    Examples with TRANSCRIPT provided:
+    For printed captions/titles with TRANSCRIPT: "President Washington and aids"
+    * GOOD: Photograph captioned "President Washington and aids" shows...
+    * GOOD: Photograph showing President Washington accompianed by aids walking on a road, as indicated in the caption
+    * BAD: Photograph captioned "President Washington accompanied by aids"
+
+    For handwritten caption on image with TRANSCRIPT: "To my dear friend, John - 1945"
+    * GOOD: Photograph with handwritten inscription "To my dear friend, John - 1945"
+    * GOOD: Photograph with handwritten note dated 1945 (paraphrased, no quotes)
+    * BAD: Photograph with handwritten inscription "To my friend John, 1945" (altered quote)
+
+    For text in scene with TRANSCRIPT: "VOTE FOR CHANGE"
+    * GOOD: Protesters carrying signs reading "VOTE FOR CHANGE"
+    * GOOD: Protesters with signs advocating for change (summarized, no quotes)
+    * BAD: Protesters carrying signs that say "Vote for change" (altered quote)
+
+- Identifying information to prioritize:
+   - Personal names (always include)
+   - Roles and occupations when stated in the description:
+     * Professional roles: coach, teacher, doctor, officer, etc.
+     * Activity-based roles: speaker, performer, athlete, worker, etc.
+     * Relational roles: parent with child, etc.
+   - Use role information to establish who people are, not just what they're wearing
+   - Do not assume roles based on stereotypes or interpersonal relationships when they are not stated in the description.
+   - Examples:
+      - GOOD: "A white coach in a suit gestures beside a young adult Black player..."
+      - GOOD: "A speaker at a microphone addresses a group..."
+      - BAD: "A man in a suit gestures beside someone in a uniform..."
+
+Detail selection:
+- Omit background elements unless they provide essential context
+- Summarize minor visual details (specific fabric patterns, minor accessories, exact color shades) that have significance for the meaning, action, or relationships in the image.
+- Use general terms when appropriate: "wearing a suit" not "wearing a dark pinstriped suit"
+- Omit details with qualifying phrases like "appears to be" when the detail isn't essential; 
+  when essential, keep the uncertainty
+- Include identifying roles, occupations, or functions of people when stated or clearly 
+  implied in the original description
+  - Roles help establish context and should be included even when condensing other details
+
+- Historical sensitivity:
+  - Document offensive historical content factually without endorsement
+  - Acknowledge the offensive nature briefly and factually
+  - Maintain historical accuracy while being concise
+  - Focus on what the image depicts, not on justifying or explaining the offensive content
+  - Use neutral, documentary language (e.g., "cartoon uses racist caricatures" rather than extensive description of the caricatures themselves)
+
+Style:
+- Use natural, flowing language
+- Write complete sentences, not fragments or lists
+- Avoid starting with "The image shows" or "This image depicts"
+- For photographs, you may start with "A photograph of..." if the medium is relevant
+- Break complex descriptions into 2-3 sentences rather than one long sentence
+- Do not use bullets or numbering
+- Do not describe images as "vintage"
+- Avoid redundant descriptions, for example:
+   - GOOD: "a white older man"
+   - BAD: "a white older adult man"
+- Avoid unnecessary description that is implied by other details:
+   - GOOD: "wearing a North Carolina uniform and a towel over his shoulders"
+   - BAD: "wearing a white North Carolina uniform with light blue trim and a towel over his shoulders; 'NORTH CAROLINA' lettering"
