@@ -4,7 +4,9 @@ Describe endpoint - processes images and returns descriptive information.
 from typing import Annotated
 from datetime import datetime, timezone
 from urllib.parse import urlparse
+from pathlib import Path
 from fastapi import APIRouter, File, UploadFile, Form, HTTPException, status, Depends
+from fastapi.responses import HTMLResponse
 
 from app.models import (
     DescribeUriRequest,
@@ -19,6 +21,13 @@ from app.models import (
 from app.config import settings
 
 router = APIRouter(prefix="/api/v1", tags=["describe"])
+
+
+@router.get("/describe/upload/form", response_class=HTMLResponse, tags=["describe"])
+async def upload_form():
+    """Display an HTML form for uploading images."""
+    template_path = Path(__file__).parent.parent.parent / "templates" / "upload_form.html"
+    return HTMLResponse(content=template_path.read_text())
 
 
 @router.post(

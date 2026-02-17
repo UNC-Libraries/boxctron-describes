@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Description Upload</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"], input[type="file"], textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+        textarea {
+            height: 100px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 30px;
+            padding: 20px;
+            background-color: #f4f4f4;
+            border-radius: 5px;
+            display: none;
+        }
+        pre {
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .error {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <h1>Image Description Upload</h1>
+    <form id="uploadForm">
+        <div class="form-group">
+            <label for="file">Image File:</label>
+            <input type="file" id="file" name="file" accept="image/*" required>
+        </div>
+
+        <div class="form-group">
+            <label for="filename">Filename:</label>
+            <input type="text" id="filename" name="filename" required>
+        </div>
+
+        <div class="form-group">
+            <label for="mimetype">MIME Type:</label>
+            <input type="text" id="mimetype" name="mimetype" required>
+        </div>
+
+        <div class="form-group">
+            <label for="context">Context (optional):</label>
+            <textarea id="context" name="context" placeholder="Optional context to guide description generation"></textarea>
+        </div>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <div id="result"></div>
+
+    <script>
+        // Auto-populate filename and mimetype when file is selected
+        document.getElementById('file').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                document.getElementById('filename').value = file.name;
+                document.getElementById('mimetype').value = file.type;
+            }
+        });
+
+        // Handle form submission
+        document.getElementById('uploadForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const formData = new FormData();
+            const fileInput = document.getElementById('file');
+            const file = fileInput.files[0];
+
+            formData.append('file', file);
+            formData.append('filename', document.getElementById('filename').value);
+            formData.append('mimetype', document.getElementById('mimetype').value);
+
+            const context = document.getElementById('context').value;
+            if (context) {
+                formData.append('context', context);
+            }
+
+            try {
+                const response = await fetch('/api/v1/describe/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+                const resultDiv = document.getElementById('result');
+
+                if (response.ok) {
+                    resultDiv.innerHTML = '<h2>Result</h2><pre>' + JSON.stringify(result, null, 2) + '</pre>';
+                    resultDiv.className = '';
+                } else {
+                    resultDiv.innerHTML = '<h2 class="error">Error</h2><pre>' + JSON.stringify(result, null, 2) + '</pre>';
+                    resultDiv.className = 'error';
+                }
+
+                resultDiv.style.display = 'block';
+            } catch (error) {
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = '<h2 class="error">Error</h2><p>' + error.message + '</p>';
+                resultDiv.className = 'error';
+                resultDiv.style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>

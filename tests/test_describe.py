@@ -13,6 +13,15 @@ def test_health_check(client):
     assert "version" in data
 
 
+def test_describe_upload_form_page(client):
+    """Test that the upload form page loads."""
+    response = client.get("/api/v1/describe/upload/form")
+    assert response.status_code == status.HTTP_200_OK
+    assert response.headers["content-type"] == "text/html; charset=utf-8"
+    assert "<form" in response.text
+    assert 'id="uploadForm"' in response.text
+
+
 def test_describe_upload_with_file(client, sample_image_data):
     """Test describe/upload endpoint with an uploaded file."""
     files = {"file": ("test.png", io.BytesIO(sample_image_data), "image/png")}
