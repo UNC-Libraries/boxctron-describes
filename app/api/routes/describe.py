@@ -16,7 +16,9 @@ from app.models import (
     ReviewAssessment,
     SymbolsPresent,
     TextCharacteristics,
-    VersionInfo
+    VersionInfo,
+    ValidationErrorResponse,
+    HTTPErrorResponse
 )
 from app.config import settings
 
@@ -39,7 +41,12 @@ async def upload_form():
     Process an uploaded image file and return descriptive information.
 
     Submit the image as multipart/form-data along with metadata fields.
-    """
+    """,
+    responses={
+        400: {"model": HTTPErrorResponse, "description": "Invalid MIME type"},
+        413: {"model": HTTPErrorResponse, "description": "File size exceeds maximum"},
+        422: {"model": ValidationErrorResponse, "description": "Validation error"}
+    }
 )
 async def describe_uploaded_image(
     file: UploadFile = File(..., description="Image file to process"),
@@ -147,7 +154,11 @@ async def describe_uploaded_image(
     Process an image from a URI and return descriptive information.
 
     Provide the URI to an accessible image along with metadata in JSON format.
-    """
+    """,
+    responses={
+        400: {"model": HTTPErrorResponse, "description": "Invalid URI format or scheme"},
+        422: {"model": ValidationErrorResponse, "description": "Validation error"}
+    }
 )
 async def describe_image_from_uri(
     request: DescribeUriRequest

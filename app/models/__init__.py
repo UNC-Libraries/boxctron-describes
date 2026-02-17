@@ -9,6 +9,11 @@ from app.models.describe_response import (
     TextCharacteristics,
     VersionInfo
 )
+from app.models.error_response import (
+    ValidationErrorResponse,
+    ValidationErrorDetail,
+    HTTPErrorResponse
+)
 
 __all__ = [
     "DescribeUriRequest",
@@ -18,5 +23,8 @@ __all__ = [
     "ReviewAssessment",
     "SymbolsPresent",
     "TextCharacteristics",
-    "VersionInfo"
+    "VersionInfo",
+    "ValidationErrorResponse",
+    "ValidationErrorDetail",
+    "HTTPErrorResponse"
 ]
