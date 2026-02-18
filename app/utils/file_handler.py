@@ -5,6 +5,7 @@ import tempfile
 import logging
 from pathlib import Path
 from typing import Optional, BinaryIO, AsyncIterator
+from urllib.parse import urlparse, ParseResult
 from fastapi import UploadFile, HTTPException, status
 import httpx
 
@@ -182,4 +183,56 @@ async def stream_url_to_temp(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Error processing file from URL"
+        )
+
+
+async def get_path_from_uri(uri: str, max_size: int, filename: Optional[str] = None) -> Path:
+    """
+    Get a file path from a URI, downloading if necessary.
+
+    For http/https URIs, downloads the file to a temporary location.
+    For file URIs, converts the URI to a local path and verifies it exists.
+
+    Args:
+        uri: The URI to process (file://, http://, or https://)
+        max_size: Maximum allowed file size in bytes (for downloads)
+        filename: Optional filename for file extension (used for downloads)
+
+    Returns:
+        Path to the file (temporary file for http/https, local path for file://)
+
+    Raises:
+        HTTPException: If file doesn't exist (file://) or download fails (http/https)
+    """
+    parsed_uri = urlparse(uri)
+
+    if parsed_uri.scheme in ["http", "https"]:
+        # Download remote file to temporary location
+        return await stream_url_to_temp(
+            url=uri,
+            max_size=max_size,
+            filename=filename
+        )
+    elif parsed_uri.scheme == "file":
+        # Convert file:// URI to local path
+        # Handle both file:///path and file://host/path formats
+        if parsed_uri.netloc:
+            # file://host/path format (e.g., file://localhost/path or file://server/share)
+            file_path = Path(f"//{parsed_uri.netloc}{parsed_uri.path}")
+        else:
+            # file:///path format (most common)
+            file_path = Path(parsed_uri.path)
+
+        # Verify the file exists
+        if not file_path.exists():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"File not found: {file_path}"
+            )
+
+        return file_path
+    else:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Unsupported URI scheme: {parsed_uri.scheme}"
         )

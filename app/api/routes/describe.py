@@ -24,7 +24,7 @@ from app.models import (
 from app.config import settings
 from app.dependencies import get_describe_workflow
 from app.services import DescribeImageWorkflow
-from app.utils import stream_upload_to_temp, stream_url_to_temp
+from app.utils import stream_upload_to_temp, get_path_from_uri
 
 logger = logging.getLogger(__name__)
 
@@ -179,62 +179,34 @@ async def describe_image_from_uri(
             detail="Invalid URI format"
         )
 
-    # TODO: Implement actual image processing logic
-    # - Download image from URI
-    # - Validate image content
-    # - Process with LLM
-    # For now, return a placeholder response
-    return DescribeResponse(
-        success=True,
-        filename=request.filename,
-        result=DescriptionResult(
-            full_description="[Placeholder] Full description will be generated here",
-            alt_text="[Placeholder] Alt text will be generated here",
-            transcript="",
-            safety_assessment=SafetyAssessment(
-                people_visible="NO",
-                demographics_described="NO",
-                misidentification_risk_people="LOW",
-                minors_present="NO",
-                named_individuals_claimed="NO",
-                violent_content="NONE",
-                racial_violence_oppression="NONE",
-                nudity="NONE",
-                sexual_content="NONE",
-                symbols_present=SymbolsPresent(
-                    types=["NONE"],
-                    names=[],
-                    misidentification_risk="LOW"
-                ),
-                stereotyping_present="NO",
-                atrocities_depicted="NO",
-                text_characteristics=TextCharacteristics(
-                    text_present="NO",
-                    text_type="N/A",
-                    legibility="N/A"
-                ),
-                confidence="LOW",
-                reasoning="Placeholder response - actual implementation pending"
-            ),
-            review_assessment=ReviewAssessment(
-                biased_language="NO",
-                stereotyping="NO",
-                value_judgments="NO",
-                contradictions_between_texts="NO",
-                contradictions_within_description="NO",
-                offensive_language="NO",
-                inconsistent_demographics="NO",
-                euphemistic_language="NO",
-                people_first_language="N/A",
-                unsupported_inferential_claims="NO",
-                safety_assessment_consistency="CONSISTENT",
-                concerns_for_review=[]
-            ),
-            version=VersionInfo(
-                version=settings.app_version,
-                models=["placeholder"],
-                timestamp=datetime.now(timezone.utc).isoformat()
-            )
-        ),
-        processing_time_ms=0.0
+    # Get file path from URI (downloads if http/https, uses local path if file://)
+    temp_path = await get_path_from_uri(
+        uri=request.uri,
+        max_size=settings.max_upload_size,
+        filename=request.filename
     )
+
+    # Determine if we need to clean up (only for downloaded files)
+    should_cleanup = parsed_uri.scheme in ["http", "https"]
+
+    try:
+        # Process the image through the workflow
+        start_time = datetime.now(timezone.utc)
+        result = await workflow.process_image(
+            image_path=temp_path,
+            filename=request.filename,
+            mimetype=request.mimetype,
+            context=request.context
+        )
+        processing_time = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
+
+        return DescribeResponse(
+            success=True,
+            filename=request.filename,
+            result=result,
+            processing_time_ms=processing_time
+        )
+    finally:
+        # Clean up temporary file only if we downloaded it
+        if should_cleanup and temp_path.exists():
+            temp_path.unlink()
