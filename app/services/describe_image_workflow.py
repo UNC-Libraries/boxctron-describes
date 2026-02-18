@@ -53,67 +53,82 @@ class DescribeImageWorkflow:
         # Normalize image
         base64_image = self.image_normalizer.normalize_image(image_path)
 
-        # Generate full description, transcript, and safety
+        # Generate full description, transcript, and safety assessment
         full_desc_result = self.image_description_service.generate_description(base64_image, context)
-        logger.info(f"Response for image was {full_desc_result}")
+        logger.info(f"Generated description for {filename}")
 
-        # 3. Call LLM with appropriate prompt and image
+        # Parse safety assessment from LLM response
+        safety_assessment = self._parse_safety_assessment(full_desc_result)
 
-        # 4. Parse LLM response into structured format
+        # TODO: Generate review assessment in a separate step
+        # For now, use placeholder
+        review_assessment = ReviewAssessment(
+            biased_language="NO",
+            stereotyping="NO",
+            value_judgments="NO",
+            contradictions_between_texts="NO",
+            contradictions_within_description="NO",
+            offensive_language="NO",
+            inconsistent_demographics="NO",
+            euphemistic_language="NO",
+            people_first_language="N/A",
+            unsupported_inferential_claims="NO",
+            safety_assessment_consistency="CONSISTENT",
+            concerns_for_review=[]
+        )
 
-        # 5. Perform safety assessment
+        # TODO: Generate alt text in a separate step
+        # For now, use a simplified version from full description
+        alt_text = full_desc_result.get("FULL_DESCRIPTION", "")[:200] + "..."
 
-        # 6. Perform review assessment
-
-        # 7. Return complete DescriptionResult
-
-        # For now, return placeholder
         return DescriptionResult(
-            full_description="[Placeholder] Full description will be generated here",
-            alt_text="[Placeholder] Alt text will be generated here",
-            transcript="",
-            safety_assessment=SafetyAssessment(
-                people_visible="NO",
-                demographics_described="NO",
-                misidentification_risk_people="LOW",
-                minors_present="NO",
-                named_individuals_claimed="NO",
-                violent_content="NONE",
-                racial_violence_oppression="NONE",
-                nudity="NONE",
-                sexual_content="NONE",
-                symbols_present=SymbolsPresent(
-                    types=["NONE"],
-                    names=[],
-                    misidentification_risk="LOW"
-                ),
-                stereotyping_present="NO",
-                atrocities_depicted="NO",
-                text_characteristics=TextCharacteristics(
-                    text_present="NO",
-                    text_type="N/A",
-                    legibility="N/A"
-                ),
-                confidence="LOW",
-                reasoning="Placeholder response - actual implementation pending"
-            ),
-            review_assessment=ReviewAssessment(
-                biased_language="NO",
-                stereotyping="NO",
-                value_judgments="NO",
-                contradictions_between_texts="NO",
-                contradictions_within_description="NO",
-                offensive_language="NO",
-                inconsistent_demographics="NO",
-                euphemistic_language="NO",
-                people_first_language="N/A",
-                unsupported_inferential_claims="NO",
-                safety_assessment_consistency="CONSISTENT",
-                concerns_for_review=[]
-            ),
+            full_description=full_desc_result.get("FULL_DESCRIPTION", ""),
+            alt_text=alt_text,
+            transcript=full_desc_result.get("TRANSCRIPT", ""),
+            safety_assessment=safety_assessment,
+            review_assessment=review_assessment,
             version=VersionInfo(
                 version=self.settings.app_version,
-                models=["placeholder"],
+                models=[self.settings.litellm_full_desc_model],
                 timestamp=datetime.now(timezone.utc).isoformat()
             )
+        )
+
+    def _parse_safety_assessment(self, full_desc_result: dict) -> SafetyAssessment:
+        """
+        Parse safety assessment from LLM response.
+
+        Args:
+            full_desc_result: Dictionary containing LLM response with SAFETY_ASSESSMENT_FORM
+
+        Returns:
+            SafetyAssessment object
+        """
+        safety_form = full_desc_result.get("SAFETY_ASSESSMENT_FORM", {})
+        symbols_data = safety_form.get("symbols_present", {})
+
+        return SafetyAssessment(
+            people_visible=safety_form.get("people_visible", "UNKNOWN"),
+            demographics_described=safety_form.get("demographics_described", "UNKNOWN"),
+            misidentification_risk_people=safety_form.get("misidentification_risk_people", "UNKNOWN"),
+            minors_present=safety_form.get("minors_present", "UNKNOWN"),
+            named_individuals_claimed=safety_form.get("named_individuals_claimed", "UNKNOWN"),
+            violent_content=safety_form.get("violent_content", "UNKNOWN"),
+            racial_violence_oppression=safety_form.get("racial_violence_oppression", "UNKNOWN"),
+            nudity=safety_form.get("nudity", "UNKNOWN"),
+            sexual_content=safety_form.get("sexual_content", "UNKNOWN"),
+            symbols_present=SymbolsPresent(
+                types=symbols_data.get("types", ["NONE"]),
+                names=symbols_data.get("names", []),
+                misidentification_risk=symbols_data.get("misidentification_risk", "UNKNOWN")
+            ),
+            stereotyping_present=safety_form.get("stereotyping_present", "UNKNOWN"),
+            atrocities_depicted=safety_form.get("atrocities_depicted", "UNKNOWN"),
+            text_characteristics=TextCharacteristics(
+                text_present=safety_form.get("text_characteristics", {}).get("text_present", "UNKNOWN"),
+                text_type=safety_form.get("text_characteristics", {}).get("text_type", "N/A"),
+                legibility=safety_form.get("text_characteristics", {}).get("legibility", "N/A")
+            ),
+            confidence=safety_form.get("confidence", "UNKNOWN"),
+            reasoning=full_desc_result.get("SAFETY_ASSESSMENT_REASONING", "")
         )

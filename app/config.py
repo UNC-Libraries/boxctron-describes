@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     litellm_full_desc_max_tokens: int = 1000
     litellm_full_desc_reasoning_effort: str = "low"
     litellm_num_retries: int = 3
+    litellm_drop_params: bool = True  # Drop unsupported parameters for the model
 
     # File Upload Configuration
     max_upload_size: int = 10 * 1024 * 1024  # 10 MB
