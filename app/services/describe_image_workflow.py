@@ -55,6 +55,7 @@ class DescribeImageWorkflow:
 
         # Generate full description, transcript, and safety
         full_desc_result = self.image_description_service.generate_description(base64_image, context)
+        logger.info(f"Response for image was {full_desc_result}")
 
         # 3. Call LLM with appropriate prompt and image
 

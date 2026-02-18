@@ -24,6 +24,7 @@ from app.models import (
 from app.config import settings
 from app.dependencies import get_describe_workflow
 from app.services import DescribeImageWorkflow
+from app.utils import stream_upload_to_temp, stream_url_to_temp
 
 logger = logging.getLogger(__name__)
 
@@ -83,73 +84,30 @@ async def describe_uploaded_image(
             detail="MIME type must be for an image"
         )
 
-    # Validate uploaded file
-    file_content = await file.read()
-    if len(file_content) > settings.max_upload_size:
-        raise HTTPException(
-            status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
-            detail=f"File size exceeds maximum allowed size of {settings.max_upload_size} bytes"
+    # Stream uploaded file to temporary location while checking size
+    temp_path = await stream_upload_to_temp(file, filename, settings.max_upload_size)
+
+    try:
+        # Process the image through the workflow
+        start_time = datetime.now(timezone.utc)
+        result = await workflow.process_image(
+            image_path=temp_path,
+            filename=filename,
+            mimetype=mimetype,
+            context=context
         )
-    # Reset file pointer for future processing
-    await file.seek(0)
+        processing_time = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
 
-    # TODO: Implement actual image processing logic
-    # For now, return a placeholder response
-    return DescribeResponse(
-        success=True,
-        filename=filename,
-        result=DescriptionResult(
-            full_description="[Placeholder] Full description will be generated here",
-            alt_text="[Placeholder] Alt text will be generated here",
-            transcript="",
-            safety_assessment=SafetyAssessment(
-                people_visible="NO",
-                demographics_described="NO",
-                misidentification_risk_people="LOW",
-                minors_present="NO",
-                named_individuals_claimed="NO",
-                violent_content="NONE",
-                racial_violence_oppression="NONE",
-                nudity="NONE",
-                sexual_content="NONE",
-                symbols_present=SymbolsPresent(
-                    types=["NONE"],
-                    names=[],
-                    misidentification_risk="LOW"
-                ),
-                stereotyping_present="NO",
-                atrocities_depicted="NO",
-                text_characteristics=TextCharacteristics(
-                    text_present="NO",
-                    text_type="N/A",
-                    legibility="N/A"
-                ),
-                confidence="LOW",
-                reasoning="Placeholder response - actual implementation pending"
-            ),
-            review_assessment=ReviewAssessment(
-                biased_language="NO",
-                stereotyping="NO",
-                value_judgments="NO",
-                contradictions_between_texts="NO",
-                contradictions_within_description="NO",
-                offensive_language="NO",
-                inconsistent_demographics="NO",
-                euphemistic_language="NO",
-                people_first_language="N/A",
-                unsupported_inferential_claims="NO",
-                safety_assessment_consistency="CONSISTENT",
-                concerns_for_review=[]
-            ),
-            version=VersionInfo(
-                version=settings.app_version,
-                models=["placeholder"],
-                timestamp=datetime.now(timezone.utc).isoformat()
-            )
-        ),
-        processing_time_ms=0.0
-    )
-
+        return DescribeResponse(
+            success=True,
+            filename=filename,
+            result=result,
+            processing_time_ms=processing_time
+        )
+    finally:
+        # Clean up temporary file
+        if temp_path.exists():
+            temp_path.unlink()
 
 @router.post(
     "/describe/uri",
