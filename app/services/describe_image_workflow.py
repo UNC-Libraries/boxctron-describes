@@ -5,6 +5,7 @@ from datetime import datetime, timezone
 import logging
 
 from app.services.image_normalizer import ImageNormalizer
+from app.services.image_description_service import ImageDescriptionService
 from app.models import DescriptionResult, SafetyAssessment, ReviewAssessment, VersionInfo, SymbolsPresent, TextCharacteristics
 from app.config import Settings
 
@@ -13,7 +14,7 @@ logger = logging.getLogger(__name__)
 class DescribeImageWorkflow:
     """Service orchestrating the image description workflow."""
 
-    def __init__(self, settings: Settings, image_normalizer: ImageNormalizer):
+    def __init__(self, settings: Settings, image_normalizer: ImageNormalizer, image_description_service: ImageDescriptionService):
         """
         Initialize the DescribeImageWorkflow.
 
@@ -23,6 +24,7 @@ class DescribeImageWorkflow:
         """
         self.settings = settings
         self.image_normalizer = image_normalizer
+        self.image_description_service = image_description_service
 
     async def process_image(
         self,
@@ -48,11 +50,11 @@ class DescribeImageWorkflow:
             ValueError: If the image format is not supported
         """
         logger.info(f"Processing image {image_path}")
-        # TODO: Implement full workflow
-        # 1. Normalize image
-        normalized_path = self.image_normalizer.normalize_image(image_path)
+        # Normalize image
+        base64_image = self.image_normalizer.normalize_image(image_path)
 
-        # 2. Prepare image for LLM (encode as base64, etc.)
+        # Generate full description, transcript, and safety
+        full_desc_result = self.image_description_service.generate_description(base64_image, context)
 
         # 3. Call LLM with appropriate prompt and image
 

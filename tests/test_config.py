@@ -11,5 +11,5 @@ def test_settings_defaults():
     assert settings.debug is False
     assert settings.host == "0.0.0.0"
     assert settings.port == 8000
-    assert settings.litellm_model == "azure/gpt-4o"
+    assert settings.litellm_full_desc_model == "azure/gpt-4o"
     assert settings.max_upload_size == 10 * 1024 * 1024

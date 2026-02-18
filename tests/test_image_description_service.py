@@ -1,0 +1,220 @@
+"""Tests for ImageDescriptionService."""
+from unittest.mock import Mock, patch
+import json
+import pytest
+
+from app.services.image_description_service import ImageDescriptionService
+from app.config import Settings
+
+
+@pytest.fixture
+def mock_settings():
+    """Create mock settings for testing."""
+    settings = Settings()
+    settings.litellm_full_desc_model = "azure/gpt-4o"
+    settings.litellm_full_desc_temperature = 0.7
+    settings.litellm_full_desc_max_tokens = 1000
+    settings.litellm_full_desc_reasoning_effort = "low"
+    settings.litellm_num_retries = 3
+    return settings
+
+@pytest.fixture
+def sample_llm_response():
+    """Sample valid LLM response."""
+    return {
+        "FULL_DESCRIPTION": "A test image description",
+        "TRANSCRIPT": "Test transcript text",
+        "SAFETY_ASSESSMENT_FORM": {
+            "people_visible": "NO",
+            "demographics_described": "NO",
+            "misidentification_risk_people": "LOW",
+            "minors_present": "NO",
+            "named_individuals_claimed": "NO",
+            "violent_content": "NONE",
+            "racial_violence_oppression": "NONE",
+            "nudity": "NONE",
+            "sexual_content": "NONE",
+            "symbols_present": {
+                "types": ["NONE"],
+                "names": [],
+                "misidentification_risk": "LOW"
+            },
+            "stereotyping_present": "NO",
+            "atrocities_depicted": "NO",
+            "text_characteristics": {
+                "text_present": "NO",
+                "text_type": "N/A",
+                "legibility": "N/A"
+            },
+            "confidence": "HIGH"
+        },
+        "SAFETY_ASSESSMENT_REASONING": "No safety concerns detected."
+    }
+
+
+@patch("app.services.image_description_service.completion")
+def test_generate_description_without_context(mock_completion, mock_settings, sample_llm_response):
+    """Test generating description without context."""
+    # Setup mock response
+    mock_response = Mock()
+    mock_response.choices = [Mock()]
+    mock_response.choices[0].message.content = json.dumps(sample_llm_response)
+    mock_completion.return_value = mock_response
+
+    # Create service and call
+    service = ImageDescriptionService(mock_settings)
+    result = service.generate_description("data:image/jpeg;base64,abc123")
+
+    # Verify completion was called with correct parameters
+    mock_completion.assert_called_once()
+    call_kwargs = mock_completion.call_args[1]
+
+    assert call_kwargs["model"] == "azure/gpt-4o"
+    assert call_kwargs["temperature"] == 0.7
+    assert call_kwargs["max_tokens"] == 1000
+    assert call_kwargs["num_retries"] == 3
+    assert call_kwargs["reasoning_effort"] == "low"
+    assert "response_format" in call_kwargs
+
+    # Verify messages structure
+    messages = call_kwargs["messages"]
+    assert len(messages) == 2
+    assert messages[0]["role"] == "system"
+    assert messages[1]["role"] == "user"
+
+    # Verify image is in user content
+    user_content = messages[1]["content"]
+    assert len(user_content) == 1
+    assert user_content[0]["type"] == "image_url"
+    assert user_content[0]["image_url"]["url"] == "data:image/jpeg;base64,abc123"
+
+    # Verify result
+    assert result == sample_llm_response
+
+
+@patch("app.services.image_description_service.completion")
+def test_generate_description_with_context(mock_completion, mock_settings, sample_llm_response):
+    """Test generating description with context."""
+    # Setup mock response
+    mock_response = Mock()
+    mock_response.choices = [Mock()]
+    mock_response.choices[0].message.content = json.dumps(sample_llm_response)
+    mock_completion.return_value = mock_response
+
+    # Create service and call
+    service = ImageDescriptionService(mock_settings)
+    result = service.generate_description(
+        "data:image/jpeg;base64,abc123",
+        context="This is a historical photograph"
+    )
+
+    # Verify completion was called
+    mock_completion.assert_called_once()
+    call_kwargs = mock_completion.call_args[1]
+
+    # Verify messages include context
+    messages = call_kwargs["messages"]
+    user_content = messages[1]["content"]
+
+    # Should have 2 items: context text and image
+    assert len(user_content) == 2
+    assert user_content[0]["type"] == "text"
+    assert "This is a historical photograph" in user_content[0]["text"]
+    assert user_content[1]["type"] == "image_url"
+
+
+@patch("app.services.image_description_service.completion")
+def test_reasoning_effort_not_set_when_none(mock_completion, mock_settings, sample_llm_response):
+    """Test that reasoning_effort is omitted when set to None."""
+    # Setup mock response
+    mock_response = Mock()
+    mock_response.choices = [Mock()]
+    mock_response.choices[0].message.content = json.dumps(sample_llm_response)
+    mock_completion.return_value = mock_response
+
+    # Set reasoning_effort to None
+    mock_settings.litellm_full_desc_reasoning_effort = None
+
+    # Create service and call
+    service = ImageDescriptionService(mock_settings)
+    service.generate_description("data:image/jpeg;base64,abc123")
+
+    # Verify reasoning_effort is not in call parameters
+    call_kwargs = mock_completion.call_args[1]
+    assert "reasoning_effort" not in call_kwargs
+
+
+@patch("app.services.image_description_service.completion")
+def test_empty_response_raises_error(mock_completion, mock_settings):
+    """Test that empty LLM response raises ValueError."""
+    # Setup mock response with no content
+    mock_response = Mock()
+    mock_response.choices = [Mock()]
+    mock_response.choices[0].message.content = None
+    mock_completion.return_value = mock_response
+
+    # Create service and call
+    service = ImageDescriptionService(mock_settings)
+
+    with pytest.raises(ValueError, match="Empty response from LLM"):
+        service.generate_description("data:image/jpeg;base64,abc123")
+
+
+@patch("app.services.image_description_service.completion")
+def test_missing_required_field_raises_error(mock_completion, mock_settings):
+    """Test that response missing required field raises ValueError."""
+    # Setup mock response missing TRANSCRIPT
+    incomplete_response = {
+        "FULL_DESCRIPTION": "Test description",
+        "SAFETY_ASSESSMENT_FORM": {},
+        "SAFETY_ASSESSMENT_REASONING": "Test"
+        # Missing TRANSCRIPT
+    }
+
+    mock_response = Mock()
+    mock_response.choices = [Mock()]
+    mock_response.choices[0].message.content = json.dumps(incomplete_response)
+    mock_completion.return_value = mock_response
+
+    # Create service and call
+    service = ImageDescriptionService(mock_settings)
+
+    with pytest.raises(ValueError, match="Missing required field: TRANSCRIPT"):
+        service.generate_description("data:image/jpeg;base64,abc123")
+
+
+@patch("app.services.image_description_service.completion")
+def test_missing_safety_field_raises_error(mock_completion, mock_settings):
+    """Test that response missing safety assessment field raises ValueError."""
+    # Setup mock response with incomplete safety form
+    incomplete_response = {
+        "FULL_DESCRIPTION": "Test",
+        "TRANSCRIPT": "Test",
+        "SAFETY_ASSESSMENT_FORM": {
+            "people_visible": "NO"
+            # Missing other required safety fields
+        },
+        "SAFETY_ASSESSMENT_REASONING": "Test"
+    }
+
+    mock_response = Mock()
+    mock_response.choices = [Mock()]
+    mock_response.choices[0].message.content = json.dumps(incomplete_response)
+    mock_completion.return_value = mock_response
+
+    # Create service and call
+    service = ImageDescriptionService(mock_settings)
+
+    with pytest.raises(ValueError, match="Missing required safety assessment field"):
+        service.generate_description("data:image/jpeg;base64,abc123")
+
+
+def test_prompt_file_loaded(mock_settings):
+    """Test that prompt file is loaded during initialization."""
+    service = ImageDescriptionService(mock_settings)
+
+    # Verify prompt was loaded from real file
+    assert service.system_prompt is not None
+    assert len(service.system_prompt) > 0
+    # Verify it's actual prompt content, not empty
+    assert isinstance(service.system_prompt, str)

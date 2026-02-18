@@ -22,6 +22,8 @@ from app.models import (
     HTTPErrorResponse
 )
 from app.config import settings
+from app.dependencies import get_describe_workflow
+from app.services import DescribeImageWorkflow
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +56,8 @@ async def describe_uploaded_image(
     file: UploadFile = File(..., description="Image file to process"),
     context: Annotated[str | None, Form()] = None,
     filename: Annotated[str, Form()] = ...,
-    mimetype: Annotated[str, Form()] = ...
+    mimetype: Annotated[str, Form()] = ...,
+    workflow: DescribeImageWorkflow = Depends(get_describe_workflow)
 ) -> DescribeResponse:
     """
     Describe an uploaded image using AI vision models.
@@ -164,7 +167,8 @@ async def describe_uploaded_image(
     }
 )
 async def describe_image_from_uri(
-    request: DescribeUriRequest
+    request: DescribeUriRequest,
+    workflow: DescribeImageWorkflow = Depends(get_describe_workflow)
 ) -> DescribeResponse:
     """
     Describe an image from a URI using AI vision models.

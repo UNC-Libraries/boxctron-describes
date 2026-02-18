@@ -26,9 +26,11 @@ class Settings(BaseSettings):
     anthropic_api_key: Optional[str] = None
 
     # LiteLLM Configuration
-    litellm_model: str = "azure/gpt-4o"
-    litellm_temperature: float = 0.7
-    litellm_max_tokens: int = 1000
+    litellm_full_desc_model: str = "azure/gpt-4o"
+    litellm_full_desc_temperature: float = 0.7
+    litellm_full_desc_max_tokens: int = 1000
+    litellm_full_desc_reasoning_effort: str = "low"
+    litellm_num_retries: int = 3
 
     # File Upload Configuration
     max_upload_size: int = 10 * 1024 * 1024  # 10 MB
