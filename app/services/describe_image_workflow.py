@@ -7,6 +7,7 @@ import logging
 from app.services.image_normalizer import ImageNormalizer
 from app.services.image_description_service import ImageDescriptionService
 from app.services.alt_text_generation_service import AltTextGenerationService
+from app.services.review_assessment_service import ReviewAssessmentService
 from app.models import DescriptionResult, SafetyAssessment, ReviewAssessment, VersionInfo, SymbolsPresent, TextCharacteristics
 from app.config import Settings
 
@@ -20,7 +21,8 @@ class DescribeImageWorkflow:
         settings: Settings,
         image_normalizer: ImageNormalizer,
         image_description_service: ImageDescriptionService,
-        alt_text_service: AltTextGenerationService
+        alt_text_service: AltTextGenerationService,
+        review_service: ReviewAssessmentService
     ):
         """
         Initialize the DescribeImageWorkflow.
@@ -30,11 +32,13 @@ class DescribeImageWorkflow:
             image_normalizer: Service for normalizing images
             image_description_service: Service for generating image descriptions
             alt_text_service: Service for generating alt text
+            review_service: Service for reviewing generated content
         """
         self.settings = settings
         self.image_normalizer = image_normalizer
         self.image_description_service = image_description_service
         self.alt_text_service = alt_text_service
+        self.review_service = review_service
 
     async def process_image(
         self,
@@ -70,31 +74,28 @@ class DescribeImageWorkflow:
         # Parse safety assessment from LLM response
         safety_assessment = self._parse_safety_assessment(full_desc_result)
 
-        # TODO: Generate review assessment in a separate step
-        # For now, use placeholder
-        review_assessment = ReviewAssessment(
-            biased_language="NO",
-            stereotyping="NO",
-            value_judgments="NO",
-            contradictions_between_texts="NO",
-            contradictions_within_description="NO",
-            offensive_language="NO",
-            inconsistent_demographics="NO",
-            euphemistic_language="NO",
-            people_first_language="N/A",
-            unsupported_inferential_claims="NO",
-            safety_assessment_consistency="CONSISTENT",
-            concerns_for_review=[]
-        )
-
         full_description = full_desc_result.get("FULL_DESCRIPTION", "")
+        transcript = full_desc_result.get("TRANSCRIPT", "")
+        safety_form = full_desc_result.get("SAFETY_ASSESSMENT_FORM", {})
+        safety_reasoning = full_desc_result.get("SAFETY_ASSESSMENT_REASONING", "")
+
         # Summarize the full description into alt text
         alt_text = self.alt_text_service.generate_alt_text(full_description)
+
+        # Generate review assessment
+        review_assessment_result = self.review_service.generate_review_assessment(
+            full_description,
+            transcript,
+            safety_form,
+            safety_reasoning,
+            alt_text
+        )
+        review_assessment = self._parse_review_assessment(review_assessment_result)
 
         return DescriptionResult(
             full_description=full_description,
             alt_text=alt_text,
-            transcript=full_desc_result.get("TRANSCRIPT", ""),
+            transcript=transcript,
             safety_assessment=safety_assessment,
             review_assessment=review_assessment,
             version=VersionInfo(
@@ -141,4 +142,29 @@ class DescribeImageWorkflow:
             ),
             confidence=safety_form.get("confidence", "UNKNOWN"),
             reasoning=full_desc_result.get("SAFETY_ASSESSMENT_REASONING", "")
+        )
+
+    def _parse_review_assessment(self, review_result: dict) -> ReviewAssessment:
+        """
+        Parse review assessment from LLM response.
+
+        Args:
+            review_result: Dictionary containing LLM response with review assessment fields
+
+        Returns:
+            ReviewAssessment object
+        """
+        return ReviewAssessment(
+            biased_language=review_result.get("biased_language", "NO"),
+            stereotyping=review_result.get("stereotyping", "NO"),
+            value_judgments=review_result.get("value_judgments", "NO"),
+            contradictions_between_texts=review_result.get("contradictions_between_texts", "NO"),
+            contradictions_within_description=review_result.get("contradictions_within_description", "NO"),
+            offensive_language=review_result.get("offensive_language", "NO"),
+            inconsistent_demographics=review_result.get("inconsistent_demographics", "NO"),
+            euphemistic_language=review_result.get("euphemistic_language", "NO"),
+            people_first_language=review_result.get("people_first_language", "N/A"),
+            unsupported_inferential_claims=review_result.get("unsupported_inferential_claims", "NO"),
+            safety_assessment_consistency=review_result.get("safety_assessment_consistency", "CONSISTENT"),
+            concerns_for_review=review_result.get("concerns_for_review", [])
         )

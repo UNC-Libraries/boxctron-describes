@@ -39,6 +39,12 @@ class Settings(BaseSettings):
     litellm_alt_text_max_tokens: int = 150
     litellm_alt_text_reasoning_effort: Optional[str] = None
 
+    # Review Assessment Configuration
+    litellm_review_model: str = "azure/gpt-4o"
+    litellm_review_temperature: float = 0.3
+    litellm_review_max_tokens: int = 500
+    litellm_review_reasoning_effort: Optional[str] = None
+
     # File Upload Configuration
     max_upload_size: int = 10 * 1024 * 1024  # 10 MB
 
