@@ -47,46 +47,7 @@ def test_describe_upload_with_file(client, sample_image_data, mock_workflow):
     response = client.post("/api/v1/describe/upload", files=files, data=data)
     assert response.status_code == status.HTTP_200_OK
 
-    result = response.json()
-    assert result["success"] is True
-    assert result["filename"] == "test.png"
-    assert result["result"] is not None
-
-    # Verify full result structure
-    result_data = result["result"]
-    assert "full_description" in result_data
-    assert "alt_text" in result_data
-    assert "transcript" in result_data
-    assert "safety_assessment" in result_data
-    assert "review_assessment" in result_data
-    assert "version" in result_data
-
-    # Verify safety_assessment structure and default values
-    safety = result_data["safety_assessment"]
-    assert safety["people_visible"] == "NO"
-    assert safety["violent_content"] == "NONE"
-    assert safety["confidence"] == "LOW"
-    assert safety["symbols_present"]["types"] == ["NONE"]
-    assert safety["symbols_present"]["names"] == []
-    assert safety["text_characteristics"]["text_present"] == "NO"
-    assert safety["text_characteristics"]["text_type"] == "N/A"
-
-    # Verify review_assessment structure and default values
-    review = result_data["review_assessment"]
-    assert review["biased_language"] == "NO"
-    assert review["stereotyping"] == "NO"
-    assert review["offensive_language"] == "NO"
-    assert review["safety_assessment_consistency"] == "CONSISTENT"
-    assert review["concerns_for_review"] == []
-    assert isinstance(review["concerns_for_review"], list)
-
-    # Verify version structure
-    version = result_data["version"]
-    assert "version" in version
-    assert "models" in version
-    assert "timestamp" in version
-    assert isinstance(version["models"], list)
-    assert len(version["models"]) > 0
+    _assert_default_response_populated(response, "test.png")
 
     # Verify workflow was called
     mock_workflow.process_image.assert_called_once()
@@ -132,46 +93,7 @@ def test_describe_uri_with_valid_request(client, mock_workflow, sample_image_dat
     response = client.post("/api/v1/describe/uri", json=payload)
     assert response.status_code == status.HTTP_200_OK
 
-    result = response.json()
-    assert result["success"] is True
-    assert result["filename"] == "image.jpg"
-    assert result["result"] is not None
-
-    # Verify full result structure
-    result_data = result["result"]
-    assert "full_description" in result_data
-    assert "alt_text" in result_data
-    assert "transcript" in result_data
-    assert "safety_assessment" in result_data
-    assert "review_assessment" in result_data
-    assert "version" in result_data
-
-    # Verify safety_assessment structure and default values
-    safety = result_data["safety_assessment"]
-    assert safety["people_visible"] == "NO"
-    assert safety["violent_content"] == "NONE"
-    assert safety["confidence"] == "LOW"
-    assert safety["symbols_present"]["types"] == ["NONE"]
-    assert safety["symbols_present"]["names"] == []
-    assert safety["text_characteristics"]["text_present"] == "NO"
-    assert safety["text_characteristics"]["text_type"] == "N/A"
-
-    # Verify review_assessment structure and default values
-    review = result_data["review_assessment"]
-    assert review["biased_language"] == "NO"
-    assert review["stereotyping"] == "NO"
-    assert review["offensive_language"] == "NO"
-    assert review["safety_assessment_consistency"] == "CONSISTENT"
-    assert review["concerns_for_review"] == []
-    assert isinstance(review["concerns_for_review"], list)
-
-    # Verify version structure
-    version = result_data["version"]
-    assert "version" in version
-    assert "models" in version
-    assert "timestamp" in version
-    assert isinstance(version["models"], list)
-    assert len(version["models"]) > 0
+    _assert_default_response_populated(response, "image.jpg")
 
     # Verify workflow was called
     mock_workflow.process_image.assert_called_once()
@@ -368,3 +290,45 @@ def test_describe_uri_with_http_scheme(client, mock_workflow, sample_image_data)
 
     response = client.post("/api/v1/describe/uri", json=payload)
     assert response.status_code == status.HTTP_200_OK
+
+def _assert_default_response_populated(response, expected_filename):
+    result = response.json()
+    assert result["success"] is True
+    assert result["filename"] == expected_filename
+    assert result["result"] is not None
+
+    # Verify full result structure
+    result_data = result["result"]
+    assert "full_description" in result_data
+    assert "alt_text" in result_data
+    assert "transcript" in result_data
+    assert "safety_assessment" in result_data
+    assert "review_assessment" in result_data
+    assert "version" in result_data
+
+    # Verify safety_assessment structure and default values
+    safety = result_data["safety_assessment"]
+    assert safety["people_visible"] == "NO"
+    assert safety["violent_content"] == "NONE"
+    assert safety["confidence"] == "LOW"
+    assert safety["symbols_present"]["types"] == ["NONE"]
+    assert safety["symbols_present"]["names"] == []
+    assert safety["text_characteristics"]["text_present"] == "NO"
+    assert safety["text_characteristics"]["text_type"] == "N/A"
+
+    # Verify review_assessment structure and default values
+    review = result_data["review_assessment"]
+    assert review["biased_language"] == "NO"
+    assert review["stereotyping"] == "NO"
+    assert review["offensive_language"] == "NO"
+    assert review["safety_assessment_consistency"] == "CONSISTENT"
+    assert review["concerns_for_review"] == []
+    assert isinstance(review["concerns_for_review"], list)
+
+    # Verify version structure
+    version = result_data["version"]
+    assert "version" in version
+    assert "models" in version
+    assert "timestamp" in version
+    assert isinstance(version["models"], list)
+    assert len(version["models"]) > 0
