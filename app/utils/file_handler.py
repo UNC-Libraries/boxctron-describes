@@ -51,7 +51,7 @@ async def _write_chunks_to_file(
         if total_size > max_size:
             _cleanup_temp_file(temp_file, temp_path)
             raise HTTPException(
-                status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+                status_code=status.HTTP_413_CONTENT_TOO_LARGE,
                 detail=f"File size exceeds maximum allowed size of {max_size} bytes"
             )
         temp_file.write(chunk)
@@ -215,13 +215,19 @@ async def get_path_from_uri(uri: str, max_size: int, filename: Optional[str] = N
         )
     elif parsed_uri.scheme == "file":
         # Convert file:// URI to local path
-        # Handle both file:///path and file://host/path formats
-        if parsed_uri.netloc:
-            # file://host/path format (e.g., file://localhost/path or file://server/share)
-            file_path = Path(f"//{parsed_uri.netloc}{parsed_uri.path}")
-        else:
-            # file:///path format (most common)
-            file_path = Path(parsed_uri.path)
+        # For file URIs, we only support local paths
+        # file:///path → /path (most common)
+        # file://localhost/path → /path (localhost means local machine)
+        # file://hostname/path → error (remote files not supported)
+
+        if parsed_uri.netloc and parsed_uri.netloc.lower() != "localhost":
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Remote file URIs not supported. Only local files (file:/// or file://localhost/) are allowed."
+            )
+
+        # Use the path directly (works for both file:///path and file://localhost/path)
+        file_path = Path(parsed_uri.path)
 
         # Verify the file exists
         if not file_path.exists():

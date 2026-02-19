@@ -1,6 +1,19 @@
 """Tests for the describe endpoints."""
 import io
+from datetime import datetime, timezone
+import pytest
+import respx
+import httpx
 from fastapi import status
+
+from app.models import (
+    DescriptionResult,
+    SafetyAssessment,
+    ReviewAssessment,
+    SymbolsPresent,
+    TextCharacteristics,
+    VersionInfo
+)
 
 
 def test_health_check(client):
@@ -22,7 +35,7 @@ def test_describe_upload_form_page(client):
     assert 'id="uploadForm"' in response.text
 
 
-def test_describe_upload_with_file(client, sample_image_data):
+def test_describe_upload_with_file(client, sample_image_data, mock_workflow):
     """Test describe/upload endpoint with an uploaded file."""
     files = {"file": ("test.png", io.BytesIO(sample_image_data), "image/png")}
     data = {
@@ -75,6 +88,9 @@ def test_describe_upload_with_file(client, sample_image_data):
     assert isinstance(version["models"], list)
     assert len(version["models"]) > 0
 
+    # Verify workflow was called
+    mock_workflow.process_image.assert_called_once()
+
 
 def test_describe_upload_without_file(client):
     """Test describe/upload endpoint without file (should fail)."""
@@ -98,8 +114,14 @@ def test_describe_upload_with_invalid_mimetype(client, sample_image_data):
     response = client.post("/api/v1/describe/upload", files=files, data=data)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
 
-def test_describe_uri_with_valid_request(client):
+@respx.mock
+def test_describe_uri_with_valid_request(client, mock_workflow, sample_image_data):
     """Test describe/uri endpoint with valid JSON request."""
+    # Mock HTTP download
+    respx.get("https://example.com/image.jpg").mock(
+        return_value=httpx.Response(200, content=sample_image_data)
+    )
+
     payload = {
         "uri": "https://example.com/image.jpg",
         "filename": "image.jpg",
@@ -151,6 +173,9 @@ def test_describe_uri_with_valid_request(client):
     assert isinstance(version["models"], list)
     assert len(version["models"]) > 0
 
+    # Verify workflow was called
+    mock_workflow.process_image.assert_called_once()
+
 
 def test_describe_uri_without_uri(client):
     """Test describe/uri endpoint without URI (should fail)."""
@@ -175,7 +200,7 @@ def test_describe_uri_with_invalid_mimetype(client):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
 
 
-def test_describe_upload_without_context(client, sample_image_data):
+def test_describe_upload_without_context(client, sample_image_data, mock_workflow):
     """Test describe/upload endpoint without optional context field."""
     files = {"file": ("test.png", io.BytesIO(sample_image_data), "image/png")}
     data = {
@@ -187,8 +212,14 @@ def test_describe_upload_without_context(client, sample_image_data):
     assert response.status_code == status.HTTP_200_OK
 
 
-def test_describe_uri_without_context(client):
+@respx.mock
+def test_describe_uri_without_context(client, mock_workflow, sample_image_data):
     """Test describe/uri endpoint without optional context field."""
+    # Mock HTTP download
+    respx.get("https://example.com/image.jpg").mock(
+        return_value=httpx.Response(200, content=sample_image_data)
+    )
+
     payload = {
         "uri": "https://example.com/image.jpg",
         "filename": "image.jpg",
@@ -283,15 +314,17 @@ def test_describe_uri_https_without_domain(client):
 
 
 def test_describe_uri_with_file_scheme(client):
-    """Test describe/uri endpoint with file URI scheme."""
+    """Test describe/uri endpoint with file URI scheme that references non-existent file."""
     payload = {
         "uri": "file:///path/to/image.jpg",
         "filename": "image.jpg",
         "mimetype": "image/jpeg"
     }
 
+    # This will fail because the file doesn't exist
     response = client.post("/api/v1/describe/uri", json=payload)
-    assert response.status_code == status.HTTP_200_OK
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert "File not found" in response.json()["detail"]
 
 def test_describe_uri_with_file_scheme_with_no_path(client):
     """Test describe/uri endpoint with file URI scheme."""
@@ -319,8 +352,14 @@ def test_describe_uri_with_file_scheme_with_only_protocol(client):
     data = response.json()
     assert "path" in data["detail"].lower()
 
-def test_describe_uri_with_http_scheme(client):
+@respx.mock
+def test_describe_uri_with_http_scheme(client, mock_workflow, sample_image_data):
     """Test describe/uri endpoint with http URI scheme."""
+    # Mock HTTP download
+    respx.get("http://example.com/image.jpg").mock(
+        return_value=httpx.Response(200, content=sample_image_data)
+    )
+
     payload = {
         "uri": "http://example.com/image.jpg",
         "filename": "image.jpg",
