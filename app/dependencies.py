@@ -2,7 +2,12 @@
 from fastapi import Depends
 
 from app.config import settings
-from app.services import ImageNormalizer, DescribeImageWorkflow, ImageDescriptionService
+from app.services import (
+    ImageNormalizer,
+    DescribeImageWorkflow,
+    ImageDescriptionService,
+    AltTextGenerationService
+)
 
 
 def get_image_normalizer() -> ImageNormalizer:
@@ -23,9 +28,19 @@ def get_image_description_service() -> ImageDescriptionService:
     """
     return ImageDescriptionService(settings)
 
+def get_alt_text_generation_service() -> AltTextGenerationService:
+    """
+    Provide an AltTextGenerationService instance.
+
+    Returns:
+        AltTextGenerationService: Configured alt text generation service
+    """
+    return AltTextGenerationService(settings)
+
 def get_describe_workflow(
     normalizer: ImageNormalizer = Depends(get_image_normalizer),
-    image_description_service: ImageDescriptionService = Depends(get_image_description_service)
+    image_description_service: ImageDescriptionService = Depends(get_image_description_service),
+    alt_text_service: AltTextGenerationService = Depends(get_alt_text_generation_service)
 ) -> DescribeImageWorkflow:
     """
     Provide a DescribeImageWorkflow instance with dependencies.
@@ -33,8 +48,9 @@ def get_describe_workflow(
     Args:
         normalizer: Image normalizer service
         image_description_service: Image description service
+        alt_text_service: Alt text generation service
 
     Returns:
         DescribeImageWorkflow: Configured workflow service
     """
-    return DescribeImageWorkflow(settings, normalizer, image_description_service)
+    return DescribeImageWorkflow(settings, normalizer, image_description_service, alt_text_service)

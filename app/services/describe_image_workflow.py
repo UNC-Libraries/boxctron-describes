@@ -6,6 +6,7 @@ import logging
 
 from app.services.image_normalizer import ImageNormalizer
 from app.services.image_description_service import ImageDescriptionService
+from app.services.alt_text_generation_service import AltTextGenerationService
 from app.models import DescriptionResult, SafetyAssessment, ReviewAssessment, VersionInfo, SymbolsPresent, TextCharacteristics
 from app.config import Settings
 
@@ -14,17 +15,26 @@ logger = logging.getLogger(__name__)
 class DescribeImageWorkflow:
     """Service orchestrating the image description workflow."""
 
-    def __init__(self, settings: Settings, image_normalizer: ImageNormalizer, image_description_service: ImageDescriptionService):
+    def __init__(
+        self,
+        settings: Settings,
+        image_normalizer: ImageNormalizer,
+        image_description_service: ImageDescriptionService,
+        alt_text_service: AltTextGenerationService
+    ):
         """
         Initialize the DescribeImageWorkflow.
 
         Args:
             settings: Application settings
             image_normalizer: Service for normalizing images
+            image_description_service: Service for generating image descriptions
+            alt_text_service: Service for generating alt text
         """
         self.settings = settings
         self.image_normalizer = image_normalizer
         self.image_description_service = image_description_service
+        self.alt_text_service = alt_text_service
 
     async def process_image(
         self,
@@ -77,12 +87,12 @@ class DescribeImageWorkflow:
             concerns_for_review=[]
         )
 
-        # TODO: Generate alt text in a separate step
-        # For now, use a simplified version from full description
-        alt_text = full_desc_result.get("FULL_DESCRIPTION", "")[:200] + "..."
+        full_description = full_desc_result.get("FULL_DESCRIPTION", "")
+        # Summarize the full description into alt text
+        alt_text = self.alt_text_service.generate_alt_text(full_description)
 
         return DescriptionResult(
-            full_description=full_desc_result.get("FULL_DESCRIPTION", ""),
+            full_description=full_description,
             alt_text=alt_text,
             transcript=full_desc_result.get("TRANSCRIPT", ""),
             safety_assessment=safety_assessment,

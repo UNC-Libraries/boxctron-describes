@@ -33,6 +33,12 @@ class Settings(BaseSettings):
     litellm_num_retries: int = 3
     litellm_drop_params: bool = True  # Drop unsupported parameters for the model
 
+    # Alt Text Generation Configuration
+    litellm_alt_text_model: str = "azure/gpt-4o"
+    litellm_alt_text_temperature: float = 0.5
+    litellm_alt_text_max_tokens: int = 150
+    litellm_alt_text_reasoning_effort: Optional[str] = None
+
     # File Upload Configuration
     max_upload_size: int = 10 * 1024 * 1024  # 10 MB
 
