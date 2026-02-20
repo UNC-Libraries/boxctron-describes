@@ -16,6 +16,7 @@ class Settings(BaseSettings):
     # Server Configuration
     host: str = "0.0.0.0"
     port: int = 8000
+    root_path: str = ""  # Set to subpath when behind reverse proxy (e.g., "/boxctron-describes")
 
     # LLM Provider API Keys
     azure_openai_api_key: Optional[str] = None

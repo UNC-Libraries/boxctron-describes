@@ -13,6 +13,7 @@ import litellm
 from app.config import settings
 from app.logging_config import setup_logging
 from app.api.routes import describe_router, health_router
+from app.exception_handlers import register_exception_handlers
 
 # Initialize logging
 setup_logging(settings)
@@ -63,7 +64,8 @@ def create_app() -> FastAPI:
         version=settings.app_version,
         description="A microservice for generating descriptive information from images using AI vision models",
         lifespan=lifespan,
-        debug=settings.debug
+        debug=settings.debug,
+        root_path=settings.root_path
     )
 
     # Configure CORS
@@ -78,6 +80,9 @@ def create_app() -> FastAPI:
     # Register routers
     app.include_router(describe_router)
     app.include_router(health_router)
+
+    # Register exception handlers
+    register_exception_handlers(app)
 
     return app
 
