@@ -1,7 +1,7 @@
 """
 Response models for the API endpoints.
 """
-from typing import Optional, List, Literal
+from typing import Optional, List, Literal, Dict
 from pydantic import BaseModel, ConfigDict, Field
 
 
@@ -194,9 +194,9 @@ class VersionInfo(BaseModel):
         description="Version of the application"
     )
 
-    models: List[str] = Field(
+    models: Dict[str, str] = Field(
         ...,
-        description="List of models used for processing"
+        description="Map of task names to model names used for processing"
     )
 
     timestamp: str = Field(
@@ -319,7 +319,9 @@ class DescribeResponse(BaseModel):
                     },
                     "version": {
                         "version": "0.1.0",
-                        "models": ["gpt-4o-2024-08-06"],
+                        "models": {
+                            "full_desc": "gpt-4o-2024-08-06"
+                        },
                         "timestamp": "2024-08-15T10:30:00Z"
                     }
                 },

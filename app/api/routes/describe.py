@@ -12,12 +12,6 @@ from fastapi.responses import HTMLResponse
 from app.models import (
     DescribeUriRequest,
     DescribeResponse,
-    DescriptionResult,
-    SafetyAssessment,
-    ReviewAssessment,
-    SymbolsPresent,
-    TextCharacteristics,
-    VersionInfo,
     ValidationErrorResponse,
     HTTPErrorResponse
 )

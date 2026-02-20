@@ -81,7 +81,11 @@ def mock_description_result():
         ),
         version=VersionInfo(
             version="0.1.0",
-            models=["test-model"],
+            models={
+                "full_desc": "test-model",
+                "alt_text": "test-model",
+                "review": "test-model"
+            },
             timestamp=datetime.now(timezone.utc).isoformat()
         )
     )

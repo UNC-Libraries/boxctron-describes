@@ -100,7 +100,11 @@ class DescribeImageWorkflow:
             review_assessment=review_assessment,
             version=VersionInfo(
                 version=self.settings.app_version,
-                models=[self.settings.litellm_full_desc_model],
+                models={
+                    "full_desc": self.settings.litellm_full_desc_model,
+                    "alt_text": self.settings.litellm_alt_text_model,
+                    "review": self.settings.litellm_review_model
+                },
                 timestamp=datetime.now(timezone.utc).isoformat()
             )
         )

@@ -399,8 +399,10 @@ def test_integration_all_result_fields_populated(client, blurry_owl_data, mock_l
     # Version info
     version = result["version"]
     assert version["version"] is not None
-    assert isinstance(version["models"], list)
-    assert len(version["models"]) > 0
+    assert isinstance(version["models"], dict)
+    assert "full_desc" in version["models"]
+    assert "alt_text" in version["models"]
+    assert "review" in version["models"]
     assert version["timestamp"] is not None
 
 

@@ -319,5 +319,7 @@ def _assert_default_response_populated(response, expected_filename):
     assert "version" in version
     assert "models" in version
     assert "timestamp" in version
-    assert isinstance(version["models"], list)
-    assert len(version["models"]) > 0
+    assert isinstance(version["models"], dict)
+    assert "full_desc" in version["models"]
+    assert "alt_text" in version["models"]
+    assert "review" in version["models"]
