@@ -68,12 +68,14 @@ def create_app() -> FastAPI:
         root_path=settings.root_path
     )
 
-    # Configure CORS
+    # Configure CORS - minimal config since primary usage is server-to-server
+    # CORS is only enforced by browsers; HTTP clients ignore it
+    # Only needed if the upload form or API is accessed directly via browser
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],  # Configure appropriately for production
-        allow_credentials=True,
-        allow_methods=["*"],
+        allow_origins=["*"],  # Allows browser access from any origin
+        allow_credentials=False,  # Must be False when allow_origins=["*"]
+        allow_methods=["GET", "POST"],
         allow_headers=["*"],
     )
 
