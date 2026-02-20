@@ -61,16 +61,6 @@
         </div>
 
         <div class="form-group">
-            <label for="filename">Filename:</label>
-            <input type="text" id="filename" name="filename" required>
-        </div>
-
-        <div class="form-group">
-            <label for="mimetype">MIME Type:</label>
-            <input type="text" id="mimetype" name="mimetype" required>
-        </div>
-
-        <div class="form-group">
             <label for="context">Context (optional):</label>
             <textarea id="context" name="context" placeholder="Optional context to guide description generation"></textarea>
         </div>
@@ -81,15 +71,6 @@
     <div id="result"></div>
 
     <script>
-        // Auto-populate filename and mimetype when file is selected
-        document.getElementById('file').addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            if (file) {
-                document.getElementById('filename').value = file.name;
-                document.getElementById('mimetype').value = file.type;
-            }
-        });
-
         // Handle form submission
         document.getElementById('uploadForm').addEventListener('submit', async function(e) {
             e.preventDefault();
@@ -98,9 +79,12 @@
             const fileInput = document.getElementById('file');
             const file = fileInput.files[0];
 
+            if (!file) {
+                alert('Please select a file');
+                return;
+            }
+
             formData.append('file', file);
-            formData.append('filename', document.getElementById('filename').value);
-            formData.append('mimetype', document.getElementById('mimetype').value);
 
             const context = document.getElementById('context').value;
             if (context) {

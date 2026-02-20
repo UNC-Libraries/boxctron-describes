@@ -82,31 +82,43 @@ Returns the health status of the service.
 ### Describe Image
 
 ```bash
-POST /api/v1/describe
+### Upload Endpoint
+
+```
+POST /api/v1/describe/upload
 ```
 
-Process an image and return descriptive information.
+Process an uploaded image file and return descriptive information.
 
 **Parameters:**
-- `file` (optional): Uploaded image file
-- `file_uri` (optional): URI to an image file
-- `filename` (required): Name of the file
-- `mimetype` (required): MIME type of the image
+- `file` (required): Uploaded image file (multipart/form-data)
 - `context` (optional): Additional context to guide description
 
-**Note:** Either `file` or `file_uri` must be provided.
+The filename and MIME type are automatically extracted from the uploaded file.
 
-**Example with cURL (file upload):**
+**Example with cURL:**
 
 ```bash
 curl -X POST "http://localhost:8000/api/v1/describe/upload" \
   -F "file=@/path/to/image.jpg" \
-  -F "filename=image.jpg" \
-  -F "mimetype=image/jpeg" \
   -F "context=Product photo"
 ```
 
-**Example with cURL (file URI):**
+### URI Endpoint
+
+```
+POST /api/v1/describe/uri
+```
+
+Process an image from a URI (file://, http://, or https://) and return descriptive information.
+
+**Parameters:**
+- `uri` (required): URI to the image file
+- `filename` (required): Name of the file
+- `mimetype` (required): MIME type of the image
+- `context` (optional): Additional context to guide description
+
+**Example with cURL:**
 
 ```bash
 curl -X POST "http://localhost:8000/api/v1/describe/uri" \

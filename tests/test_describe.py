@@ -39,8 +39,6 @@ def test_describe_upload_with_file(client, sample_image_data, mock_workflow):
     """Test describe/upload endpoint with an uploaded file."""
     files = {"file": ("test.png", io.BytesIO(sample_image_data), "image/png")}
     data = {
-        "filename": "test.png",
-        "mimetype": "image/png",
         "context": "Test image"
     }
 
@@ -55,10 +53,7 @@ def test_describe_upload_with_file(client, sample_image_data, mock_workflow):
 
 def test_describe_upload_without_file(client):
     """Test describe/upload endpoint without file (should fail)."""
-    data = {
-        "filename": "test.jpg",
-        "mimetype": "image/jpeg"
-    }
+    data = {}
 
     response = client.post("/api/v1/describe/upload", data=data)
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_CONTENT
@@ -67,10 +62,7 @@ def test_describe_upload_without_file(client):
 def test_describe_upload_with_invalid_mimetype(client, sample_image_data):
     """Test describe/upload endpoint with invalid MIME type."""
     files = {"file": ("document.pdf", io.BytesIO(sample_image_data), "application/pdf")}
-    data = {
-        "filename": "document.pdf",
-        "mimetype": "application/pdf"
-    }
+    data = {}
 
     response = client.post("/api/v1/describe/upload", files=files, data=data)
     assert response.status_code == status.HTTP_400_BAD_REQUEST
@@ -125,10 +117,7 @@ def test_describe_uri_with_invalid_mimetype(client):
 def test_describe_upload_without_context(client, sample_image_data, mock_workflow):
     """Test describe/upload endpoint without optional context field."""
     files = {"file": ("test.png", io.BytesIO(sample_image_data), "image/png")}
-    data = {
-        "filename": "test.png",
-        "mimetype": "image/png"
-    }
+    data = {}
 
     response = client.post("/api/v1/describe/upload", files=files, data=data)
     assert response.status_code == status.HTTP_200_OK

@@ -45,10 +45,10 @@ async def upload_form():
     description="""
     Process an uploaded image file and return descriptive information.
 
-    Submit the image as multipart/form-data along with metadata fields.
+    Submit the image as multipart/form-data along with optional context.
     """,
     responses={
-        400: {"model": HTTPErrorResponse, "description": "Invalid MIME type"},
+        400: {"model": HTTPErrorResponse, "description": "Invalid MIME type or missing filename"},
         413: {"model": HTTPErrorResponse, "description": "File size exceeds maximum"},
         422: {"model": ValidationErrorResponse, "description": "Validation error"}
     }
@@ -56,8 +56,6 @@ async def upload_form():
 async def describe_uploaded_image(
     file: UploadFile = File(..., description="Image file to process"),
     context: Annotated[str | None, Form()] = None,
-    filename: Annotated[str, Form()] = ...,
-    mimetype: Annotated[str, Form()] = ...,
     workflow: DescribeImageWorkflow = Depends(get_describe_workflow)
 ) -> DescribeResponse:
     """
@@ -66,8 +64,6 @@ async def describe_uploaded_image(
     Args:
         file: Uploaded image file
         context: Optional context string to guide description generation
-        filename: Name of the file being processed
-        mimetype: MIME type of the image
 
     Returns:
         DescribeResponse with description results or error information
@@ -75,13 +71,17 @@ async def describe_uploaded_image(
     Raises:
         HTTPException: If validation fails
     """
+    # Extract filename and mimetype from uploaded file
+    filename = file.filename or "uploaded_image"
+    mimetype = file.content_type or "application/octet-stream"
+
     logger.info(f"Received request to describe uploaded file {filename}")
 
     # Validate MIME type
     if not mimetype.startswith("image/"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="MIME type must be for an image"
+            detail=f"MIME type must be for an image (received: {mimetype})"
         )
 
     # Stream uploaded file to temporary location while checking size

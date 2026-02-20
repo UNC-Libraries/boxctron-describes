@@ -141,8 +141,6 @@ def test_integration_upload_real_image(client, blurry_owl_data, mock_llm_respons
     """
     files = {"file": ("blurry_owl.jpg", io.BytesIO(blurry_owl_data), "image/jpeg")}
     data = {
-        "filename": "blurry_owl.jpg",
-        "mimetype": "image/jpeg",
         "context": "Wildlife photography"
     }
 
@@ -268,11 +266,8 @@ def test_integration_no_context(client, blurry_owl_data, mock_llm_responses):
     - All services handle None context appropriately
     """
     files = {"file": ("owl.jpg", io.BytesIO(blurry_owl_data), "image/jpeg")}
-    data = {
-        "filename": "owl.jpg",
-        "mimetype": "image/jpeg"
-        # No context provided
-    }
+    data = {}
+    # No context provided
 
     response = client.post("/api/v1/describe/upload", files=files, data=data)
 
@@ -303,8 +298,6 @@ def test_integration_large_context(client, blurry_owl_data, mock_llm_responses):
 
     files = {"file": ("owl.jpg", io.BytesIO(blurry_owl_data), "image/jpeg")}
     data = {
-        "filename": "owl.jpg",
-        "mimetype": "image/jpeg",
         "context": large_context
     }
 
@@ -353,10 +346,7 @@ def test_integration_invalid_image_format(client, mock_llm_responses):
     invalid_data = b"This is not a valid image file"
 
     files = {"file": ("fake.jpg", io.BytesIO(invalid_data), "image/jpeg")}
-    data = {
-        "filename": "fake.jpg",
-        "mimetype": "image/jpeg"
-    }
+    data = {}
 
     response = client.post("/api/v1/describe/upload", files=files, data=data)
 
@@ -376,8 +366,6 @@ def test_integration_all_result_fields_populated(client, blurry_owl_data, mock_l
     """
     files = {"file": ("owl.jpg", io.BytesIO(blurry_owl_data), "image/jpeg")}
     data = {
-        "filename": "owl.jpg",
-        "mimetype": "image/jpeg",
         "context": "Test"
     }
 
@@ -429,10 +417,7 @@ def test_integration_file_cleanup(client, blurry_owl_data, mock_llm_responses, t
     temp_files_before = set(Path(original_tempdir).glob("tmp*"))
 
     files = {"file": ("owl.jpg", io.BytesIO(blurry_owl_data), "image/jpeg")}
-    data = {
-        "filename": "owl.jpg",
-        "mimetype": "image/jpeg"
-    }
+    data = {}
 
     response = client.post("/api/v1/describe/upload", files=files, data=data)
     assert response.status_code == status.HTTP_200_OK
