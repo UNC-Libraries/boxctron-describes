@@ -220,40 +220,6 @@ Configuration is managed through environment variables using `pydantic-settings`
 
 See [.env.example](.env.example) for all available configuration options.
 
-## Development
-
-### Adding New Endpoints
-
-1. Create a new router file in `app/api/routes/`
-2. Define request/response models in `app/models/`
-3. Register the router in `main.py`
-4. Add tests in `tests/`
-
-### Code Quality
-
-The project uses:
-- Type hints throughout the codebase
-- Pydantic for data validation
-- FastAPI's built-in OpenAPI documentation
-- Pytest for testing
-
-## Next Steps
-
-The current implementation provides the basic project structure and API skeleton. To complete the service, you'll need to:
-
-1. Implement the actual image processing logic in the describe endpoint
-2. Add LiteLLM integration for calling vision models
-3. Handle image downloading from URIs
-4. Implement proper error handling and logging
-5. Add authentication/authorization if needed
-6. Configure CORS settings for production
-7. Add Docker support for containerization
-8. Set up CI/CD pipelines
-
 ## License
 
-[Add your license information here]
-
-## Contributing
-
-[Add contribution guidelines here]
+See [LICENSE](LICENSE) for details.
