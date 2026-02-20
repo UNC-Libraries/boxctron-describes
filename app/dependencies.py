@@ -1,5 +1,7 @@
 """Dependency injection providers for the application."""
-from fastapi import Depends
+from typing import Optional
+from fastapi import Depends, Security
+from fastapi.security import APIKeyHeader, HTTPBasic, HTTPBasicCredentials
 
 from app.config import settings
 from app.services import (
@@ -7,8 +9,13 @@ from app.services import (
     DescribeImageWorkflow,
     ImageDescriptionService,
     AltTextGenerationService,
-    ReviewAssessmentService
+    ReviewAssessmentService,
+    AuthenticationService
 )
+
+# Security schemes for authentication
+api_key_header = APIKeyHeader(name="X-API-Key", auto_error=False)
+http_basic = HTTPBasic(auto_error=False)
 
 
 def get_image_normalizer() -> ImageNormalizer:
@@ -66,3 +73,39 @@ def get_describe_workflow(
         DescribeImageWorkflow: Configured workflow service
     """
     return DescribeImageWorkflow(settings, normalizer, image_description_service, alt_text_service, review_service)
+
+
+def get_authentication_service() -> AuthenticationService:
+    """
+    Provide an AuthenticationService instance.
+
+    Returns:
+        AuthenticationService: Configured authentication service
+    """
+    return AuthenticationService(settings)
+
+
+async def verify_auth(
+    api_key: Optional[str] = Security(api_key_header),
+    credentials: Optional[HTTPBasicCredentials] = Depends(http_basic),
+    auth_service: AuthenticationService = Depends(get_authentication_service)
+) -> bool:
+    """
+    Verify authentication using either API key or HTTP Basic authentication.
+
+    This dependency supports hybrid authentication, accepting either:
+    - API key via X-API-Key header
+    - HTTP Basic authentication credentials
+
+    Args:
+        api_key: Optional API key from X-API-Key header
+        credentials: Optional HTTP Basic credentials
+        auth_service: Authentication service instance
+
+    Returns:
+        True if authentication succeeds
+
+    Raises:
+        HTTPException: If authentication fails or is misconfigured
+    """
+    return auth_service.verify_authentication(api_key=api_key, credentials=credentials)

@@ -16,7 +16,7 @@ from app.models import (
     HTTPErrorResponse
 )
 from app.config import settings
-from app.dependencies import get_describe_workflow
+from app.dependencies import get_describe_workflow, verify_auth
 from app.services import DescribeImageWorkflow
 from app.utils import stream_upload_to_temp, get_path_from_uri
 
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/v1", tags=["describe"])
 
-@router.get("/describe/upload/form", response_class=HTMLResponse, tags=["describe"])
+@router.get("/describe/upload/form", response_class=HTMLResponse, tags=["describe"], dependencies=[Depends(verify_auth)])
 async def upload_form():
     """Display an HTML form for uploading images."""
     template_path = Path(__file__).parent.parent.parent / "templates" / "upload_form.html"
@@ -50,7 +50,8 @@ async def upload_form():
 async def describe_uploaded_image(
     file: UploadFile = File(..., description="Image file to process"),
     context: Annotated[str | None, Form()] = None,
-    workflow: DescribeImageWorkflow = Depends(get_describe_workflow)
+    workflow: DescribeImageWorkflow = Depends(get_describe_workflow),
+    _auth: bool = Depends(verify_auth)
 ) -> DescribeResponse:
     """
     Describe an uploaded image using AI vision models.
@@ -120,7 +121,8 @@ async def describe_uploaded_image(
 )
 async def describe_image_from_uri(
     request: DescribeUriRequest,
-    workflow: DescribeImageWorkflow = Depends(get_describe_workflow)
+    workflow: DescribeImageWorkflow = Depends(get_describe_workflow),
+    _auth: bool = Depends(verify_auth)
 ) -> DescribeResponse:
     """
     Describe an image from a URI using AI vision models.

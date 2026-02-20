@@ -52,6 +52,12 @@ class Settings(BaseSettings):
     # Image Processing Configuration
     image_max_dimension: int = 1600
 
+    # Authentication Configuration
+    auth_enabled: bool = False  # Set to False in dev/test environments
+    api_keys: Optional[str] = None  # Comma-separated list of valid API keys
+    auth_username: Optional[str] = None  # Username for HTTP Basic authentication
+    auth_password: Optional[str] = None  # Password for HTTP Basic authentication
+
     # Logging Configuration
     log_level: str = "INFO"  # DEBUG, INFO, WARNING, ERROR, CRITICAL
     log_format: str = "default"  # default or json
