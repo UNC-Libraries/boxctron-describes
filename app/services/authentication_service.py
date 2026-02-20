@@ -19,6 +19,9 @@ class AuthenticationService:
 
         Args:
             settings: Application settings containing authentication configuration
+
+        Raises:
+            ValueError: If authentication is enabled but no credentials are configured
         """
         self.settings = settings
         self._valid_api_keys = None
@@ -26,6 +29,19 @@ class AuthenticationService:
         # Parse and cache API keys on initialization
         if self.settings.api_keys:
             self._valid_api_keys = set(key.strip() for key in self.settings.api_keys.split(",") if key.strip())
+
+        # Cache authentication configuration status
+        self._has_api_keys = bool(self._valid_api_keys)
+        self._has_basic_auth = bool(self.settings.auth_username and self.settings.auth_password)
+
+        # Validate configuration at startup - fail fast if misconfigured
+        if self.settings.auth_enabled and not self._has_api_keys and not self._has_basic_auth:
+            error_msg = (
+                "Authentication is enabled (auth_enabled=True) but no credentials are configured. "
+                "Please set either API_KEYS or both AUTH_USERNAME and AUTH_PASSWORD in your environment."
+            )
+            logger.error(error_msg)
+            raise ValueError(error_msg)
 
     def verify_api_key(self, api_key: Optional[str]) -> bool:
         """
@@ -92,33 +108,25 @@ class AuthenticationService:
             True if authentication succeeds
 
         Raises:
-            HTTPException: If authentication is enabled but credentials are invalid
+            HTTPException: If authentication fails
         """
         # Skip authentication if disabled (for dev/test environments)
         if not self.settings.auth_enabled:
             logger.debug("Authentication is disabled")
             return True
 
-        # Check if any authentication method is configured
-        has_api_keys = bool(self._valid_api_keys)
-        has_basic_auth = bool(self.settings.auth_username and self.settings.auth_password)
-
-        if not has_api_keys and not has_basic_auth:
-            logger.error("Authentication is enabled but no credentials are configured")
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Authentication is enabled but no credentials configured"
-            )
+        # Note: Configuration validity is already checked in __init__
+        # If we reach here with auth_enabled=True, at least one auth method is configured
 
         # Try API key authentication first
-        if api_key and has_api_keys:
+        if api_key and self._has_api_keys:
             if self.verify_api_key(api_key):
                 logger.debug("Successfully authenticated via API key")
                 return True
             logger.warning("Invalid API key provided")
 
         # Try HTTP Basic authentication
-        if credentials and has_basic_auth:
+        if credentials and self._has_basic_auth:
             if self.verify_basic_auth(credentials):
                 logger.debug(f"Successfully authenticated user: {credentials.username}")
                 return True
