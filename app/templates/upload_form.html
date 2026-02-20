@@ -36,6 +36,16 @@
         button:hover {
             background-color: #45a049;
         }
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        #processing {
+            margin-top: 10px;
+            color: #4CAF50;
+            font-weight: bold;
+            display: none;
+        }
         #result {
             margin-top: 30px;
             padding: 20px;
@@ -65,15 +75,25 @@
             <textarea id="context" name="context" placeholder="Optional context to guide description generation"></textarea>
         </div>
 
-        <button type="submit">Submit</button>
+        <button type="submit" id="submitBtn">Submit</button>
     </form>
 
+    <div id="processing">Processing...</div>
     <div id="result"></div>
 
     <script>
         // Handle form submission
         document.getElementById('uploadForm').addEventListener('submit', async function(e) {
             e.preventDefault();
+
+            const submitBtn = document.getElementById('submitBtn');
+            const processingDiv = document.getElementById('processing');
+            const resultDiv = document.getElementById('result');
+
+            // Disable button and show processing message
+            submitBtn.disabled = true;
+            processingDiv.style.display = 'block';
+            resultDiv.style.display = 'none';
 
             const formData = new FormData();
             const fileInput = document.getElementById('file');
@@ -98,7 +118,6 @@
                 });
 
                 const result = await response.json();
-                const resultDiv = document.getElementById('result');
 
                 if (response.ok) {
                     resultDiv.innerHTML = '<h2>Result</h2><pre>' + JSON.stringify(result, null, 2) + '</pre>';
@@ -109,11 +128,14 @@
                 }
 
                 resultDiv.style.display = 'block';
+                processingDiv.style.display = 'none';
+                submitBtn.disabled = false;
             } catch (error) {
-                const resultDiv = document.getElementById('result');
                 resultDiv.innerHTML = '<h2 class="error">Error</h2><p>' + error.message + '</p>';
                 resultDiv.className = 'error';
                 resultDiv.style.display = 'block';
+                processingDiv.style.display = 'none';
+                submitBtn.disabled = false;
             }
         });
     </script>
