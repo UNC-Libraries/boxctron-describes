@@ -84,9 +84,11 @@ def test_generate_description_without_context(mock_completion, mock_settings, sa
 
     # Verify image is in user content
     user_content = messages[1]["content"]
-    assert len(user_content) == 1
-    assert user_content[0]["type"] == "image_url"
-    assert user_content[0]["image_url"]["url"] == "data:image/jpeg;base64,abc123"
+    assert len(user_content) == 2  # task prompt + image
+    assert user_content[0]["type"] == "text"  # task prompt
+    assert "Analyze this image" in user_content[0]["text"]  # verify it's the task prompt
+    assert user_content[1]["type"] == "image_url"
+    assert user_content[1]["image_url"]["url"] == "data:image/jpeg;base64,abc123"
 
     # Verify result
     assert result == sample_llm_response
@@ -116,11 +118,13 @@ def test_generate_description_with_context(mock_completion, mock_settings, sampl
     messages = call_kwargs["messages"]
     user_content = messages[1]["content"]
 
-    # Should have 2 items: context text and image
-    assert len(user_content) == 2
-    assert user_content[0]["type"] == "text"
-    assert "This is a historical photograph" in user_content[0]["text"]
-    assert user_content[1]["type"] == "image_url"
+    # Should have 3 items: task prompt, context text, and image
+    assert len(user_content) == 3
+    assert user_content[0]["type"] == "text"  # task prompt
+    assert "Analyze this image" in user_content[0]["text"]
+    assert user_content[1]["type"] == "text"  # context
+    assert "This is a historical photograph" in user_content[1]["text"]
+    assert user_content[2]["type"] == "image_url"
 
 
 @patch("app.services.image_description_service.completion")

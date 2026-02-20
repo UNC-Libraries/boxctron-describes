@@ -23,10 +23,17 @@ class ImageDescriptionService:
         """
         self.settings = settings
 
-        # Load the prompt template
+        # Load the task prompt template
         prompt_path = Path(__file__).parent.parent / "prompts" / "full_description_prompt.txt"
         with open(prompt_path, 'r', encoding='utf-8') as f:
-            self.system_prompt = f.read()
+            self.task_prompt = f.read()
+
+        self.system_prompt = (
+            "You are a specialized visual content analyzer creating detailed descriptive metadata for archival and accessibility purposes.\n"
+            "You generate clear, factual descriptions that document everything visible without interpretation.\n"
+            "You use precise language appropriate to the content domain, while avoiding unnecessary jargon.\n"
+            "Your descriptions are well-structured and prioritize factual documentation over stylistic concerns."
+        )
 
     def generate_description(
         self,
@@ -63,11 +70,17 @@ class ImageDescriptionService:
         # Build user message content
         user_content = []
 
+        # Add task instructions
+        user_content.append({
+            "type": "text",
+            "text": self.task_prompt
+        })
+
         # Add context if provided
         if context:
             user_content.append({
                 "type": "text",
-                "text": f"Reference information: {context}"
+                "text": f"\n\nReference information: {context}"
             })
 
         # Add image
