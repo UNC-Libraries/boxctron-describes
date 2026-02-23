@@ -2,6 +2,7 @@
 Global exception handlers for the FastAPI application.
 """
 import logging
+import traceback
 from fastapi import FastAPI, Request, status
 from fastapi.responses import JSONResponse
 
@@ -46,4 +47,16 @@ def register_exception_handlers(app: FastAPI):
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={"detail": "System operation failed"}
+        )
+
+    @app.exception_handler(Exception)
+    async def general_exception_handler(request: Request, exc: Exception):
+        """Handle any unhandled exceptions."""
+        logger.error(
+            f"Unhandled exception on {request.url.path}: {exc}\n"
+            f"Traceback: {traceback.format_exc()}"
+        )
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"detail": "Internal server error"}
         )

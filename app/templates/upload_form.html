@@ -112,7 +112,11 @@
             }
 
             try {
-                const response = await fetch('/api/v1/describe/upload', {
+                // Use relative path to handle root_path correctly
+                // Current URL: .../describe/upload/form -> Post to: .../describe/upload
+                const uploadUrl = window.location.pathname.replace(/\/form$/, '');
+
+                const response = await fetch(uploadUrl, {
                     method: 'POST',
                     body: formData
                 });

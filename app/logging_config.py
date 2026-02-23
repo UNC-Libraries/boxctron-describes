@@ -83,6 +83,16 @@ def setup_logging(settings: Settings) -> None:
         f"format={settings.log_format}"
     )
 
+    # Configure uvicorn/FastAPI loggers to use our handlers
+    for logger_name in ["uvicorn", "uvicorn.access", "uvicorn.error", "fastapi"]:
+        logger_obj = logging.getLogger(logger_name)
+        logger_obj.setLevel(log_level)
+        logger_obj.handlers = []  # Remove default handlers
+        # Add our handlers
+        for handler in root_logger.handlers:
+            logger_obj.addHandler(handler)
+        logger_obj.propagate = False  # Don't propagate to root to avoid duplicates
+
     # Set log levels for noisy third-party libraries
     logging.getLogger("httpx").setLevel(logging.WARNING)
     logging.getLogger("httpcore").setLevel(logging.WARNING)
