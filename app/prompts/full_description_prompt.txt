@@ -167,18 +167,7 @@ Analyze this image and provide a comprehensive response with the following compo
     - If you can read some words in a handwritten passage but not others, transcribe what you can and mark the rest:
         "Dear [illegible], I hope this letter finds you well..."
 
-3. SAF (safety assessment form) - Assess the content of this image for later evaluation by humans or agents to help determine if the image itself contains unsafe content or is likely to produce a description that may be unreliable or subjective. This will be provided as a structured object with abbreviated field names and values (see legend below).
-
-  Abbreviated value legend (used across fields as specified in the schema):
-    Y=Yes, N=No
-    L=Low, M=Medium, H=High
-    0=None, IMP=Implied, DEP=Depicted
-    PAR=Partial, FULL=Full
-    SUG=Suggestive, EXP=Explicit
-    P=Possibly
-    Symbol types: 0=None, CUL=Cultural, REL=Religious, POL=Political, HATE=Hate, BRD=Brand
-    Text type: NA=N/A, PR=Printed, TY=Typed, HWPR=Handwritten print, HWCU=Handwritten cursive, MX=Mixed
-    Legibility: NA=N/A, CL=Clear, PC=Partially clear, DIF=Difficult, ILL=Illegible
+3. SAF (safety assessment form) - Assess the content of this image for later evaluation by humans or agents to help determine if the image itself contains unsafe content or is likely to produce a description that may be unreliable or subjective. This will be provided as a structured object with abbreviated field names and values.
 
   Notes on field values:
     - If people (people visible) is "N", set demog to "N", misid_risk to "L", minors to "N", and named_indiv to "N"

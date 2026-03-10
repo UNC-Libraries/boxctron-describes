@@ -15,25 +15,6 @@ Provide a comprehensive response with the following components:
 
 Use the following abbreviated field names and values in your JSON output to keep responses compact.
 
-**Field name legend:**
-- bias = biased_language
-- stereo = stereotyping
-- val_judg = value_judgments
-- contra_btwn = contradictions_between_texts
-- contra_within = contradictions_within_description
-- offensive = offensive_language
-- incon_demog = inconsistent_demographics
-- euphemism = euphemistic_language
-- ppl_first = people_first_language
-- unsup_infer = unsupported_inferential_claims
-- safety_consist = safety_assessment_consistency
-- concerns = concerns_for_review
-
-**Value legend:**
-- Y=Yes, N=No, P=Possibly
-- U=Used, NU=Not Used, NA=N/A
-- CON=Consistent, INCON=Inconsistent
-
 ## Field Definitions and Guidance
 
 ### biased_language
@@ -96,7 +77,7 @@ Mark as YES or POSSIBLY if the text includes subjective assessments that introdu
 
 **Flag only:**
 - Evaluations of people's appearance, dress, or behavior ("beautiful," "shabby," "awkward", "attractive", "stylish")
-- Cultural hierarchy or loaded characterizations ("primitive," "exotic," "civilized," "backward")  
+- Cultural hierarchy or loaded characterizations ("primitive," "exotic," "civilized," "backward")
 - Moral framing of sensitive events ("glorious," "shameful," "heroic," "barbaric," "tragic")
 - Aesthetic judgments with implications ("impressive," "crude," "elegant" applied to cultural artifacts)
 - Taking sides ("righteous cause," "unjust," "justified," "unprovoked")

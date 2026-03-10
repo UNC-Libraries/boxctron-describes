@@ -8,6 +8,7 @@ from litellm import completion
 
 from app.config import Settings
 from app.services.safety_form_expander import expand_safety_form, SAFETY_FORM_KEY_MAP
+from app.utils.llm_utils import log_token_usage
 
 logger = logging.getLogger(__name__)
 
@@ -135,6 +136,8 @@ class ImageDescriptionService:
                     # Expand abbreviated safety form keys/values and rename top-level keys
                     result["SAFETY_ASSESSMENT_FORM"] = expand_safety_form(result.pop("SAF"))
                     result["SAFETY_ASSESSMENT_REASONING"] = result.pop("SAR")
+
+                    log_token_usage(logger, "image description", response.usage)
 
                     logger.info("Successfully generated image description")
                     return result

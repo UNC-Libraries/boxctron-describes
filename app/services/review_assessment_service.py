@@ -8,6 +8,7 @@ from litellm import completion
 
 from app.config import Settings
 from app.services.review_form_expander import expand_review_form, REVIEW_KEY_MAP
+from app.utils.llm_utils import log_token_usage
 
 logger = logging.getLogger(__name__)
 
@@ -119,6 +120,8 @@ class ReviewAssessmentService:
 
                     # Expand abbreviated keys/values to full forms
                     result = expand_review_form(result)
+
+                    log_token_usage(logger, "review assessment", response.usage)
 
                     logger.info("Successfully generated review assessment")
                     return result

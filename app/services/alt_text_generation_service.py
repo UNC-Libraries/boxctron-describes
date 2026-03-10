@@ -5,6 +5,7 @@ from pathlib import Path
 from litellm import completion
 
 from app.config import Settings
+from app.utils.llm_utils import log_token_usage
 
 logger = logging.getLogger(__name__)
 
@@ -83,6 +84,7 @@ class AltTextGenerationService:
 
             alt_text = response.choices[0].message.content.strip()
 
+            log_token_usage(logger, "alt text", response.usage)
             logger.info("Successfully generated alt text")
             return alt_text
 
