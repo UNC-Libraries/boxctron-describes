@@ -61,28 +61,28 @@ def mock_llm_responses():
                 "FULL_DESCRIPTION": "A detailed photograph showing a blurry owl perched on a branch in low light conditions. The owl appears to be a species with mottled brown and white plumage.",
                 "TRANSCRIPT": "No visible text in image.",
                 "SAFETY_ASSESSMENT_FORM": {
-                    "people_visible": "NO",
-                    "demographics_described": "NO",
-                    "misidentification_risk_people": "LOW",
-                    "minors_present": "NO",
-                    "named_individuals_claimed": "NO",
-                    "violent_content": "NONE",
-                    "racial_violence_oppression": "NONE",
-                    "nudity": "NONE",
-                    "sexual_content": "NONE",
-                    "symbols_present": {
-                        "types": ["NONE"],
+                    "people": "N",
+                    "demog": "N",
+                    "misid_risk": "L",
+                    "minors": "N",
+                    "named_indiv": "N",
+                    "violence": "0",
+                    "racial_viol": "0",
+                    "nudity": "0",
+                    "sexual": "0",
+                    "symbols": {
+                        "types": ["0"],
                         "names": [],
-                        "misidentification_risk": "LOW"
+                        "misid_risk": "L"
                     },
-                    "stereotyping_present": "NO",
-                    "atrocities_depicted": "NO",
-                    "text_characteristics": {
-                        "text_present": "NO",
-                        "text_type": "N/A",
-                        "legibility": "N/A"
+                    "stereotyping": "N",
+                    "atrocities": "N",
+                    "text_chars": {
+                        "present": "N",
+                        "type": "NA",
+                        "legib": "NA"
                     },
-                    "confidence": "MEDIUM"
+                    "confidence": "M"
                 },
                 "SAFETY_ASSESSMENT_REASONING": "This is a nature photograph with no concerning content. The blurriness affects image quality but not safety assessment."
             })

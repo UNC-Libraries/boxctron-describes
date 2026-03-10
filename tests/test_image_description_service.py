@@ -20,33 +20,33 @@ def mock_settings():
 
 @pytest.fixture
 def sample_llm_response():
-    """Sample valid LLM response."""
+    """Sample valid LLM response (abbreviated form as produced by the LLM)."""
     return {
         "FULL_DESCRIPTION": "A test image description",
         "TRANSCRIPT": "Test transcript text",
         "SAFETY_ASSESSMENT_FORM": {
-            "people_visible": "NO",
-            "demographics_described": "NO",
-            "misidentification_risk_people": "LOW",
-            "minors_present": "NO",
-            "named_individuals_claimed": "NO",
-            "violent_content": "NONE",
-            "racial_violence_oppression": "NONE",
-            "nudity": "NONE",
-            "sexual_content": "NONE",
-            "symbols_present": {
-                "types": ["NONE"],
+            "people": "N",
+            "demog": "N",
+            "misid_risk": "L",
+            "minors": "N",
+            "named_indiv": "N",
+            "violence": "0",
+            "racial_viol": "0",
+            "nudity": "0",
+            "sexual": "0",
+            "symbols": {
+                "types": ["0"],
                 "names": [],
-                "misidentification_risk": "LOW"
+                "misid_risk": "L"
             },
-            "stereotyping_present": "NO",
-            "atrocities_depicted": "NO",
-            "text_characteristics": {
-                "text_present": "NO",
-                "text_type": "N/A",
-                "legibility": "N/A"
+            "stereotyping": "N",
+            "atrocities": "N",
+            "text_chars": {
+                "present": "N",
+                "type": "NA",
+                "legib": "NA"
             },
-            "confidence": "HIGH"
+            "confidence": "H"
         },
         "SAFETY_ASSESSMENT_REASONING": "No safety concerns detected."
     }
@@ -90,8 +90,15 @@ def test_generate_description_without_context(mock_completion, mock_settings, sa
     assert user_content[1]["type"] == "image_url"
     assert user_content[1]["image_url"]["url"] == "data:image/jpeg;base64,abc123"
 
-    # Verify result
-    assert result == sample_llm_response
+    # Verify result has expanded safety form keys/values
+    assert result["FULL_DESCRIPTION"] == sample_llm_response["FULL_DESCRIPTION"]
+    assert result["TRANSCRIPT"] == sample_llm_response["TRANSCRIPT"]
+    assert result["SAFETY_ASSESSMENT_REASONING"] == sample_llm_response["SAFETY_ASSESSMENT_REASONING"]
+    safety = result["SAFETY_ASSESSMENT_FORM"]
+    assert safety["people_visible"] == "NO"
+    assert safety["violent_content"] == "NONE"
+    assert safety["confidence"] == "HIGH"
+    assert safety["symbols_present"]["types"] == ["NONE"]
 
 
 @patch("app.services.image_description_service.completion")
@@ -190,12 +197,12 @@ def test_missing_required_field_raises_error(mock_completion, mock_settings):
 @patch("app.services.image_description_service.completion")
 def test_missing_safety_field_raises_error(mock_completion, mock_settings):
     """Test that response missing safety assessment field raises ValueError."""
-    # Setup mock response with incomplete safety form
+    # Setup mock response with incomplete safety form (using short keys)
     incomplete_response = {
         "FULL_DESCRIPTION": "Test",
         "TRANSCRIPT": "Test",
         "SAFETY_ASSESSMENT_FORM": {
-            "people_visible": "NO"
+            "people": "N"
             # Missing other required safety fields
         },
         "SAFETY_ASSESSMENT_REASONING": "Test"
