@@ -109,18 +109,18 @@ def mock_llm_responses():
             mock_response = Mock()
             mock_response.choices = [Mock()]
             mock_response.choices[0].message.content = json.dumps({
-                "biased_language": "NO",
-                "stereotyping": "NO",
-                "value_judgments": "NO",
-                "contradictions_between_texts": "NO",
-                "contradictions_within_description": "NO",
-                "offensive_language": "NO",
-                "inconsistent_demographics": "NO",
-                "euphemistic_language": "NO",
-                "people_first_language": "N/A",
-                "unsupported_inferential_claims": "NO",
-                "safety_assessment_consistency": "CONSISTENT",
-                "concerns_for_review": []
+                "bias": "N",
+                "stereo": "N",
+                "val_judg": "N",
+                "contra_btwn": "N",
+                "contra_within": "N",
+                "offensive": "N",
+                "incon_demog": "N",
+                "euphemism": "N",
+                "ppl_first": "NA",
+                "unsup_infer": "N",
+                "safety_consist": "CON",
+                "concerns": []
             })
             return mock_response
 

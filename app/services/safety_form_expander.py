@@ -117,6 +117,13 @@ _FIELD_VALUE_MAPS: Dict[str, Dict[str, str]] = {
 }
 
 
+def _map_value(value: str, value_map: Dict[str, str], field: str) -> str:
+    """Look up value in map, raising ValueError with context if not found."""
+    if value not in value_map:
+        raise ValueError(f"Unexpected value {value!r} for field {field!r}")
+    return value_map[value]
+
+
 def expand_safety_form(short_form: Dict[str, Any]) -> Dict[str, Any]:
     """
     Expand abbreviated safety form keys and values to full forms.
@@ -129,11 +136,13 @@ def expand_safety_form(short_form: Dict[str, Any]) -> Dict[str, Any]:
         Dictionary with full-length keys and values matching the SafetyAssessment model.
 
     Raises:
-        KeyError: If a short key or value is not in the mapping.
+        ValueError: If a short key or value is not in the mapping.
     """
     expanded: Dict[str, Any] = {}
 
     for short_key, value in short_form.items():
+        if short_key not in SAFETY_FORM_KEY_MAP:
+            raise ValueError(f"Unknown short key {short_key!r}")
         full_key = SAFETY_FORM_KEY_MAP[short_key]
 
         if short_key == "symbols":
@@ -143,7 +152,7 @@ def expand_safety_form(short_form: Dict[str, Any]) -> Dict[str, Any]:
         else:
             value_map = _FIELD_VALUE_MAPS.get(short_key)
             if value_map and isinstance(value, str):
-                expanded[full_key] = value_map[value]
+                expanded[full_key] = _map_value(value, value_map, short_key)
             else:
                 expanded[full_key] = value
 
@@ -154,11 +163,13 @@ def _expand_symbols(symbols: Dict[str, Any]) -> Dict[str, Any]:
     """Expand the symbols sub-object."""
     expanded: Dict[str, Any] = {}
     for short_key, value in symbols.items():
+        if short_key not in SYMBOLS_KEY_MAP:
+            raise ValueError(f"Unknown symbols key {short_key!r}")
         full_key = SYMBOLS_KEY_MAP[short_key]
         if short_key == "types":
-            expanded[full_key] = [SYMBOL_TYPE_VALUE_MAP[v] for v in value]
+            expanded[full_key] = [_map_value(v, SYMBOL_TYPE_VALUE_MAP, "symbols.types") for v in value]
         elif short_key == "misid_risk":
-            expanded[full_key] = RISK_VALUE_MAP[value]
+            expanded[full_key] = _map_value(value, RISK_VALUE_MAP, "symbols.misid_risk")
         else:
             # names — pass through as-is
             expanded[full_key] = value
@@ -174,10 +185,12 @@ def _expand_text_chars(text_chars: Dict[str, Any]) -> Dict[str, Any]:
     }
     expanded: Dict[str, Any] = {}
     for short_key, value in text_chars.items():
+        if short_key not in TEXT_CHARS_KEY_MAP:
+            raise ValueError(f"Unknown text_chars key {short_key!r}")
         full_key = TEXT_CHARS_KEY_MAP[short_key]
         value_map = _value_maps.get(short_key)
         if value_map and isinstance(value, str):
-            expanded[full_key] = value_map[value]
+            expanded[full_key] = _map_value(value, value_map, f"text_chars.{short_key}")
         else:
             expanded[full_key] = value
     return expanded

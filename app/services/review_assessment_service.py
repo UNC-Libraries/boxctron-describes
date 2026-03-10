@@ -7,6 +7,7 @@ from typing import Dict, Any
 from litellm import completion
 
 from app.config import Settings
+from app.services.review_form_expander import expand_review_form, REVIEW_KEY_MAP
 
 logger = logging.getLogger(__name__)
 
@@ -111,6 +112,9 @@ class ReviewAssessmentService:
             # Validate required fields
             self._validate_response(result)
 
+            # Expand abbreviated keys/values to full forms
+            result = expand_review_form(result)
+
             logger.info("Successfully generated review assessment")
             return result
 
@@ -172,51 +176,51 @@ ALT_TEXT:
                 "schema": {
                     "type": "object",
                     "properties": {
-                        "biased_language": {
+                        "bias": {
                             "type": "string",
-                            "enum": ["NO", "POSSIBLY", "YES"]
+                            "enum": ["N", "P", "Y"]
                         },
-                        "stereotyping": {
+                        "stereo": {
                             "type": "string",
-                            "enum": ["NO", "POSSIBLY", "YES"]
+                            "enum": ["N", "P", "Y"]
                         },
-                        "value_judgments": {
+                        "val_judg": {
                             "type": "string",
-                            "enum": ["NO", "POSSIBLY", "YES"]
+                            "enum": ["N", "P", "Y"]
                         },
-                        "contradictions_between_texts": {
+                        "contra_btwn": {
                             "type": "string",
-                            "enum": ["NO", "YES"]
+                            "enum": ["N", "Y"]
                         },
-                        "contradictions_within_description": {
+                        "contra_within": {
                             "type": "string",
-                            "enum": ["NO", "POSSIBLY", "YES"]
+                            "enum": ["N", "P", "Y"]
                         },
-                        "offensive_language": {
+                        "offensive": {
                             "type": "string",
-                            "enum": ["NO", "YES"]
+                            "enum": ["N", "Y"]
                         },
-                        "inconsistent_demographics": {
+                        "incon_demog": {
                             "type": "string",
-                            "enum": ["NO", "YES"]
+                            "enum": ["N", "Y"]
                         },
-                        "euphemistic_language": {
+                        "euphemism": {
                             "type": "string",
-                            "enum": ["NO", "POSSIBLY", "YES"]
+                            "enum": ["N", "P", "Y"]
                         },
-                        "people_first_language": {
+                        "ppl_first": {
                             "type": "string",
-                            "enum": ["USED", "NOT_USED", "N/A"]
+                            "enum": ["U", "NU", "NA"]
                         },
-                        "unsupported_inferential_claims": {
+                        "unsup_infer": {
                             "type": "string",
-                            "enum": ["NO", "POSSIBLY", "YES"]
+                            "enum": ["N", "P", "Y"]
                         },
-                        "safety_assessment_consistency": {
+                        "safety_consist": {
                             "type": "string",
-                            "enum": ["CONSISTENT", "INCONSISTENT"]
+                            "enum": ["CON", "INCON"]
                         },
-                        "concerns_for_review": {
+                        "concerns": {
                             "type": "array",
                             "items": {
                                 "type": "string"
@@ -224,18 +228,18 @@ ALT_TEXT:
                         }
                     },
                     "required": [
-                        "biased_language",
-                        "stereotyping",
-                        "value_judgments",
-                        "contradictions_between_texts",
-                        "contradictions_within_description",
-                        "offensive_language",
-                        "inconsistent_demographics",
-                        "euphemistic_language",
-                        "people_first_language",
-                        "unsupported_inferential_claims",
-                        "safety_assessment_consistency",
-                        "concerns_for_review"
+                        "bias",
+                        "stereo",
+                        "val_judg",
+                        "contra_btwn",
+                        "contra_within",
+                        "offensive",
+                        "incon_demog",
+                        "euphemism",
+                        "ppl_first",
+                        "unsup_infer",
+                        "safety_consist",
+                        "concerns"
                     ],
                     "additionalProperties": False
                 }
@@ -252,20 +256,6 @@ ALT_TEXT:
         Raises:
             ValueError: If response is missing required fields
         """
-        required_fields = [
-            "biased_language",
-            "stereotyping",
-            "value_judgments",
-            "contradictions_between_texts",
-            "contradictions_within_description",
-            "offensive_language",
-            "inconsistent_demographics",
-            "euphemistic_language",
-            "people_first_language",
-            "unsupported_inferential_claims",
-            "safety_assessment_consistency",
-            "concerns_for_review"
-        ]
-        for field in required_fields:
-            if field not in response:
-                raise ValueError(f"Missing required field: {field}")
+        for short_key in REVIEW_KEY_MAP:
+            if short_key not in response:
+                raise ValueError(f"Missing required field: {short_key}")

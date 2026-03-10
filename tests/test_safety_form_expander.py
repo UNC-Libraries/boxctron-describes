@@ -193,9 +193,49 @@ def test_expand_nudity_full():
 
 
 def test_expand_unknown_key_raises():
-    """Unknown short key raises KeyError."""
-    with pytest.raises(KeyError):
+    """Unknown short key raises ValueError with the key name in the message."""
+    with pytest.raises(ValueError, match="unknown_field"):
         expand_safety_form({"unknown_field": "Y"})
+
+
+def test_expand_unknown_top_level_value_raises():
+    """Unknown value for a top-level field raises ValueError naming the field."""
+    with pytest.raises(ValueError, match="people"):
+        expand_safety_form({
+            "people": "MAYBE",
+            "demog": "N", "misid_risk": "L", "minors": "N",
+            "named_indiv": "N", "violence": "0", "racial_viol": "0",
+            "nudity": "0", "sexual": "0",
+            "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
+            "stereotyping": "N", "atrocities": "N", "confidence": "H",
+            "text_chars": {"present": "N", "type": "NA", "legib": "NA"},
+        })
+
+
+def test_expand_unknown_symbol_type_raises():
+    """Unknown value in symbols.types list raises ValueError naming the field."""
+    with pytest.raises(ValueError, match="symbols.types"):
+        expand_safety_form({
+            "people": "N", "demog": "N", "misid_risk": "L", "minors": "N",
+            "named_indiv": "N", "violence": "0", "racial_viol": "0",
+            "nudity": "0", "sexual": "0",
+            "symbols": {"types": ["UNKNOWN"], "names": [], "misid_risk": "L"},
+            "stereotyping": "N", "atrocities": "N", "confidence": "H",
+            "text_chars": {"present": "N", "type": "NA", "legib": "NA"},
+        })
+
+
+def test_expand_unknown_text_chars_value_raises():
+    """Unknown value in text_chars raises ValueError naming the sub-field."""
+    with pytest.raises(ValueError, match="text_chars.legib"):
+        expand_safety_form({
+            "people": "N", "demog": "N", "misid_risk": "L", "minors": "N",
+            "named_indiv": "N", "violence": "0", "racial_viol": "0",
+            "nudity": "0", "sexual": "0",
+            "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
+            "stereotyping": "N", "atrocities": "N", "confidence": "H",
+            "text_chars": {"present": "Y", "type": "PR", "legib": "UNCLEAR"},
+        })
 
 
 def test_expand_preserves_names_list():

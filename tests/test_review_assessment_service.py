@@ -103,18 +103,18 @@ def test_generate_review_assessment_success(mock_completion, service, mock_setti
     mock_response = Mock()
     mock_response.choices = [Mock()]
     mock_response.choices[0].message.content = json.dumps({
-        "biased_language": "NO",
-        "stereotyping": "NO",
-        "value_judgments": "NO",
-        "contradictions_between_texts": "NO",
-        "contradictions_within_description": "NO",
-        "offensive_language": "NO",
-        "inconsistent_demographics": "NO",
-        "euphemistic_language": "NO",
-        "people_first_language": "N/A",
-        "unsupported_inferential_claims": "NO",
-        "safety_assessment_consistency": "CONSISTENT",
-        "concerns_for_review": []
+        "bias": "N",
+        "stereo": "N",
+        "val_judg": "N",
+        "contra_btwn": "N",
+        "contra_within": "N",
+        "offensive": "N",
+        "incon_demog": "N",
+        "euphemism": "N",
+        "ppl_first": "NA",
+        "unsup_infer": "N",
+        "safety_consist": "CON",
+        "concerns": []
     })
     mock_completion.return_value = mock_response
 
@@ -126,7 +126,7 @@ def test_generate_review_assessment_success(mock_completion, service, mock_setti
         alt_text="Person in field"
     )
 
-    # Verify result structure
+    # Verify result has expanded keys/values
     assert result["biased_language"] == "NO"
     assert result["stereotyping"] == "NO"
     assert result["safety_assessment_consistency"] == "CONSISTENT"
@@ -157,18 +157,18 @@ def test_generate_review_assessment_with_concerns(mock_completion, service, samp
     mock_response = Mock()
     mock_response.choices = [Mock()]
     mock_response.choices[0].message.content = json.dumps({
-        "biased_language": "POSSIBLY",
-        "stereotyping": "YES",
-        "value_judgments": "NO",
-        "contradictions_between_texts": "NO",
-        "contradictions_within_description": "NO",
-        "offensive_language": "NO",
-        "inconsistent_demographics": "NO",
-        "euphemistic_language": "NO",
-        "people_first_language": "NOT_USED",
-        "unsupported_inferential_claims": "POSSIBLY",
-        "safety_assessment_consistency": "INCONSISTENT",
-        "concerns_for_review": ["Possible stereotyping in description", "Safety assessment inconsistent with content"]
+        "bias": "P",
+        "stereo": "Y",
+        "val_judg": "N",
+        "contra_btwn": "N",
+        "contra_within": "N",
+        "offensive": "N",
+        "incon_demog": "N",
+        "euphemism": "N",
+        "ppl_first": "NU",
+        "unsup_infer": "P",
+        "safety_consist": "INCON",
+        "concerns": ["Possible stereotyping in description", "Safety assessment inconsistent with content"]
     })
     mock_completion.return_value = mock_response
 
@@ -182,6 +182,7 @@ def test_generate_review_assessment_with_concerns(mock_completion, service, samp
 
     assert result["biased_language"] == "POSSIBLY"
     assert result["stereotyping"] == "YES"
+    assert result["people_first_language"] == "NOT_USED"
     assert result["safety_assessment_consistency"] == "INCONSISTENT"
     assert len(result["concerns_for_review"]) == 2
     assert "stereotyping" in result["concerns_for_review"][0].lower()
@@ -245,19 +246,19 @@ def test_generate_review_assessment_missing_required_field(mock_completion, serv
     """Test validation of missing required fields."""
     mock_response = Mock()
     mock_response.choices = [Mock()]
-    # Missing 'concerns_for_review' field
+    # Missing 'concerns' field
     mock_response.choices[0].message.content = json.dumps({
-        "biased_language": "NO",
-        "stereotyping": "NO",
-        "value_judgments": "NO",
-        "contradictions_between_texts": "NO",
-        "contradictions_within_description": "NO",
-        "offensive_language": "NO",
-        "inconsistent_demographics": "NO",
-        "euphemistic_language": "NO",
-        "people_first_language": "N/A",
-        "unsupported_inferential_claims": "NO",
-        "safety_assessment_consistency": "CONSISTENT"
+        "bias": "N",
+        "stereo": "N",
+        "val_judg": "N",
+        "contra_btwn": "N",
+        "contra_within": "N",
+        "offensive": "N",
+        "incon_demog": "N",
+        "euphemism": "N",
+        "ppl_first": "NA",
+        "unsup_infer": "N",
+        "safety_consist": "CON"
     })
     mock_completion.return_value = mock_response
 
@@ -298,19 +299,19 @@ def test_get_response_format(service):
     assert "properties" in schema
     assert "required" in schema
 
-    # Verify all required fields are in the schema
+    # Verify all required fields are in the schema (abbreviated keys)
     required_fields = schema["required"]
-    assert "biased_language" in required_fields
-    assert "stereotyping" in required_fields
-    assert "safety_assessment_consistency" in required_fields
-    assert "concerns_for_review" in required_fields
+    assert "bias" in required_fields
+    assert "stereo" in required_fields
+    assert "safety_consist" in required_fields
+    assert "concerns" in required_fields
     assert len(required_fields) == 12
 
-    # Verify enum constraints
-    assert schema["properties"]["biased_language"]["enum"] == ["NO", "POSSIBLY", "YES"]
-    assert schema["properties"]["people_first_language"]["enum"] == ["USED", "NOT_USED", "N/A"]
-    assert schema["properties"]["safety_assessment_consistency"]["enum"] == ["CONSISTENT", "INCONSISTENT"]
+    # Verify enum constraints (abbreviated values)
+    assert schema["properties"]["bias"]["enum"] == ["N", "P", "Y"]
+    assert schema["properties"]["ppl_first"]["enum"] == ["U", "NU", "NA"]
+    assert schema["properties"]["safety_consist"]["enum"] == ["CON", "INCON"]
 
-    # Verify concerns_for_review is an array
-    assert schema["properties"]["concerns_for_review"]["type"] == "array"
-    assert schema["properties"]["concerns_for_review"]["items"]["type"] == "string"
+    # Verify concerns is an array
+    assert schema["properties"]["concerns"]["type"] == "array"
+    assert schema["properties"]["concerns"]["items"]["type"] == "string"
