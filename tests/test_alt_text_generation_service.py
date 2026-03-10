@@ -143,3 +143,47 @@ def test_generate_alt_text_llm_error(mock_completion, service):
 
     with pytest.raises(Exception, match="LLM API error"):
         service.generate_alt_text("Test description")
+
+
+@patch("app.services.alt_text_generation_service.completion")
+def test_retries_on_empty_response_then_succeeds(mock_completion, service):
+    """Test that a transient empty response triggers a retry and eventual success is returned."""
+    bad_response = Mock()
+    bad_response.choices = [Mock()]
+    bad_response.choices[0].message.content = None
+
+    good_response = Mock()
+    good_response.choices = [Mock()]
+    good_response.choices[0].message.content = "A person in a field"
+
+    mock_completion.side_effect = [bad_response, bad_response, good_response]
+
+    result = service.generate_alt_text("Test description")
+
+    assert mock_completion.call_count == 3
+    assert result == "A person in a field"
+
+
+@patch("app.services.alt_text_generation_service.completion")
+def test_all_retries_exhausted_raises_error(mock_completion, service):
+    """Test that after MAX_PARSE_RETRIES attempts the error is re-raised."""
+    mock_response = Mock()
+    mock_response.choices = [Mock()]
+    mock_response.choices[0].message.content = None
+    mock_completion.return_value = mock_response
+
+    with pytest.raises(ValueError, match="Empty response from LLM"):
+        service.generate_alt_text("Test description")
+
+    assert mock_completion.call_count == AltTextGenerationService._MAX_PARSE_RETRIES
+
+
+@patch("app.services.alt_text_generation_service.completion")
+def test_non_value_error_is_not_retried(mock_completion, service):
+    """Test that non-ValueError exceptions are not retried."""
+    mock_completion.side_effect = RuntimeError("Network error")
+
+    with pytest.raises(RuntimeError, match="Network error"):
+        service.generate_alt_text("Test description")
+
+    assert mock_completion.call_count == 1

@@ -13,6 +13,8 @@ logger = logging.getLogger(__name__)
 class AltTextGenerationService:
     """Service for generating concise alt text from detailed image descriptions."""
 
+    _MAX_PARSE_RETRIES = 3
+
     def __init__(self, settings: Settings):
         """
         Initialize the AltTextGenerationService.
@@ -76,17 +78,30 @@ class AltTextGenerationService:
             if self.settings.litellm_alt_text_reasoning_effort:
                 completion_params["reasoning_effort"] = self.settings.litellm_alt_text_reasoning_effort
 
-            response = completion(**completion_params)
+            last_exc: Exception = ValueError("No attempts made")
+            for attempt in range(1, self._MAX_PARSE_RETRIES + 1):
+                try:
+                    response = completion(**completion_params)
 
-            # Parse response
-            if not response.choices or not response.choices[0].message.content:
-                raise ValueError("Empty response from LLM")
+                    # Parse response
+                    if not response.choices or not response.choices[0].message.content:
+                        raise ValueError("Empty response from LLM")
 
-            alt_text = response.choices[0].message.content.strip()
+                    alt_text = response.choices[0].message.content.strip()
 
-            log_token_usage(logger, "alt text", response.usage)
-            logger.info("Successfully generated alt text")
-            return alt_text
+                    log_token_usage(logger, "alt text", response.usage)
+                    logger.info("Successfully generated alt text")
+                    return alt_text
+
+                except ValueError as e:
+                    last_exc = e
+                    if attempt < self._MAX_PARSE_RETRIES:
+                        logger.warning(
+                            f"Attempt {attempt}/{self._MAX_PARSE_RETRIES} failed with "
+                            f"parse/validation error, retrying: {e}"
+                        )
+
+            raise last_exc
 
         except Exception as e:
             logger.error(f"Error generating alt text: {e}")
