@@ -15,6 +15,8 @@ logger = logging.getLogger(__name__)
 class ImageDescriptionService:
     """Service for generating image descriptions using LLM vision models."""
 
+    _MAX_PARSE_RETRIES = 3
+
     def __init__(self, settings: Settings):
         """
         Initialize the ImageDescriptionService.
@@ -116,22 +118,35 @@ class ImageDescriptionService:
             if self.settings.litellm_full_desc_reasoning_effort:
                 completion_params["reasoning_effort"] = self.settings.litellm_full_desc_reasoning_effort
 
-            response = completion(**completion_params)
+            last_exc: Exception = ValueError("No attempts made")
+            for attempt in range(1, self._MAX_PARSE_RETRIES + 1):
+                try:
+                    response = completion(**completion_params)
 
-            # Parse response
-            if not response.choices or not response.choices[0].message.content:
-                raise ValueError("Empty response from LLM")
+                    # Parse response
+                    if not response.choices or not response.choices[0].message.content:
+                        raise ValueError("Empty response from LLM")
 
-            result = json.loads(response.choices[0].message.content)
+                    result = json.loads(response.choices[0].message.content)
 
-            # Validate required fields
-            self._validate_response(result)
+                    # Validate required fields
+                    self._validate_response(result)
 
-            # Expand abbreviated safety form keys/values to full forms
-            result["SAFETY_ASSESSMENT_FORM"] = expand_safety_form(result["SAFETY_ASSESSMENT_FORM"])
+                    # Expand abbreviated safety form keys/values to full forms
+                    result["SAFETY_ASSESSMENT_FORM"] = expand_safety_form(result["SAFETY_ASSESSMENT_FORM"])
 
-            logger.info("Successfully generated image description")
-            return result
+                    logger.info("Successfully generated image description")
+                    return result
+
+                except (ValueError, json.JSONDecodeError) as e:
+                    last_exc = e
+                    if attempt < self._MAX_PARSE_RETRIES:
+                        logger.warning(
+                            f"Attempt {attempt}/{self._MAX_PARSE_RETRIES} failed with "
+                            f"parse/validation error, retrying: {e}"
+                        )
+
+            raise last_exc
 
         except Exception as e:
             logger.error(f"Error generating description: {e}")

@@ -315,3 +315,65 @@ def test_get_response_format(service):
     # Verify concerns is an array
     assert schema["properties"]["concerns"]["type"] == "array"
     assert schema["properties"]["concerns"]["items"]["type"] == "string"
+
+
+@patch("app.services.review_assessment_service.completion")
+def test_retries_on_invalid_response_then_succeeds(mock_completion, service, sample_safety_assessment):
+    """Test that a transient parse error triggers a retry and eventual success is returned."""
+    bad_response = Mock()
+    bad_response.choices = [Mock()]
+    bad_response.choices[0].message.content = "not valid json"
+
+    good_response = Mock()
+    good_response.choices = [Mock()]
+    good_response.choices[0].message.content = json.dumps({
+        "bias": "N", "stereo": "N", "val_judg": "N",
+        "contra_btwn": "N", "contra_within": "N", "offensive": "N",
+        "incon_demog": "N", "euphemism": "N", "ppl_first": "NA",
+        "unsup_infer": "N", "safety_consist": "CON", "concerns": []
+    })
+
+    mock_completion.side_effect = [bad_response, bad_response, good_response]
+
+    result = service.generate_review_assessment(
+        full_description="Test", transcript="Test",
+        safety_assessment=sample_safety_assessment,
+        safety_assessment_reasoning="Test", alt_text="Test"
+    )
+
+    assert mock_completion.call_count == 3
+    assert result["biased_language"] == "NO"
+    assert result["safety_assessment_consistency"] == "CONSISTENT"
+
+
+@patch("app.services.review_assessment_service.completion")
+def test_all_retries_exhausted_raises_error(mock_completion, service, sample_safety_assessment):
+    """Test that after MAX_PARSE_RETRIES attempts the error is re-raised."""
+    mock_response = Mock()
+    mock_response.choices = [Mock()]
+    mock_response.choices[0].message.content = None
+    mock_completion.return_value = mock_response
+
+    with pytest.raises(ValueError, match="Empty response from LLM"):
+        service.generate_review_assessment(
+            full_description="Test", transcript="Test",
+            safety_assessment=sample_safety_assessment,
+            safety_assessment_reasoning="Test", alt_text="Test"
+        )
+
+    assert mock_completion.call_count == ReviewAssessmentService._MAX_PARSE_RETRIES
+
+
+@patch("app.services.review_assessment_service.completion")
+def test_non_parse_error_is_not_retried(mock_completion, service, sample_safety_assessment):
+    """Test that non-ValueError/JSONDecodeError exceptions are not retried."""
+    mock_completion.side_effect = RuntimeError("Network error")
+
+    with pytest.raises(RuntimeError, match="Network error"):
+        service.generate_review_assessment(
+            full_description="Test", transcript="Test",
+            safety_assessment=sample_safety_assessment,
+            safety_assessment_reasoning="Test", alt_text="Test"
+        )
+
+    assert mock_completion.call_count == 1

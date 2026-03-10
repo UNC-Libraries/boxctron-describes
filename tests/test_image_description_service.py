@@ -229,3 +229,52 @@ def test_prompt_file_loaded(mock_settings):
     assert len(service.system_prompt) > 0
     # Verify it's actual prompt content, not empty
     assert isinstance(service.system_prompt, str)
+
+
+@patch("app.services.image_description_service.completion")
+def test_retries_on_invalid_response_then_succeeds(mock_completion, mock_settings, sample_llm_response):
+    """Test that a transient parse error triggers a retry and eventual success is returned."""
+    bad_response = Mock()
+    bad_response.choices = [Mock()]
+    bad_response.choices[0].message.content = "not valid json"
+
+    good_response = Mock()
+    good_response.choices = [Mock()]
+    good_response.choices[0].message.content = json.dumps(sample_llm_response)
+
+    mock_completion.side_effect = [bad_response, bad_response, good_response]
+
+    service = ImageDescriptionService(mock_settings)
+    result = service.generate_description("data:image/jpeg;base64,abc123")
+
+    assert mock_completion.call_count == 3
+    assert result["FULL_DESCRIPTION"] == sample_llm_response["FULL_DESCRIPTION"]
+
+
+@patch("app.services.image_description_service.completion")
+def test_all_retries_exhausted_raises_error(mock_completion, mock_settings):
+    """Test that after MAX_PARSE_RETRIES attempts the error is re-raised."""
+    mock_response = Mock()
+    mock_response.choices = [Mock()]
+    mock_response.choices[0].message.content = None
+    mock_completion.return_value = mock_response
+
+    service = ImageDescriptionService(mock_settings)
+
+    with pytest.raises(ValueError, match="Empty response from LLM"):
+        service.generate_description("data:image/jpeg;base64,abc123")
+
+    assert mock_completion.call_count == ImageDescriptionService._MAX_PARSE_RETRIES
+
+
+@patch("app.services.image_description_service.completion")
+def test_non_parse_error_is_not_retried(mock_completion, mock_settings):
+    """Test that non-ValueError/JSONDecodeError exceptions are not retried."""
+    mock_completion.side_effect = RuntimeError("Network error")
+
+    service = ImageDescriptionService(mock_settings)
+
+    with pytest.raises(RuntimeError, match="Network error"):
+        service.generate_description("data:image/jpeg;base64,abc123")
+
+    assert mock_completion.call_count == 1
