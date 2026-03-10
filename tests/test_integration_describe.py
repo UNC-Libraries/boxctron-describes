@@ -60,7 +60,7 @@ def mock_llm_responses():
             mock_response.choices[0].message.content = json.dumps({
                 "FULL_DESCRIPTION": "A detailed photograph showing a blurry owl perched on a branch in low light conditions. The owl appears to be a species with mottled brown and white plumage.",
                 "TRANSCRIPT": "No visible text in image.",
-                "SAFETY_ASSESSMENT_FORM": {
+                "SAF": {
                     "people": "N",
                     "demog": "N",
                     "misid_risk": "L",
@@ -84,7 +84,7 @@ def mock_llm_responses():
                     },
                     "confidence": "M"
                 },
-                "SAFETY_ASSESSMENT_REASONING": "This is a nature photograph with no concerning content. The blurriness affects image quality but not safety assessment."
+                "SAR": "This is a nature photograph with no concerning content. The blurriness affects image quality but not safety assessment."
             })
             return mock_response
 

@@ -24,7 +24,7 @@ def sample_llm_response():
     return {
         "FULL_DESCRIPTION": "A test image description",
         "TRANSCRIPT": "Test transcript text",
-        "SAFETY_ASSESSMENT_FORM": {
+        "SAF": {
             "people": "N",
             "demog": "N",
             "misid_risk": "L",
@@ -48,7 +48,7 @@ def sample_llm_response():
             },
             "confidence": "H"
         },
-        "SAFETY_ASSESSMENT_REASONING": "No safety concerns detected."
+        "SAR": "No safety concerns detected."
     }
 
 
@@ -93,7 +93,7 @@ def test_generate_description_without_context(mock_completion, mock_settings, sa
     # Verify result has expanded safety form keys/values
     assert result["FULL_DESCRIPTION"] == sample_llm_response["FULL_DESCRIPTION"]
     assert result["TRANSCRIPT"] == sample_llm_response["TRANSCRIPT"]
-    assert result["SAFETY_ASSESSMENT_REASONING"] == sample_llm_response["SAFETY_ASSESSMENT_REASONING"]
+    assert result["SAFETY_ASSESSMENT_REASONING"] == sample_llm_response["SAR"]
     safety = result["SAFETY_ASSESSMENT_FORM"]
     assert safety["people_visible"] == "NO"
     assert safety["violent_content"] == "NONE"
@@ -177,8 +177,8 @@ def test_missing_required_field_raises_error(mock_completion, mock_settings):
     # Setup mock response missing TRANSCRIPT
     incomplete_response = {
         "FULL_DESCRIPTION": "Test description",
-        "SAFETY_ASSESSMENT_FORM": {},
-        "SAFETY_ASSESSMENT_REASONING": "Test"
+        "SAF": {},
+        "SAR": "Test"
         # Missing TRANSCRIPT
     }
 
@@ -201,11 +201,11 @@ def test_missing_safety_field_raises_error(mock_completion, mock_settings):
     incomplete_response = {
         "FULL_DESCRIPTION": "Test",
         "TRANSCRIPT": "Test",
-        "SAFETY_ASSESSMENT_FORM": {
+        "SAF": {
             "people": "N"
             # Missing other required safety fields
         },
-        "SAFETY_ASSESSMENT_REASONING": "Test"
+        "SAR": "Test"
     }
 
     mock_response = Mock()

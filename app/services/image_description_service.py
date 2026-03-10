@@ -132,8 +132,9 @@ class ImageDescriptionService:
                     # Validate required fields
                     self._validate_response(result)
 
-                    # Expand abbreviated safety form keys/values to full forms
-                    result["SAFETY_ASSESSMENT_FORM"] = expand_safety_form(result["SAFETY_ASSESSMENT_FORM"])
+                    # Expand abbreviated safety form keys/values and rename top-level keys
+                    result["SAFETY_ASSESSMENT_FORM"] = expand_safety_form(result.pop("SAF"))
+                    result["SAFETY_ASSESSMENT_REASONING"] = result.pop("SAR")
 
                     logger.info("Successfully generated image description")
                     return result
@@ -173,7 +174,7 @@ class ImageDescriptionService:
                         "TRANSCRIPT": {
                             "type": "string"
                         },
-                        "SAFETY_ASSESSMENT_FORM": {
+                        "SAF": {
                             "type": "object",
                             "properties": {
                                 "people": {
@@ -286,11 +287,11 @@ class ImageDescriptionService:
                             ],
                             "additionalProperties": False
                         },
-                        "SAFETY_ASSESSMENT_REASONING": {
+                        "SAR": {
                             "type": "string"
                         }
                     },
-                    "required": ["FULL_DESCRIPTION", "TRANSCRIPT", "SAFETY_ASSESSMENT_FORM", "SAFETY_ASSESSMENT_REASONING"],
+                    "required": ["FULL_DESCRIPTION", "TRANSCRIPT", "SAF", "SAR"],
                     "additionalProperties": False
                 }
             }
@@ -306,13 +307,13 @@ class ImageDescriptionService:
         Raises:
             ValueError: If response is missing required fields
         """
-        required_fields = ["FULL_DESCRIPTION", "TRANSCRIPT", "SAFETY_ASSESSMENT_FORM", "SAFETY_ASSESSMENT_REASONING"]
+        required_fields = ["FULL_DESCRIPTION", "TRANSCRIPT", "SAF", "SAR"]
         for field in required_fields:
             if field not in response:
                 raise ValueError(f"Missing required field: {field}")
 
-        # Validate nested SAFETY_ASSESSMENT_FORM structure (uses abbreviated keys)
-        safety_form = response["SAFETY_ASSESSMENT_FORM"]
+        # Validate nested SAF structure (uses abbreviated keys)
+        safety_form = response["SAF"]
         for short_key in SAFETY_FORM_KEY_MAP:
             if short_key not in safety_form:
                 raise ValueError(f"Missing required safety assessment field: {short_key}")

@@ -144,7 +144,7 @@ Analyze this image and provide a comprehensive response with the following compo
     11. For historical images that may contain outdated terminology or sensitive depictions, describe what is visible while using contemporary respectful language.
     12. When uncertain about any element:
       - Use qualifying language: "appears to be", "possibly", "suggests"
-      - Note your uncertainty in SAFETY_ASSESSMENT_REASONING for elements important to the image
+      - Note your uncertainty in SAR for elements important to the image
       - Err on the side of observable facts over speculation
       - It's better to say "unable to determine" than to guess
 
@@ -167,7 +167,7 @@ Analyze this image and provide a comprehensive response with the following compo
     - If you can read some words in a handwritten passage but not others, transcribe what you can and mark the rest:
         "Dear [illegible], I hope this letter finds you well..."
 
-3. SAFETY_ASSESSMENT_FORM - Assess the content of this image for later evaluation by humans or agents to help determine if the image itself contains unsafe content or is likely to produce a description that may be unreliable or subjective. This will be provided as a structured object with abbreviated field names and values (see legend below).
+3. SAF (safety assessment form) - Assess the content of this image for later evaluation by humans or agents to help determine if the image itself contains unsafe content or is likely to produce a description that may be unreliable or subjective. This will be provided as a structured object with abbreviated field names and values (see legend below).
 
   Abbreviated value legend (used across fields as specified in the schema):
     Y=Yes, N=No
@@ -224,9 +224,9 @@ Analyze this image and provide a comprehensive response with the following compo
       - Demographic assessment: [e.g., "distant figures," "obscured features," "ambiguous age range"]
       - Historical context: [e.g., "uncertain time period," "unfamiliar clothing style," "unclear location"]
       - Identity claims: [e.g., "based only on reference information," "uncertain name transcription"]
-      - When you note uncertainty in SAFETY_ASSESSMENT_REASONING
+      - When you note uncertainty in SAR
 
-4. SAFETY_ASSESSMENT_REASONING - Explain ONLY the reasons for positive identifications, elevated risks, or uncertain assessments.
+4. SAR (safety assessment reasoning) - Explain ONLY the reasons for positive identifications, elevated risks, or uncertain assessments.
   - Address only fields marked with concerning values:
     - Why specific fields were marked (e.g., why "P" for stereotyping, why "M" or "H" risk)
     - What elements created uncertainty
@@ -237,7 +237,7 @@ Analyze this image and provide a comprehensive response with the following compo
     - Fields marked as "N", "0", "L", "CL", or "PC"
     - The absence of issues
     - General reassurances
-  - If ALL assessments are negative/low-risk/clear, state only: "No elevated risks identified." Do not state this if you generated any other text for the SAFETY_ASSESSMENT_REASONING.
+  - If ALL assessments are negative/low-risk/clear, state only: "No elevated risks identified." Do not state this if you generated any other text for the SAR.
   - Examples:
     - Good reasoning (violent content depicted): "The image shows an explosion and ship destruction, qualifying as depicted violent content."
     - Good reasoning (misidentification risk): "Three individuals are described with demographic details. Names are claimed based on reference information, creating medium misidentification risk that should be verified against archival records."

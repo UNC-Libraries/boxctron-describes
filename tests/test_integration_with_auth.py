@@ -77,7 +77,7 @@ def mock_llm_responses():
             mock_response.choices[0].message.content = json.dumps({
                 "FULL_DESCRIPTION": "A test image description",
                 "TRANSCRIPT": "No text visible.",
-                "SAFETY_ASSESSMENT_FORM": {
+                "SAF": {
                     "people": "N",
                     "demog": "N",
                     "misid_risk": "L",
@@ -101,7 +101,7 @@ def mock_llm_responses():
                     },
                     "confidence": "M"
                 },
-                "SAFETY_ASSESSMENT_REASONING": "Test reasoning"
+                "SAR": "Test reasoning"
             })
             return mock_response
 
