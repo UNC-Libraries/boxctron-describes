@@ -55,7 +55,7 @@ def short_form_with_concerns():
         "atrocities": "Y",
         "text_chars": {
             "present": "Y",
-            "type": "HW_CU",
+            "type": "HWCU",
             "legib": "DIF"
         },
         "confidence": "L"
@@ -129,8 +129,8 @@ def test_expand_all_text_types():
     }
 
     type_map = {
-        "PR": "PRINTED", "TY": "TYPED", "HW_PR": "HANDWRITTEN_PRINT",
-        "HW_CU": "HANDWRITTEN_CURSIVE", "MX": "MIXED",
+        "PR": "PRINTED", "TY": "TYPED", "HWPR": "HANDWRITTEN_PRINT",
+        "HWCU": "HANDWRITTEN_CURSIVE", "MX": "MIXED",
     }
     for short, full in type_map.items():
         form = {**base, "text_chars": {"present": "Y", "type": short, "legib": "CL"}}

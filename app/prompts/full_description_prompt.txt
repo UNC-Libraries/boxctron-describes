@@ -177,7 +177,7 @@ Analyze this image and provide a comprehensive response with the following compo
     SUG=Suggestive, EXP=Explicit
     P=Possibly
     Symbol types: 0=None, CUL=Cultural, REL=Religious, POL=Political, HATE=Hate, BRD=Brand
-    Text type: NA=N/A, PR=Printed, TY=Typed, HW_PR=Handwritten print, HW_CU=Handwritten cursive, MX=Mixed
+    Text type: NA=N/A, PR=Printed, TY=Typed, HWPR=Handwritten print, HWCU=Handwritten cursive, MX=Mixed
     Legibility: NA=N/A, CL=Clear, PC=Partially clear, DIF=Difficult, ILL=Illegible
 
   Notes on field values:

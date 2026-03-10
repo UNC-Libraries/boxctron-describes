@@ -87,8 +87,8 @@ TEXT_TYPE_VALUE_MAP: Dict[str, str] = {
     "NA": "N/A",
     "PR": "PRINTED",
     "TY": "TYPED",
-    "HW_PR": "HANDWRITTEN_PRINT",
-    "HW_CU": "HANDWRITTEN_CURSIVE",
+    "HWPR": "HANDWRITTEN_PRINT",
+    "HWCU": "HANDWRITTEN_CURSIVE",
     "MX": "MIXED",
 }
 

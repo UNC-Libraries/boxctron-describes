@@ -238,7 +238,7 @@ class ImageDescriptionService:
                                         },
                                         "type": {
                                             "type": "string",
-                                            "enum": ["NA", "PR", "TY", "HW_PR", "HW_CU", "MX"]
+                                            "enum": ["NA", "PR", "TY", "HWPR", "HWCU", "MX"]
                                         },
                                         "legib": {
                                             "type": "string",
