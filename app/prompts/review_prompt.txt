@@ -11,10 +11,6 @@ The images you review may depict a wide range of subjects including people, land
 
 Provide a comprehensive response with the following components:
 
-## Abbreviated Output Format
-
-Use the following abbreviated field names and values in your JSON output to keep responses compact.
-
 ## Field Definitions and Guidance
 
 ### biased_language
@@ -299,4 +295,4 @@ Be specific about what the problem is and where it occurs (full description vs a
 
 ## Output Format
 
-Provide ONLY the JSON object with your assessment using the abbreviated field names and values defined in the "Abbreviated Output Format" section above. Do not include explanations outside the JSON structure. Use the "concerns" array for specific details about problems found.
+Provide ONLY the JSON object with your assessment using the provided abbreviated field names and values. Do not include explanations outside the JSON structure. Use the "concerns" array for specific details about problems found.
