@@ -73,7 +73,7 @@ Mark as YES or POSSIBLY if the text includes subjective assessments that introdu
 
 **Flag only:**
 - Evaluations of people's appearance, dress, or behavior ("beautiful," "shabby," "awkward", "attractive", "stylish")
-- Cultural hierarchy or loaded characterizations ("primitive," "exotic," "civilized," "backward")  
+- Cultural hierarchy or loaded characterizations ("primitive," "exotic," "civilized," "backward")
 - Moral framing of sensitive events ("glorious," "shameful," "heroic," "barbaric," "tragic")
 - Aesthetic judgments with implications ("impressive," "crude," "elegant" applied to cultural artifacts)
 - Taking sides ("righteous cause," "unjust," "justified," "unprovoked")
@@ -295,4 +295,4 @@ Be specific about what the problem is and where it occurs (full description vs a
 
 ## Output Format
 
-Provide ONLY the JSON object with your assessment. Do not include explanations outside the JSON structure. Use the "concerns_for_review" array for specific details about problems found.
+Provide ONLY the JSON object with your assessment using the provided abbreviated field names and values. Do not include explanations outside the JSON structure. Use the "concerns" array for specific details about problems found.

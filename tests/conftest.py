@@ -4,6 +4,10 @@ from datetime import datetime, timezone
 from unittest.mock import AsyncMock
 from fastapi.testclient import TestClient
 
+# Disable authentication for all tests in this conftest by default. Override in tests that need it
+from app.config import settings as _app_settings
+_app_settings.auth_enabled = False
+
 from main import app
 from app.dependencies import get_describe_workflow
 from app.models import (

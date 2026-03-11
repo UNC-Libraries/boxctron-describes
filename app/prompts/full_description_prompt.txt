@@ -36,7 +36,7 @@ Analyze this image and provide a comprehensive response with the following compo
        - Use qualifying language for functional interpretations: "appears to serve as," "possibly used for," "suggests"
        - Avoid categorical assumptions about origin, purpose, or cultural significance unless clearly supported by visible text, reference information, or widely recognized characteristics
        - When uncertain about an object's identity or purpose, it's better to describe what you see than to speculate
-    8. Do not attempt to provide counts of people or objects. Instead, use estimation terminology like the following: 
+    8. Do not attempt to provide counts of people or objects. Instead, use estimation terminology like the following:
        - Small numbers (1-4): Use terms like "a few", or specific counts if certain
        - Medium groups (5-20): Use terms like "several," "a small group," "approximately"
        - Large groups (20+): Use terms like "a crowd," "many," "numerous," "dozens"
@@ -144,7 +144,7 @@ Analyze this image and provide a comprehensive response with the following compo
     11. For historical images that may contain outdated terminology or sensitive depictions, describe what is visible while using contemporary respectful language.
     12. When uncertain about any element:
       - Use qualifying language: "appears to be", "possibly", "suggests"
-      - Note your uncertainty in SAFETY_ASSESSMENT_REASONING for elements important to the image
+      - Note your uncertainty in SAR for elements important to the image
       - Err on the side of observable facts over speculation
       - It's better to say "unable to determine" than to guess
 
@@ -167,46 +167,45 @@ Analyze this image and provide a comprehensive response with the following compo
     - If you can read some words in a handwritten passage but not others, transcribe what you can and mark the rest:
         "Dear [illegible], I hope this letter finds you well..."
 
-3. SAFETY_ASSESSMENT_FORM - Assess the content of this image for later evaluation by humans or agents to help determine if the image itself contains unsafe content or is likely to produce a description that may be unreliable or subjective. This will be provided as a structured object with specific fields.
+3. SAF (safety assessment form) - Assess the content of this image for later evaluation by humans or agents to help determine if the image itself contains unsafe content or is likely to produce a description that may be unreliable or subjective. This will be provided as a structured object with abbreviated field names and values.
 
   Notes on field values:
-    - If people_visible is "NO", set demographics_described to "NO", 
-      misidentification_risk_people to "LOW", minors_present to "NO", and named_individuals_claimed to "NO"
-    - symbols_present.types: Use ["NONE"] only if no symbols present, otherwise list all applicable types.
-    - symbols_present.names: Empty array [] ONLY if types is ["NONE"]
-    - symbols_present.types and symbols_present.names MUST MATCH
-      - If you identify a symbol type other than NONE, you MUST list the specific symbol(s) in names
+    - If people (people visible) is "N", set demog to "N", misid_risk to "L", minors to "N", and named_indiv to "N"
+    - symbols.types: Use ["0"] only if no symbols present, otherwise list all applicable types.
+    - symbols.names: Empty array [] ONLY if types is ["0"]
+    - symbols.types and symbols.names MUST MATCH
+      - If you identify a symbol type other than 0 (none), you MUST list the specific symbol(s) in names
       - If you cannot identify what the symbol is, do NOT list it in types
       - Every type listed requires at least one corresponding named symbol
       - Every named symbol must have a corresponding type
       - Examples:
-        - Correct: {"types": ["NONE"], "names": [], "misidentification_risk": "LOW"}
-        - Correct: {"types": ["BRAND", "POLITICAL"], "names": ["Coca-Cola logo", "Nike swoosh", "American flag"], "misidentification_risk": "LOW"}
-        - Incorrect: {"types": ["CULTURAL"], "names": [], ...} // Since a type is listed, but there is no name
-        - Incorrect: {"types": ["NONE"], "names": ["some symbol"], ...} // Since type is NONE but a symbol is named
-    - "demographics_described": Mark as "YES" only if the description includes race/ethnicity, gender, age descriptors beyond simple categories, disability status, or other demographic characteristics. 
-        - Examples of YES: "middle-aged men", "an elderly Asian woman", "young adults of diverse backgrounds", "a white boy", "person using a wheelchair", "individual with a visible prosthetic limb"
-        - Examples of NO: "three adults", "a person", "two people", "children", "a group of adults of diverse backgrounds"
-    - "misidentification_risk_people":
-        - LOW: No specific identity claims, only general demographics you are confident about. For example, "a boy", "adult women", "African american"
-        - MEDIUM: Specific demographics described but there is uncertainty about, or names are claimed based on text directly in the image or in the reference information
-        - HIGH: Names claimed only due to context or facial recognition, or specific identity assertions made without supporting reference or textual information.
-    - "named_individuals_claimed": Mark "YES" if the description identifies a specific person by name as being visually depicted in the image (not just mentioned in text).
-        - Examples of YES:
+        - Correct: {"types": ["0"], "names": [], "misid_risk": "L"}
+        - Correct: {"types": ["BRD", "POL"], "names": ["Coca-Cola logo", "Nike swoosh", "American flag"], "misid_risk": "L"}
+        - Incorrect: {"types": ["CUL"], "names": [], ...} // type listed but no name
+        - Incorrect: {"types": ["0"], "names": ["some symbol"], ...} // type is none but a symbol is named
+    - "demog" (demographics described): Mark as "Y" only if the description includes race/ethnicity, gender, age descriptors beyond simple categories, disability status, or other demographic characteristics.
+        - Examples of Y: "middle-aged men", "an elderly Asian woman", "young adults of diverse backgrounds", "a white boy", "person using a wheelchair", "individual with a visible prosthetic limb"
+        - Examples of N: "three adults", "a person", "two people", "children", "a group of adults of diverse backgrounds"
+    - "misid_risk" (misidentification risk for people):
+        - L: No specific identity claims, only general demographics you are confident about. For example, "a boy", "adult women", "African american"
+        - M: Specific demographics described but there is uncertainty about, or names are claimed based on text directly in the image or in the reference information
+        - H: Names claimed only due to context or facial recognition, or specific identity assertions made without supporting reference or textual information.
+    - "named_indiv" (named individuals claimed): Mark "Y" if the description identifies a specific person by name as being visually depicted in the image (not just mentioned in text).
+        - Examples of Y:
             - "portrait of Martin Luther King Jr"
             - "statue depicts Abraham Lincoln"
-        - Mark NO when:
+        - Mark N when:
             - Names appear only in visible text/captions but are not connected to depicted people
             - People are visible but not identified by name
             - Names are mentioned in historical context but those people aren't visually present
                 * "A letter discussing Ada Lovelace" (no image of Ada Lovelace)
-    - If text_characteristics.text_present is NO, then text_type and legibility should both be "N/A"
-    - sexual_content - Medical/anatomical images would be NONE. Historical/ethnographic documentation would be NONE. Fine art would be NONE unless the pose or context is explicitly sexual.
-    - confidence - Provide an overall confidence assessment using the following values:
-      - HIGH: Clear, well-preserved image with easily identifiable subjects and context
-      - MEDIUM: Generally clear image but with some uncertain elements (partial text legibility, ambiguous objects, uncertain demographics, approximate dating)
-      - LOW: Poor image quality, unusual/unfamiliar subjects, or significant ambiguity requiring substantial inference
-      
+    - If text_chars.present is N, then type and legib should both be "NA"
+    - sexual (sexual content) - Medical/anatomical images would be "0". Historical/ethnographic documentation would be "0". Fine art would be "0" unless the pose or context is explicitly sexual.
+    - confidence - Provide an overall confidence assessment:
+      - H: Clear, well-preserved image with easily identifiable subjects and context
+      - M: Generally clear image but with some uncertain elements (partial text legibility, ambiguous objects, uncertain demographics, approximate dating)
+      - L: Poor image quality, unusual/unfamiliar subjects, or significant ambiguity requiring substantial inference
+
       Some factors that would impact the confidence rating negatively:
       - Image quality issues: [e.g., "low resolution," "poor lighting," "significant damage/deterioration"]
       - Text legibility: [e.g., "cursive handwriting difficult to read," "faded text," "partially obscured"]
@@ -214,23 +213,22 @@ Analyze this image and provide a comprehensive response with the following compo
       - Demographic assessment: [e.g., "distant figures," "obscured features," "ambiguous age range"]
       - Historical context: [e.g., "uncertain time period," "unfamiliar clothing style," "unclear location"]
       - Identity claims: [e.g., "based only on reference information," "uncertain name transcription"]
-      - When you note uncertainty in SAFETY_ASSESSMENT_REASONING
+      - When you note uncertainty in SAR
 
-4. SAFETY_ASSESSMENT_REASONING - Explain ONLY the reasons for positive identifications, elevated risks, or uncertain assessments.
+4. SAR (safety assessment reasoning) - Explain ONLY the reasons for positive identifications, elevated risks, or uncertain assessments.
   - Address only fields marked with concerning values:
-    - Why specific fields were marked (e.g., why "POSSIBLY" for stereotyping, why "MEDIUM" or "HIGH" risk)
+    - Why specific fields were marked (e.g., why "P" for stereotyping, why "M" or "H" risk)
     - What elements created uncertainty
     - Any contextual factors that influenced the assessment
     - Specific concerns for human reviewers to verify
-    - text_characteristics.legibility is "DIFFICULT" or "ILLEGIBLE"
+    - text_chars.legib is "DIF" or "ILL"
   - DO NOT mention:
-    - Fields marked as "NO", "NONE", or "LOW", or "CLEAR" or "PARTIALLY CLEAR"
+    - Fields marked as "N", "0", "L", "CL", or "PC"
     - The absence of issues
     - General reassurances
-  - If ALL assessments are negative/low-risk/clear, state only: "No elevated risks identified." Do not state this if you generated any other text for the SAFETY_ASSESSMENT_REASONING.
+  - If ALL assessments are negative/low-risk/clear, state only: "No elevated risks identified." Do not state this if you generated any other text for the SAR.
   - Examples:
     - Good reasoning (violent content depicted): "The image shows an explosion and ship destruction, qualifying as depicted violent content."
     - Good reasoning (misidentification risk): "Three individuals are described with demographic details. Names are claimed based on reference information, creating medium misidentification risk that should be verified against archival records."
-    - Bad reasoning (reports negatives): "The image depicts violence. No people are visible, so identity risks are minimal. No other significant concerns." 
+    - Bad reasoning (reports negatives): "The image depicts violence. No people are visible, so identity risks are minimal. No other significant concerns."
     - Good reasoning (all low risk): "No elevated risks identified."
-  

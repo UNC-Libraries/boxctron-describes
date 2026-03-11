@@ -77,31 +77,31 @@ def mock_llm_responses():
             mock_response.choices[0].message.content = json.dumps({
                 "FULL_DESCRIPTION": "A test image description",
                 "TRANSCRIPT": "No text visible.",
-                "SAFETY_ASSESSMENT_FORM": {
-                    "people_visible": "NO",
-                    "demographics_described": "NO",
-                    "misidentification_risk_people": "LOW",
-                    "minors_present": "NO",
-                    "named_individuals_claimed": "NO",
-                    "violent_content": "NONE",
-                    "racial_violence_oppression": "NONE",
-                    "nudity": "NONE",
-                    "sexual_content": "NONE",
-                    "symbols_present": {
-                        "types": ["NONE"],
+                "SAF": {
+                    "people": "N",
+                    "demog": "N",
+                    "misid_risk": "L",
+                    "minors": "N",
+                    "named_indiv": "N",
+                    "violence": "0",
+                    "racial_viol": "0",
+                    "nudity": "0",
+                    "sexual": "0",
+                    "symbols": {
+                        "types": ["0"],
                         "names": [],
-                        "misidentification_risk": "LOW"
+                        "misid_risk": "L"
                     },
-                    "stereotyping_present": "NO",
-                    "atrocities_depicted": "NO",
-                    "text_characteristics": {
-                        "text_present": "NO",
-                        "text_type": "N/A",
-                        "legibility": "N/A"
+                    "stereotyping": "N",
+                    "atrocities": "N",
+                    "text_chars": {
+                        "present": "N",
+                        "type": "NA",
+                        "legib": "NA"
                     },
-                    "confidence": "MEDIUM"
+                    "confidence": "M"
                 },
-                "SAFETY_ASSESSMENT_REASONING": "Test reasoning"
+                "SAR": "Test reasoning"
             })
             return mock_response
 
@@ -109,18 +109,18 @@ def mock_llm_responses():
             mock_response = Mock()
             mock_response.choices = [Mock()]
             mock_response.choices[0].message.content = json.dumps({
-                "biased_language": "NO",
-                "stereotyping": "NO",
-                "value_judgments": "NO",
-                "contradictions_between_texts": "NO",
-                "contradictions_within_description": "NO",
-                "offensive_language": "NO",
-                "inconsistent_demographics": "NO",
-                "euphemistic_language": "NO",
-                "people_first_language": "N/A",
-                "unsupported_inferential_claims": "NO",
-                "safety_assessment_consistency": "CONSISTENT",
-                "concerns_for_review": []
+                "bias": "N",
+                "stereo": "N",
+                "val_judg": "N",
+                "contra_btwn": "N",
+                "contra_within": "N",
+                "offensive": "N",
+                "incon_demog": "N",
+                "euphemism": "N",
+                "ppl_first": "NA",
+                "unsup_infer": "N",
+                "safety_consist": "CON",
+                "concerns": []
             })
             return mock_response
 

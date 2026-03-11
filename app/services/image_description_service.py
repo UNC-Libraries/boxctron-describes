@@ -7,12 +7,16 @@ from typing import Optional, Dict, Any
 from litellm import completion
 
 from app.config import Settings
+from app.services.safety_form_expander import expand_safety_form, SAFETY_FORM_KEY_MAP
+from app.utils.llm_utils import log_token_usage
 
 logger = logging.getLogger(__name__)
 
 
 class ImageDescriptionService:
     """Service for generating image descriptions using LLM vision models."""
+
+    _MAX_PARSE_RETRIES = 3
 
     def __init__(self, settings: Settings):
         """
@@ -115,19 +119,38 @@ class ImageDescriptionService:
             if self.settings.litellm_full_desc_reasoning_effort:
                 completion_params["reasoning_effort"] = self.settings.litellm_full_desc_reasoning_effort
 
-            response = completion(**completion_params)
+            last_exc: Exception = ValueError("No attempts made")
+            for attempt in range(1, self._MAX_PARSE_RETRIES + 1):
+                try:
+                    response = completion(**completion_params)
 
-            # Parse response
-            if not response.choices or not response.choices[0].message.content:
-                raise ValueError("Empty response from LLM")
+                    # Parse response
+                    if not response.choices or not response.choices[0].message.content:
+                        raise ValueError("Empty response from LLM")
 
-            result = json.loads(response.choices[0].message.content)
+                    result = json.loads(response.choices[0].message.content)
 
-            # Validate required fields
-            self._validate_response(result)
+                    # Validate required fields
+                    self._validate_response(result)
 
-            logger.info("Successfully generated image description")
-            return result
+                    # Expand abbreviated safety form keys/values and rename top-level keys
+                    result["SAFETY_ASSESSMENT_FORM"] = expand_safety_form(result.pop("SAF"))
+                    result["SAFETY_ASSESSMENT_REASONING"] = result.pop("SAR")
+
+                    log_token_usage(logger, "image description", response.usage)
+
+                    logger.info("Successfully generated image description")
+                    return result
+
+                except (ValueError, json.JSONDecodeError) as e:
+                    last_exc = e
+                    if attempt < self._MAX_PARSE_RETRIES:
+                        logger.warning(
+                            f"Attempt {attempt}/{self._MAX_PARSE_RETRIES} failed with "
+                            f"parse/validation error, retrying: {e}"
+                        )
+
+            raise last_exc
 
         except Exception as e:
             logger.error(f"Error generating description: {e}")
@@ -154,53 +177,53 @@ class ImageDescriptionService:
                         "TRANSCRIPT": {
                             "type": "string"
                         },
-                        "SAFETY_ASSESSMENT_FORM": {
+                        "SAF": {
                             "type": "object",
                             "properties": {
-                                "people_visible": {
+                                "people": {
                                     "type": "string",
-                                    "enum": ["YES", "NO"]
+                                    "enum": ["Y", "N"]
                                 },
-                                "demographics_described": {
+                                "demog": {
                                     "type": "string",
-                                    "enum": ["YES", "NO"]
+                                    "enum": ["Y", "N"]
                                 },
-                                "misidentification_risk_people": {
+                                "misid_risk": {
                                     "type": "string",
-                                    "enum": ["LOW", "MEDIUM", "HIGH"]
+                                    "enum": ["L", "M", "H"]
                                 },
-                                "minors_present": {
+                                "minors": {
                                     "type": "string",
-                                    "enum": ["YES", "NO"]
+                                    "enum": ["Y", "N"]
                                 },
-                                "named_individuals_claimed": {
+                                "named_indiv": {
                                     "type": "string",
-                                    "enum": ["YES", "NO"]
+                                    "enum": ["Y", "N"]
                                 },
-                                "violent_content": {
+                                "violence": {
                                     "type": "string",
-                                    "enum": ["NONE", "IMPLIED", "DEPICTED"]
+                                    "enum": ["0", "IMP", "DEP"]
                                 },
-                                "racial_violence_oppression": {
+                                "racial_viol": {
                                     "type": "string",
-                                    "enum": ["NONE", "IMPLIED", "DEPICTED"]
+                                    "enum": ["0", "IMP", "DEP"]
                                 },
                                 "nudity": {
                                     "type": "string",
-                                    "enum": ["NONE", "PARTIAL", "FULL"]
+                                    "enum": ["0", "PAR", "FULL"]
                                 },
-                                "sexual_content": {
+                                "sexual": {
                                     "type": "string",
-                                    "enum": ["NONE", "SUGGESTIVE", "EXPLICIT"]
+                                    "enum": ["0", "SUG", "EXP"]
                                 },
-                                "symbols_present": {
+                                "symbols": {
                                     "type": "object",
                                     "properties": {
                                         "types": {
                                             "type": "array",
                                             "items": {
                                                 "type": "string",
-                                                "enum": ["NONE", "CULTURAL", "RELIGIOUS", "POLITICAL", "HATE", "BRAND"]
+                                                "enum": ["0", "CUL", "REL", "POL", "HATE", "BRD"]
                                             }
                                         },
                                         "names": {
@@ -209,69 +232,69 @@ class ImageDescriptionService:
                                                 "type": "string"
                                             }
                                         },
-                                        "misidentification_risk": {
+                                        "misid_risk": {
                                             "type": "string",
-                                            "enum": ["LOW", "MEDIUM", "HIGH"]
+                                            "enum": ["L", "M", "H"]
                                         }
                                     },
-                                    "required": ["types", "names", "misidentification_risk"],
+                                    "required": ["types", "names", "misid_risk"],
                                     "additionalProperties": False
                                 },
-                                "stereotyping_present": {
+                                "stereotyping": {
                                     "type": "string",
-                                    "enum": ["NO", "POSSIBLY", "YES"]
+                                    "enum": ["N", "P", "Y"]
                                 },
-                                "atrocities_depicted": {
+                                "atrocities": {
                                     "type": "string",
-                                    "enum": ["NO", "YES"]
+                                    "enum": ["N", "Y"]
                                 },
-                                "text_characteristics": {
+                                "text_chars": {
                                     "type": "object",
                                     "properties": {
-                                        "text_present": {
+                                        "present": {
                                             "type": "string",
-                                            "enum": ["YES", "NO"]
+                                            "enum": ["Y", "N"]
                                         },
-                                        "text_type": {
+                                        "type": {
                                             "type": "string",
-                                            "enum": ["N/A", "PRINTED", "TYPED", "HANDWRITTEN_PRINT", "HANDWRITTEN_CURSIVE", "MIXED"]
+                                            "enum": ["NA", "PR", "TY", "HWPR", "HWCU", "MX"]
                                         },
-                                        "legibility": {
+                                        "legib": {
                                             "type": "string",
-                                            "enum": ["N/A", "CLEAR", "PARTIALLY_CLEAR", "DIFFICULT", "ILLEGIBLE"]
+                                            "enum": ["NA", "CL", "PC", "DIF", "ILL"]
                                         }
                                     },
-                                    "required": ["text_present", "text_type", "legibility"],
+                                    "required": ["present", "type", "legib"],
                                     "additionalProperties": False
                                 },
                                 "confidence": {
                                     "type": "string",
-                                    "enum": ["LOW", "MEDIUM", "HIGH"]
+                                    "enum": ["L", "M", "H"]
                                 }
                             },
                             "required": [
-                                "people_visible",
-                                "demographics_described",
-                                "misidentification_risk_people",
-                                "minors_present",
-                                "named_individuals_claimed",
-                                "violent_content",
-                                "racial_violence_oppression",
+                                "people",
+                                "demog",
+                                "misid_risk",
+                                "minors",
+                                "named_indiv",
+                                "violence",
+                                "racial_viol",
                                 "nudity",
-                                "sexual_content",
-                                "symbols_present",
-                                "stereotyping_present",
-                                "atrocities_depicted",
-                                "text_characteristics",
+                                "sexual",
+                                "symbols",
+                                "stereotyping",
+                                "atrocities",
+                                "text_chars",
                                 "confidence"
                             ],
                             "additionalProperties": False
                         },
-                        "SAFETY_ASSESSMENT_REASONING": {
+                        "SAR": {
                             "type": "string"
                         }
                     },
-                    "required": ["FULL_DESCRIPTION", "TRANSCRIPT", "SAFETY_ASSESSMENT_FORM", "SAFETY_ASSESSMENT_REASONING"],
+                    "required": ["FULL_DESCRIPTION", "TRANSCRIPT", "SAF", "SAR"],
                     "additionalProperties": False
                 }
             }
@@ -287,19 +310,13 @@ class ImageDescriptionService:
         Raises:
             ValueError: If response is missing required fields
         """
-        required_fields = ["FULL_DESCRIPTION", "TRANSCRIPT", "SAFETY_ASSESSMENT_FORM", "SAFETY_ASSESSMENT_REASONING"]
+        required_fields = ["FULL_DESCRIPTION", "TRANSCRIPT", "SAF", "SAR"]
         for field in required_fields:
             if field not in response:
                 raise ValueError(f"Missing required field: {field}")
 
-        # Validate nested SAFETY_ASSESSMENT_FORM structure
-        safety_form = response["SAFETY_ASSESSMENT_FORM"]
-        required_safety_fields = [
-            "people_visible", "demographics_described", "misidentification_risk_people",
-            "minors_present", "named_individuals_claimed", "violent_content",
-            "racial_violence_oppression", "nudity", "sexual_content", "symbols_present",
-            "stereotyping_present", "atrocities_depicted", "text_characteristics", "confidence"
-        ]
-        for field in required_safety_fields:
-            if field not in safety_form:
-                raise ValueError(f"Missing required safety assessment field: {field}")
+        # Validate nested SAF structure (uses abbreviated keys)
+        safety_form = response["SAF"]
+        for short_key in SAFETY_FORM_KEY_MAP:
+            if short_key not in safety_form:
+                raise ValueError(f"Missing required safety assessment field: {short_key}")

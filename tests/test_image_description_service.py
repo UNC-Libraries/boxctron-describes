@@ -20,35 +20,35 @@ def mock_settings():
 
 @pytest.fixture
 def sample_llm_response():
-    """Sample valid LLM response."""
+    """Sample valid LLM response (abbreviated form as produced by the LLM)."""
     return {
         "FULL_DESCRIPTION": "A test image description",
         "TRANSCRIPT": "Test transcript text",
-        "SAFETY_ASSESSMENT_FORM": {
-            "people_visible": "NO",
-            "demographics_described": "NO",
-            "misidentification_risk_people": "LOW",
-            "minors_present": "NO",
-            "named_individuals_claimed": "NO",
-            "violent_content": "NONE",
-            "racial_violence_oppression": "NONE",
-            "nudity": "NONE",
-            "sexual_content": "NONE",
-            "symbols_present": {
-                "types": ["NONE"],
+        "SAF": {
+            "people": "N",
+            "demog": "N",
+            "misid_risk": "L",
+            "minors": "N",
+            "named_indiv": "N",
+            "violence": "0",
+            "racial_viol": "0",
+            "nudity": "0",
+            "sexual": "0",
+            "symbols": {
+                "types": ["0"],
                 "names": [],
-                "misidentification_risk": "LOW"
+                "misid_risk": "L"
             },
-            "stereotyping_present": "NO",
-            "atrocities_depicted": "NO",
-            "text_characteristics": {
-                "text_present": "NO",
-                "text_type": "N/A",
-                "legibility": "N/A"
+            "stereotyping": "N",
+            "atrocities": "N",
+            "text_chars": {
+                "present": "N",
+                "type": "NA",
+                "legib": "NA"
             },
-            "confidence": "HIGH"
+            "confidence": "H"
         },
-        "SAFETY_ASSESSMENT_REASONING": "No safety concerns detected."
+        "SAR": "No safety concerns detected."
     }
 
 
@@ -90,8 +90,15 @@ def test_generate_description_without_context(mock_completion, mock_settings, sa
     assert user_content[1]["type"] == "image_url"
     assert user_content[1]["image_url"]["url"] == "data:image/jpeg;base64,abc123"
 
-    # Verify result
-    assert result == sample_llm_response
+    # Verify result has expanded safety form keys/values
+    assert result["FULL_DESCRIPTION"] == sample_llm_response["FULL_DESCRIPTION"]
+    assert result["TRANSCRIPT"] == sample_llm_response["TRANSCRIPT"]
+    assert result["SAFETY_ASSESSMENT_REASONING"] == sample_llm_response["SAR"]
+    safety = result["SAFETY_ASSESSMENT_FORM"]
+    assert safety["people_visible"] == "NO"
+    assert safety["violent_content"] == "NONE"
+    assert safety["confidence"] == "HIGH"
+    assert safety["symbols_present"]["types"] == ["NONE"]
 
 
 @patch("app.services.image_description_service.completion")
@@ -170,8 +177,8 @@ def test_missing_required_field_raises_error(mock_completion, mock_settings):
     # Setup mock response missing TRANSCRIPT
     incomplete_response = {
         "FULL_DESCRIPTION": "Test description",
-        "SAFETY_ASSESSMENT_FORM": {},
-        "SAFETY_ASSESSMENT_REASONING": "Test"
+        "SAF": {},
+        "SAR": "Test"
         # Missing TRANSCRIPT
     }
 
@@ -190,15 +197,15 @@ def test_missing_required_field_raises_error(mock_completion, mock_settings):
 @patch("app.services.image_description_service.completion")
 def test_missing_safety_field_raises_error(mock_completion, mock_settings):
     """Test that response missing safety assessment field raises ValueError."""
-    # Setup mock response with incomplete safety form
+    # Setup mock response with incomplete safety form (using short keys)
     incomplete_response = {
         "FULL_DESCRIPTION": "Test",
         "TRANSCRIPT": "Test",
-        "SAFETY_ASSESSMENT_FORM": {
-            "people_visible": "NO"
+        "SAF": {
+            "people": "N"
             # Missing other required safety fields
         },
-        "SAFETY_ASSESSMENT_REASONING": "Test"
+        "SAR": "Test"
     }
 
     mock_response = Mock()
@@ -222,3 +229,52 @@ def test_prompt_file_loaded(mock_settings):
     assert len(service.system_prompt) > 0
     # Verify it's actual prompt content, not empty
     assert isinstance(service.system_prompt, str)
+
+
+@patch("app.services.image_description_service.completion")
+def test_retries_on_invalid_response_then_succeeds(mock_completion, mock_settings, sample_llm_response):
+    """Test that a transient parse error triggers a retry and eventual success is returned."""
+    bad_response = Mock()
+    bad_response.choices = [Mock()]
+    bad_response.choices[0].message.content = "not valid json"
+
+    good_response = Mock()
+    good_response.choices = [Mock()]
+    good_response.choices[0].message.content = json.dumps(sample_llm_response)
+
+    mock_completion.side_effect = [bad_response, bad_response, good_response]
+
+    service = ImageDescriptionService(mock_settings)
+    result = service.generate_description("data:image/jpeg;base64,abc123")
+
+    assert mock_completion.call_count == 3
+    assert result["FULL_DESCRIPTION"] == sample_llm_response["FULL_DESCRIPTION"]
+
+
+@patch("app.services.image_description_service.completion")
+def test_all_retries_exhausted_raises_error(mock_completion, mock_settings):
+    """Test that after MAX_PARSE_RETRIES attempts the error is re-raised."""
+    mock_response = Mock()
+    mock_response.choices = [Mock()]
+    mock_response.choices[0].message.content = None
+    mock_completion.return_value = mock_response
+
+    service = ImageDescriptionService(mock_settings)
+
+    with pytest.raises(ValueError, match="Empty response from LLM"):
+        service.generate_description("data:image/jpeg;base64,abc123")
+
+    assert mock_completion.call_count == ImageDescriptionService._MAX_PARSE_RETRIES
+
+
+@patch("app.services.image_description_service.completion")
+def test_non_parse_error_is_not_retried(mock_completion, mock_settings):
+    """Test that non-ValueError/JSONDecodeError exceptions are not retried."""
+    mock_completion.side_effect = RuntimeError("Network error")
+
+    service = ImageDescriptionService(mock_settings)
+
+    with pytest.raises(RuntimeError, match="Network error"):
+        service.generate_description("data:image/jpeg;base64,abc123")
+
+    assert mock_completion.call_count == 1
