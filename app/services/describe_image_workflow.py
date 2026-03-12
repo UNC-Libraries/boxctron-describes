@@ -146,7 +146,6 @@ class DescribeImageWorkflow:
                 text_type=safety_form.get("text_characteristics", {}).get("text_type", "N/A"),
                 legibility=safety_form.get("text_characteristics", {}).get("legibility", "N/A")
             ),
-            confidence=safety_form.get("confidence", "UNKNOWN"),
             reasoning=full_desc_result.get("SAFETY_ASSESSMENT_REASONING", "")
         )
 

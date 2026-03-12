@@ -33,7 +33,6 @@ def make_assessment(**overrides) -> SafetyAssessment:
             text_type="N/A",
             legibility="N/A",
         ),
-        confidence="HIGH",
         reasoning=None,
     )
     defaults.update(overrides)

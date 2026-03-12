@@ -45,8 +45,7 @@ def sample_llm_response():
                 "present": "N",
                 "type": "NA",
                 "legib": "NA"
-            },
-            "confidence": "H"
+            }
         },
         "SAR": "No safety concerns detected."
     }
@@ -97,7 +96,6 @@ def test_generate_description_without_context(mock_completion, mock_settings, sa
     safety = result["SAFETY_ASSESSMENT_FORM"]
     assert safety["people_visible"] == "NO"
     assert safety["violent_content"] == "NONE"
-    assert safety["confidence"] == "HIGH"
     assert safety["symbols_present"]["types"] == ["NONE"]
 
 

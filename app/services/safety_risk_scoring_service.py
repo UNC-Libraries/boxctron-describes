@@ -54,11 +54,7 @@ SAFETY_FIELD_WEIGHTS: dict[str, dict[str, int]] = {
         "NO": 0,
         "YES": 10,
     },
-    "confidence": {
-        "LOW": 0,
-        "MEDIUM": 0,
-        "HIGH": 0,
-    },
+
 }
 
 # Weights for each symbol type value.

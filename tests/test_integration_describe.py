@@ -81,8 +81,7 @@ def mock_llm_responses():
                         "present": "N",
                         "type": "NA",
                         "legib": "NA"
-                    },
-                    "confidence": "M"
+                    }
                 },
                 "SAR": "This is a nature photograph with no concerning content. The blurriness affects image quality but not safety assessment."
             })
@@ -162,7 +161,6 @@ def test_integration_upload_real_image(client, blurry_owl_data, mock_llm_respons
     # Verify safety assessment was processed
     safety = result_data["safety_assessment"]
     assert safety["people_visible"] == "NO"
-    assert safety["confidence"] == "MEDIUM"
     assert safety["risk_score"] is not None
     assert safety["inconsistency_count"] is not None
     assert isinstance(safety["risk_score"], int)
@@ -388,7 +386,6 @@ def test_integration_all_result_fields_populated(client, blurry_owl_data, mock_l
     # Safety assessment fields
     safety = result["safety_assessment"]
     assert safety["people_visible"] in ["YES", "NO"]
-    assert safety["confidence"] in ["LOW", "MEDIUM", "HIGH"]
     assert safety["reasoning"] is not None
     assert isinstance(safety["symbols_present"]["types"], list)
     assert isinstance(safety["symbols_present"]["names"], list)

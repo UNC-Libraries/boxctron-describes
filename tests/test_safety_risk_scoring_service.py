@@ -36,7 +36,6 @@ def make_assessment(**overrides) -> SafetyAssessment:
             text_type="N/A",
             legibility="N/A",
         ),
-        confidence="HIGH",
         reasoning=None,
     )
     defaults.update(overrides)
@@ -82,7 +81,6 @@ def test_score_is_100_for_all_maximum_risk_values():
             text_type="HANDWRITTEN_CURSIVE",
             legibility="DIFFICULT",
         ),
-        confidence="HIGH",
     )
     assert calculate_risk_score(assessment) == 100
 

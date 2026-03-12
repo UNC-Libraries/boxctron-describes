@@ -299,7 +299,6 @@ def _assert_default_response_populated(response, expected_filename):
     safety = result_data["safety_assessment"]
     assert safety["people_visible"] == "NO"
     assert safety["violent_content"] == "NONE"
-    assert safety["confidence"] == "LOW"
     assert safety["symbols_present"]["types"] == ["NONE"]
     assert safety["symbols_present"]["names"] == []
     assert safety["text_characteristics"]["text_present"] == "NO"

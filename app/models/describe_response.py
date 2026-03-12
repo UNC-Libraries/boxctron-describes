@@ -111,11 +111,6 @@ class SafetyAssessment(BaseModel):
         description="Characteristics of text in the image"
     )
 
-    confidence: Literal["LOW", "MEDIUM", "HIGH"] = Field(
-        ...,
-        description="Overall confidence in the safety assessment"
-    )
-
     reasoning: Optional[str] = Field(
         None,
         description="Reasoning behind the safety assessment"
@@ -310,7 +305,6 @@ class DescribeResponse(BaseModel):
                             "text_type": "N/A",
                             "legibility": "N/A"
                         },
-                        "confidence": "HIGH",
                         "reasoning": "Clear natural landscape with no sensitive content",
                         "risk_score": 0,
                         "inconsistency_count": 0

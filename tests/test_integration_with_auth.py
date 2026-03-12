@@ -98,8 +98,7 @@ def mock_llm_responses():
                         "present": "N",
                         "type": "NA",
                         "legib": "NA"
-                    },
-                    "confidence": "M"
+                    }
                 },
                 "SAR": "Test reasoning"
             })

@@ -66,7 +66,6 @@ def mock_description_result():
                 text_type="N/A",
                 legibility="N/A"
             ),
-            confidence="LOW",
             reasoning="Test reasoning",
             risk_score=0,
             inconsistency_count=0
