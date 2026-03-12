@@ -67,7 +67,9 @@ def mock_description_result():
                 legibility="N/A"
             ),
             confidence="LOW",
-            reasoning="Test reasoning"
+            reasoning="Test reasoning",
+            risk_score=0,
+            inconsistency_count=0
         ),
         review_assessment=ReviewAssessment(
             biased_language="NO",

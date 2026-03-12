@@ -163,6 +163,10 @@ def test_integration_upload_real_image(client, blurry_owl_data, mock_llm_respons
     safety = result_data["safety_assessment"]
     assert safety["people_visible"] == "NO"
     assert safety["confidence"] == "MEDIUM"
+    assert safety["risk_score"] is not None
+    assert safety["inconsistency_count"] is not None
+    assert isinstance(safety["risk_score"], int)
+    assert isinstance(safety["inconsistency_count"], int)
 
     # Verify review assessment was processed
     review = result_data["review_assessment"]

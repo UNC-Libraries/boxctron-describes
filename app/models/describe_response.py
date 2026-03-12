@@ -121,6 +121,16 @@ class SafetyAssessment(BaseModel):
         description="Reasoning behind the safety assessment"
     )
 
+    risk_score: Optional[int] = Field(
+        None,
+        description="Normalized risk score from 0 to 100 derived from safety assessment field weights"
+    )
+
+    inconsistency_count: Optional[int] = Field(
+        None,
+        description="Number of logical inconsistencies detected in the safety assessment fields"
+    )
+
 
 class ReviewAssessment(BaseModel):
     """Assessment for content review requirements."""
@@ -301,7 +311,9 @@ class DescribeResponse(BaseModel):
                             "legibility": "N/A"
                         },
                         "confidence": "HIGH",
-                        "reasoning": "Clear natural landscape with no sensitive content"
+                        "reasoning": "Clear natural landscape with no sensitive content",
+                        "risk_score": 0,
+                        "inconsistency_count": 0
                     },
                     "review_assessment": {
                         "biased_language": "NO",

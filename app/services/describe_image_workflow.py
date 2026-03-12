@@ -8,6 +8,8 @@ from app.services.image_normalizer import ImageNormalizer
 from app.services.image_description_service import ImageDescriptionService
 from app.services.alt_text_generation_service import AltTextGenerationService
 from app.services.review_assessment_service import ReviewAssessmentService
+from app.services.safety_risk_scoring_service import calculate_risk_score
+from app.services.safety_inconsistency_service import count_safety_inconsistencies
 from app.models import DescriptionResult, SafetyAssessment, ReviewAssessment, VersionInfo, SymbolsPresent, TextCharacteristics
 from app.config import Settings
 
@@ -122,7 +124,7 @@ class DescribeImageWorkflow:
         safety_form = full_desc_result.get("SAFETY_ASSESSMENT_FORM", {})
         symbols_data = safety_form.get("symbols_present", {})
 
-        return SafetyAssessment(
+        assessment = SafetyAssessment(
             people_visible=safety_form.get("people_visible", "UNKNOWN"),
             demographics_described=safety_form.get("demographics_described", "UNKNOWN"),
             misidentification_risk_people=safety_form.get("misidentification_risk_people", "UNKNOWN"),
@@ -147,6 +149,10 @@ class DescribeImageWorkflow:
             confidence=safety_form.get("confidence", "UNKNOWN"),
             reasoning=full_desc_result.get("SAFETY_ASSESSMENT_REASONING", "")
         )
+
+        assessment.risk_score = calculate_risk_score(assessment)
+        assessment.inconsistency_count = count_safety_inconsistencies(assessment)
+        return assessment
 
     def _parse_review_assessment(self, review_result: dict) -> ReviewAssessment:
         """
