@@ -8,6 +8,9 @@ from app.services.image_normalizer import ImageNormalizer
 from app.services.image_description_service import ImageDescriptionService
 from app.services.alt_text_generation_service import AltTextGenerationService
 from app.services.review_assessment_service import ReviewAssessmentService
+from app.services.safety_risk_scoring_service import calculate_risk_score
+from app.services.safety_inconsistency_service import count_safety_inconsistencies
+from app.services.review_risk_scoring_service import calculate_review_risk_score
 from app.models import DescriptionResult, SafetyAssessment, ReviewAssessment, VersionInfo, SymbolsPresent, TextCharacteristics
 from app.config import Settings
 
@@ -92,12 +95,16 @@ class DescribeImageWorkflow:
         )
         review_assessment = self._parse_review_assessment(review_assessment_result)
 
+        scores = [s for s in [safety_assessment.risk_score, review_assessment.risk_score] if s is not None]
+        overall_risk_Score = round(sum(scores) / len(scores)) if scores else None
+
         return DescriptionResult(
             full_description=full_description,
             alt_text=alt_text,
             transcript=transcript,
             safety_assessment=safety_assessment,
             review_assessment=review_assessment,
+            overall_risk_Score=overall_risk_Score,
             version=VersionInfo(
                 version=self.settings.app_version,
                 models={
@@ -122,7 +129,7 @@ class DescribeImageWorkflow:
         safety_form = full_desc_result.get("SAFETY_ASSESSMENT_FORM", {})
         symbols_data = safety_form.get("symbols_present", {})
 
-        return SafetyAssessment(
+        assessment = SafetyAssessment(
             people_visible=safety_form.get("people_visible", "UNKNOWN"),
             demographics_described=safety_form.get("demographics_described", "UNKNOWN"),
             misidentification_risk_people=safety_form.get("misidentification_risk_people", "UNKNOWN"),
@@ -144,9 +151,12 @@ class DescribeImageWorkflow:
                 text_type=safety_form.get("text_characteristics", {}).get("text_type", "N/A"),
                 legibility=safety_form.get("text_characteristics", {}).get("legibility", "N/A")
             ),
-            confidence=safety_form.get("confidence", "UNKNOWN"),
             reasoning=full_desc_result.get("SAFETY_ASSESSMENT_REASONING", "")
         )
+
+        assessment.risk_score = calculate_risk_score(assessment)
+        assessment.inconsistency_count = count_safety_inconsistencies(assessment)
+        return assessment
 
     def _parse_review_assessment(self, review_result: dict) -> ReviewAssessment:
         """
@@ -158,7 +168,7 @@ class DescribeImageWorkflow:
         Returns:
             ReviewAssessment object
         """
-        return ReviewAssessment(
+        assessment = ReviewAssessment(
             biased_language=review_result.get("biased_language", "NO"),
             stereotyping=review_result.get("stereotyping", "NO"),
             value_judgments=review_result.get("value_judgments", "NO"),
@@ -172,3 +182,5 @@ class DescribeImageWorkflow:
             safety_assessment_consistency=review_result.get("safety_assessment_consistency", "CONSISTENT"),
             concerns_for_review=review_result.get("concerns_for_review", [])
         )
+        assessment.risk_score = calculate_review_risk_score(assessment)
+        return assessment

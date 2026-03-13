@@ -49,8 +49,7 @@ def sample_safety_assessment():
             "text_present": "NO",
             "text_type": "N/A",
             "legibility": "N/A"
-        },
-        "confidence": "HIGH"
+        }
     }
 
 

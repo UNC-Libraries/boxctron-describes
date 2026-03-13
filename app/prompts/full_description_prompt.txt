@@ -201,19 +201,6 @@ Analyze this image and provide a comprehensive response with the following compo
                 * "A letter discussing Ada Lovelace" (no image of Ada Lovelace)
     - If text_chars.present is N, then type and legib should both be "NA"
     - sexual (sexual content) - Medical/anatomical images would be "0". Historical/ethnographic documentation would be "0". Fine art would be "0" unless the pose or context is explicitly sexual.
-    - confidence - Provide an overall confidence assessment:
-      - H: Clear, well-preserved image with easily identifiable subjects and context
-      - M: Generally clear image but with some uncertain elements (partial text legibility, ambiguous objects, uncertain demographics, approximate dating)
-      - L: Poor image quality, unusual/unfamiliar subjects, or significant ambiguity requiring substantial inference
-
-      Some factors that would impact the confidence rating negatively:
-      - Image quality issues: [e.g., "low resolution," "poor lighting," "significant damage/deterioration"]
-      - Text legibility: [e.g., "cursive handwriting difficult to read," "faded text," "partially obscured"]
-      - Object/subject identification: [e.g., "unfamiliar artifact type," "unclear purpose," "ambiguous materials"]
-      - Demographic assessment: [e.g., "distant figures," "obscured features," "ambiguous age range"]
-      - Historical context: [e.g., "uncertain time period," "unfamiliar clothing style," "unclear location"]
-      - Identity claims: [e.g., "based only on reference information," "uncertain name transcription"]
-      - When you note uncertainty in SAR
 
 4. SAR (safety assessment reasoning) - Explain ONLY the reasons for positive identifications, elevated risks, or uncertain assessments.
   - Address only fields marked with concerning values:

@@ -22,7 +22,6 @@ SAFETY_FORM_KEY_MAP: Dict[str, str] = {
     "stereotyping": "stereotyping_present",
     "atrocities": "atrocities_depicted",
     "text_chars": "text_characteristics",
-    "confidence": "confidence",
 }
 
 SYMBOLS_KEY_MAP: Dict[str, str] = {
@@ -113,7 +112,6 @@ _FIELD_VALUE_MAPS: Dict[str, Dict[str, str]] = {
     "sexual": SEXUAL_VALUE_MAP,
     "stereotyping": TERNARY_NPY_VALUE_MAP,
     "atrocities": BINARY_VALUE_MAP,
-    "confidence": RISK_VALUE_MAP,
 }
 
 

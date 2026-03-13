@@ -28,8 +28,7 @@ def short_form_no_concerns():
             "present": "N",
             "type": "NA",
             "legib": "NA"
-        },
-        "confidence": "H"
+        }
     }
 
 
@@ -57,8 +56,7 @@ def short_form_with_concerns():
             "present": "Y",
             "type": "HWCU",
             "legib": "DIF"
-        },
-        "confidence": "L"
+        }
     }
 
 
@@ -87,7 +85,6 @@ def test_expand_no_concerns(short_form_no_concerns):
         "text_type": "N/A",
         "legibility": "N/A"
     }
-    assert result["confidence"] == "HIGH"
 
 
 def test_expand_with_concerns(short_form_with_concerns):
@@ -115,7 +112,6 @@ def test_expand_with_concerns(short_form_with_concerns):
         "text_type": "HANDWRITTEN_CURSIVE",
         "legibility": "DIFFICULT"
     }
-    assert result["confidence"] == "LOW"
 
 
 def test_expand_all_text_types():
@@ -125,7 +121,7 @@ def test_expand_all_text_types():
         "named_indiv": "N", "violence": "0", "racial_viol": "0",
         "nudity": "0", "sexual": "0",
         "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
-        "stereotyping": "N", "atrocities": "N", "confidence": "H",
+        "stereotyping": "N", "atrocities": "N",
     }
 
     type_map = {
@@ -145,7 +141,7 @@ def test_expand_all_legibility_values():
         "named_indiv": "N", "violence": "0", "racial_viol": "0",
         "nudity": "0", "sexual": "0",
         "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
-        "stereotyping": "N", "atrocities": "N", "confidence": "H",
+        "stereotyping": "N", "atrocities": "N",
     }
 
     legib_map = {
@@ -163,7 +159,7 @@ def test_expand_all_symbol_types():
         "people": "N", "demog": "N", "misid_risk": "L", "minors": "N",
         "named_indiv": "N", "violence": "0", "racial_viol": "0",
         "nudity": "0", "sexual": "0", "stereotyping": "N",
-        "atrocities": "N", "confidence": "H",
+        "atrocities": "N",
         "text_chars": {"present": "N", "type": "NA", "legib": "NA"},
     }
 
@@ -184,7 +180,7 @@ def test_expand_nudity_full():
         "named_indiv": "N", "violence": "0", "racial_viol": "0",
         "nudity": "FULL", "sexual": "EXP",
         "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
-        "stereotyping": "N", "atrocities": "N", "confidence": "M",
+        "stereotyping": "N", "atrocities": "N",
         "text_chars": {"present": "N", "type": "NA", "legib": "NA"},
     }
     result = expand_safety_form(base)
@@ -207,7 +203,7 @@ def test_expand_unknown_top_level_value_raises():
             "named_indiv": "N", "violence": "0", "racial_viol": "0",
             "nudity": "0", "sexual": "0",
             "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
-            "stereotyping": "N", "atrocities": "N", "confidence": "H",
+            "stereotyping": "N", "atrocities": "N",
             "text_chars": {"present": "N", "type": "NA", "legib": "NA"},
         })
 
@@ -220,7 +216,7 @@ def test_expand_unknown_symbol_type_raises():
             "named_indiv": "N", "violence": "0", "racial_viol": "0",
             "nudity": "0", "sexual": "0",
             "symbols": {"types": ["UNKNOWN"], "names": [], "misid_risk": "L"},
-            "stereotyping": "N", "atrocities": "N", "confidence": "H",
+            "stereotyping": "N", "atrocities": "N",
             "text_chars": {"present": "N", "type": "NA", "legib": "NA"},
         })
 
@@ -233,7 +229,7 @@ def test_expand_unknown_text_chars_value_raises():
             "named_indiv": "N", "violence": "0", "racial_viol": "0",
             "nudity": "0", "sexual": "0",
             "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
-            "stereotyping": "N", "atrocities": "N", "confidence": "H",
+            "stereotyping": "N", "atrocities": "N",
             "text_chars": {"present": "Y", "type": "PR", "legib": "UNCLEAR"},
         })
 
@@ -249,7 +245,7 @@ def test_expand_preserves_names_list():
             "names": ["Star of David", "Menorah"],
             "misid_risk": "M"
         },
-        "stereotyping": "N", "atrocities": "N", "confidence": "H",
+        "stereotyping": "N", "atrocities": "N",
         "text_chars": {"present": "N", "type": "NA", "legib": "NA"},
     }
     result = expand_safety_form(base)

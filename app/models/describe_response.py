@@ -111,14 +111,19 @@ class SafetyAssessment(BaseModel):
         description="Characteristics of text in the image"
     )
 
-    confidence: Literal["LOW", "MEDIUM", "HIGH"] = Field(
-        ...,
-        description="Overall confidence in the safety assessment"
-    )
-
     reasoning: Optional[str] = Field(
         None,
         description="Reasoning behind the safety assessment"
+    )
+
+    risk_score: Optional[int] = Field(
+        None,
+        description="Normalized risk score from 0 to 100 derived from safety assessment field weights"
+    )
+
+    inconsistency_count: Optional[int] = Field(
+        None,
+        description="Number of logical inconsistencies detected in the safety assessment fields"
     )
 
 
@@ -185,6 +190,11 @@ class ReviewAssessment(BaseModel):
         description="List of specific concerns that may require human review"
     )
 
+    risk_score: Optional[int] = Field(
+        None,
+        description="Normalized risk score from 0 to 100 derived from review assessment field weights"
+    )
+
 
 class VersionInfo(BaseModel):
     """Version information about the processing."""
@@ -231,6 +241,11 @@ class DescriptionResult(BaseModel):
     review_assessment: ReviewAssessment = Field(
         ...,
         description="Analysis for determining if the image needs human review"
+    )
+
+    overall_risk_Score: Optional[int] = Field(
+        None,
+        description="Average of all available risk scores (safety and review), normalized to 0-100"
     )
 
     version: VersionInfo = Field(
@@ -300,8 +315,9 @@ class DescribeResponse(BaseModel):
                             "text_type": "N/A",
                             "legibility": "N/A"
                         },
-                        "confidence": "HIGH",
-                        "reasoning": "Clear natural landscape with no sensitive content"
+                        "reasoning": "Clear natural landscape with no sensitive content",
+                        "risk_score": 0,
+                        "inconsistency_count": 0
                     },
                     "review_assessment": {
                         "biased_language": "NO",
@@ -315,8 +331,10 @@ class DescribeResponse(BaseModel):
                         "people_first_language": "N/A",
                         "unsupported_inferential_claims": "NO",
                         "safety_assessment_consistency": "CONSISTENT",
-                        "concerns_for_review": []
+                        "concerns_for_review": [],
+                        "risk_score": 0
                     },
+                    "overall_risk_Score": 0,
                     "version": {
                         "version": "0.1.0",
                         "models": {

@@ -266,10 +266,6 @@ class ImageDescriptionService:
                                     },
                                     "required": ["present", "type", "legib"],
                                     "additionalProperties": False
-                                },
-                                "confidence": {
-                                    "type": "string",
-                                    "enum": ["L", "M", "H"]
                                 }
                             },
                             "required": [
@@ -285,8 +281,7 @@ class ImageDescriptionService:
                                 "symbols",
                                 "stereotyping",
                                 "atrocities",
-                                "text_chars",
-                                "confidence"
+                                "text_chars"
                             ],
                             "additionalProperties": False
                         },

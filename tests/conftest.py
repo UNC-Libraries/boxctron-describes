@@ -66,8 +66,9 @@ def mock_description_result():
                 text_type="N/A",
                 legibility="N/A"
             ),
-            confidence="LOW",
-            reasoning="Test reasoning"
+            reasoning="Test reasoning",
+            risk_score=0,
+            inconsistency_count=0
         ),
         review_assessment=ReviewAssessment(
             biased_language="NO",
@@ -81,8 +82,10 @@ def mock_description_result():
             people_first_language="N/A",
             unsupported_inferential_claims="NO",
             safety_assessment_consistency="CONSISTENT",
-            concerns_for_review=[]
+            concerns_for_review=[],
+            risk_score=0
         ),
+        overall_risk_Score=0,
         version=VersionInfo(
             version="0.1.0",
             models={
