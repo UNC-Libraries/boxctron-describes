@@ -82,7 +82,8 @@ def mock_description_result():
             people_first_language="N/A",
             unsupported_inferential_claims="NO",
             safety_assessment_consistency="CONSISTENT",
-            concerns_for_review=[]
+            concerns_for_review=[],
+            risk_score=0
         ),
         version=VersionInfo(
             version="0.1.0",

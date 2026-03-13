@@ -190,6 +190,11 @@ class ReviewAssessment(BaseModel):
         description="List of specific concerns that may require human review"
     )
 
+    risk_score: Optional[int] = Field(
+        None,
+        description="Normalized risk score from 0 to 100 derived from review assessment field weights"
+    )
+
 
 class VersionInfo(BaseModel):
     """Version information about the processing."""
@@ -321,7 +326,8 @@ class DescribeResponse(BaseModel):
                         "people_first_language": "N/A",
                         "unsupported_inferential_claims": "NO",
                         "safety_assessment_consistency": "CONSISTENT",
-                        "concerns_for_review": []
+                        "concerns_for_review": [],
+                        "risk_score": 0
                     },
                     "version": {
                         "version": "0.1.0",

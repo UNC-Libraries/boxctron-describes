@@ -314,6 +314,7 @@ def _assert_default_response_populated(response, expected_filename):
     assert review["safety_assessment_consistency"] == "CONSISTENT"
     assert review["concerns_for_review"] == []
     assert isinstance(review["concerns_for_review"], list)
+    assert review["risk_score"] == 0
 
     # Verify version structure
     version = result_data["version"]

@@ -10,6 +10,7 @@ from app.services.alt_text_generation_service import AltTextGenerationService
 from app.services.review_assessment_service import ReviewAssessmentService
 from app.services.safety_risk_scoring_service import calculate_risk_score
 from app.services.safety_inconsistency_service import count_safety_inconsistencies
+from app.services.review_risk_scoring_service import calculate_review_risk_score
 from app.models import DescriptionResult, SafetyAssessment, ReviewAssessment, VersionInfo, SymbolsPresent, TextCharacteristics
 from app.config import Settings
 
@@ -163,7 +164,7 @@ class DescribeImageWorkflow:
         Returns:
             ReviewAssessment object
         """
-        return ReviewAssessment(
+        assessment = ReviewAssessment(
             biased_language=review_result.get("biased_language", "NO"),
             stereotyping=review_result.get("stereotyping", "NO"),
             value_judgments=review_result.get("value_judgments", "NO"),
@@ -177,3 +178,5 @@ class DescribeImageWorkflow:
             safety_assessment_consistency=review_result.get("safety_assessment_consistency", "CONSISTENT"),
             concerns_for_review=review_result.get("concerns_for_review", [])
         )
+        assessment.risk_score = calculate_review_risk_score(assessment)
+        return assessment

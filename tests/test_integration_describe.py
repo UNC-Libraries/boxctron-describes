@@ -170,6 +170,8 @@ def test_integration_upload_real_image(client, blurry_owl_data, mock_llm_respons
     review = result_data["review_assessment"]
     assert review["safety_assessment_consistency"] == "CONSISTENT"
     assert isinstance(review["concerns_for_review"], list)
+    assert review["risk_score"] is not None
+    assert isinstance(review["risk_score"], int)
 
     # Verify version info
     version = result_data["version"]
@@ -396,6 +398,8 @@ def test_integration_all_result_fields_populated(client, blurry_owl_data, mock_l
     assert review["biased_language"] in ["NO", "POSSIBLY", "YES"]
     assert review["safety_assessment_consistency"] in ["CONSISTENT", "INCONSISTENT"]
     assert isinstance(review["concerns_for_review"], list)
+    assert review["risk_score"] is not None
+    assert isinstance(review["risk_score"], int)
 
     # Version info
     version = result["version"]
