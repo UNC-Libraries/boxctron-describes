@@ -316,6 +316,8 @@ def _assert_default_response_populated(response, expected_filename):
     assert isinstance(review["concerns_for_review"], list)
     assert review["risk_score"] == 0
 
+    assert result_data["overall_risk_Score"] == 0
+
     # Verify version structure
     version = result_data["version"]
     assert "version" in version

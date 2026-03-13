@@ -26,7 +26,7 @@ REVIEW_FIELD_WEIGHTS: dict[str, dict[str, int]] = {
     "contradictions_within_description": {
         "NO": 0,
         "POSSIBLY": 2,
-        "YES": 0,
+        "YES": 10,
     },
     "offensive_language": {
         "NO": 0,

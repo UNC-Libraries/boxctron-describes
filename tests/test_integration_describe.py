@@ -173,6 +173,9 @@ def test_integration_upload_real_image(client, blurry_owl_data, mock_llm_respons
     assert review["risk_score"] is not None
     assert isinstance(review["risk_score"], int)
 
+    assert result_data["overall_risk_Score"] is not None
+    assert isinstance(result_data["overall_risk_Score"], int)
+
     # Verify version info
     version = result_data["version"]
     assert "version" in version

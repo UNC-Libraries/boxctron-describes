@@ -85,6 +85,7 @@ def mock_description_result():
             concerns_for_review=[],
             risk_score=0
         ),
+        overall_risk_Score=0,
         version=VersionInfo(
             version="0.1.0",
             models={

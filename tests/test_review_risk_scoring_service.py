@@ -55,8 +55,7 @@ def test_score_is_100_for_all_maximum_weighted_values():
         stereotyping="YES",
         value_judgments="YES",
         contradictions_between_texts="YES",
-        # POSSIBLY is the max-weighted value (YES has weight 0 in this field)
-        contradictions_within_description="POSSIBLY",
+        contradictions_within_description="YES",
         offensive_language="YES",
         inconsistent_demographics="YES",
         euphemistic_language="YES",
