@@ -170,7 +170,12 @@ Analyze this image and provide a comprehensive response with the following compo
 3. SAF (safety assessment form) - Assess the content of this image for later evaluation by humans or agents to help determine if the image itself contains unsafe content or is likely to produce a description that may be unreliable or subjective. This will be provided as a structured object with abbreviated field names and values.
 
   Notes on field values:
+    - "people" (people visible) and "minors" (minors present) accept "Y", "N", or "U" (unknown):
+        - Use "Y" if at least one person is clearly present regardless of whether other background figures are ambiguous.
+        - Use "U" for "people" only when there are NO confirmed people anywhere in the image and it is genuinely unclear whether any people are present at all — e.g., heavily obscured figures, extremely distant or degraded images where human presence cannot be confirmed. Do NOT use "U" simply because faces are obscured; use it only when presence itself is uncertain.
+        - Use "U" for "minors" when people are visible but age cannot be reliably assessed from available cues (e.g., all faces are obscured and no other indicators such as height, build, clothing, or context allow a reasonable determination). Do NOT use "U" simply because you are slightly uncertain; use it only when there is no reasonable basis for YES or NO.
     - If people (people visible) is "N", set demog to "N", misid_risk to "L", minors to "N", and named_indiv to "N"
+    - If people (people visible) is "U", set minors to "U", misid_risk to "L" (unless specific identity claims were still made), and named_indiv to "N"; set demog based on whether the description actually included demographic descriptors
     - symbols.types: Use ["0"] only if no symbols present, otherwise list all applicable types.
     - symbols.names: Empty array [] ONLY if types is ["0"]
     - symbols.types and symbols.names MUST MATCH
@@ -213,6 +218,7 @@ Analyze this image and provide a comprehensive response with the following compo
     - Fields marked as "N", "0", "L", "CL", or "PC"
     - The absence of issues
     - General reassurances
+  - DO explain any field marked "U" (unknown): state what visual information was available and why a YES/NO determination was not possible
   - If ALL assessments are negative/low-risk/clear, state only: "No elevated risks identified." Do not state this if you generated any other text for the SAR.
   - Examples:
     - Good reasoning (violent content depicted): "The image shows an explosion and ship destruction, qualifying as depicted violent content."

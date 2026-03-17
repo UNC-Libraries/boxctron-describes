@@ -208,6 +208,21 @@ def test_expand_unknown_top_level_value_raises():
         })
 
 
+def test_expand_people_unknown():
+    """'U' for people expands to UNKNOWN."""
+    result = expand_safety_form({
+        "people": "U",
+        "demog": "N", "misid_risk": "L", "minors": "U",
+        "named_indiv": "N", "violence": "0", "racial_viol": "0",
+        "nudity": "0", "sexual": "0",
+        "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
+        "stereotyping": "N", "atrocities": "N",
+        "text_chars": {"present": "N", "type": "NA", "legib": "NA"},
+    })
+    assert result["people_visible"] == "UNKNOWN"
+    assert result["minors_present"] == "UNKNOWN"
+
+
 def test_expand_unknown_symbol_type_raises():
     """Unknown value in symbols.types list raises ValueError naming the field."""
     with pytest.raises(ValueError, match="symbols.types"):

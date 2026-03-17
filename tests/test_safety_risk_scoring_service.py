@@ -270,3 +270,23 @@ def test_score_is_always_within_valid_range():
 def test_max_possible_score_is_positive():
     """Weight tables must be configured so that a non-zero maximum exists."""
     assert _MAX_POSSIBLE_SCORE > 0
+
+
+# ---------------------------------------------------------------------------
+# UNKNOWN field values
+# ---------------------------------------------------------------------------
+
+def test_unknown_people_scores_between_no_and_yes():
+    """people_visible=UNKNOWN should score higher than NO but lower than YES."""
+    score_no = calculate_risk_score(make_assessment(people_visible="NO"))
+    score_unknown = calculate_risk_score(make_assessment(people_visible="UNKNOWN"))
+    score_yes = calculate_risk_score(make_assessment(people_visible="YES"))
+    assert score_no < score_unknown < score_yes
+
+
+def test_unknown_minors_scores_between_no_and_yes():
+    """minors_present=UNKNOWN should score higher than NO but lower than YES."""
+    score_no = calculate_risk_score(make_assessment(people_visible="YES", minors_present="NO"))
+    score_unknown = calculate_risk_score(make_assessment(people_visible="YES", minors_present="UNKNOWN"))
+    score_yes = calculate_risk_score(make_assessment(people_visible="YES", minors_present="YES"))
+    assert score_no < score_unknown < score_yes

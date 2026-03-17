@@ -46,7 +46,7 @@ class TextCharacteristics(BaseModel):
 class SafetyAssessment(BaseModel):
     """Safety assessment of the image content."""
 
-    people_visible: Literal["YES", "NO"] = Field(
+    people_visible: Literal["YES", "NO", "UNKNOWN"] = Field(
         ...,
         description="Whether people are visible in the image"
     )
@@ -61,7 +61,7 @@ class SafetyAssessment(BaseModel):
         description="Risk level of misidentifying people"
     )
 
-    minors_present: Literal["YES", "NO"] = Field(
+    minors_present: Literal["YES", "NO", "UNKNOWN"] = Field(
         ...,
         description="Whether minors are present in the image"
     )

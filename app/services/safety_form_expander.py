@@ -43,6 +43,12 @@ BINARY_VALUE_MAP: Dict[str, str] = {
     "N": "NO",
 }
 
+BINARY_UNKNOWN_VALUE_MAP: Dict[str, str] = {
+    "Y": "YES",
+    "N": "NO",
+    "U": "UNKNOWN",
+}
+
 RISK_VALUE_MAP: Dict[str, str] = {
     "L": "LOW",
     "M": "MEDIUM",
@@ -101,10 +107,10 @@ LEGIBILITY_VALUE_MAP: Dict[str, str] = {
 
 # Map each short key to its value expansion map
 _FIELD_VALUE_MAPS: Dict[str, Dict[str, str]] = {
-    "people": BINARY_VALUE_MAP,
+    "people": BINARY_UNKNOWN_VALUE_MAP,
     "demog": BINARY_VALUE_MAP,
     "misid_risk": RISK_VALUE_MAP,
-    "minors": BINARY_VALUE_MAP,
+    "minors": BINARY_UNKNOWN_VALUE_MAP,
     "named_indiv": BINARY_VALUE_MAP,
     "violence": VIOLENCE_VALUE_MAP,
     "racial_viol": VIOLENCE_VALUE_MAP,

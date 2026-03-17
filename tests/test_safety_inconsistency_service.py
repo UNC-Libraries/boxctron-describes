@@ -198,6 +198,48 @@ def test_multiple_people_inconsistencies_compound():
     assert count_safety_inconsistencies(assessment) == 2
 
 
+# ---------------------------------------------------------------------------
+# UNKNOWN people_visible inconsistencies
+# ---------------------------------------------------------------------------
+
+def test_unknown_people_visible_with_minors_yes_counts_once():
+    """minors_present=YES while people_visible=UNKNOWN is contradictory."""
+    assessment = make_assessment(
+        people_visible="UNKNOWN",
+        minors_present="YES",
+    )
+    assert count_safety_inconsistencies(assessment) == 1
+
+
+def test_unknown_people_visible_with_named_individuals_counts_once():
+    """named_individuals_claimed=YES while people_visible=UNKNOWN is contradictory."""
+    assessment = make_assessment(
+        people_visible="UNKNOWN",
+        named_individuals_claimed="YES",
+    )
+    assert count_safety_inconsistencies(assessment) == 1
+
+
+def test_unknown_people_visible_with_minors_unknown_is_consistent():
+    """people_visible=UNKNOWN with minors_present=UNKNOWN should not flag inconsistencies."""
+    assessment = make_assessment(
+        people_visible="UNKNOWN",
+        minors_present="UNKNOWN",
+    )
+    assert count_safety_inconsistencies(assessment) == 0
+
+
+def test_unknown_people_visible_with_demographics_and_misid_risk_is_consistent():
+    """demographics and elevated misid_risk are not contradictions when people presence is UNKNOWN."""
+    assessment = make_assessment(
+        people_visible="UNKNOWN",
+        demographics_described="YES",
+        misidentification_risk_people="HIGH",
+        minors_present="UNKNOWN",
+    )
+    assert count_safety_inconsistencies(assessment) == 0
+
+
 def test_inconsistencies_across_groups_compound():
     """Inconsistencies from different groups (people, symbols, text) all accumulate."""
     assessment = make_assessment(
