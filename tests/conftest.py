@@ -83,6 +83,7 @@ def mock_description_result():
             unsupported_inferential_claims="NO",
             safety_assessment_consistency="CONSISTENT",
             concerns_for_review=[],
+            source_content_warnings=[],
             risk_score=0
         ),
         overall_risk_Score=0,

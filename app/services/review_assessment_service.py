@@ -243,6 +243,12 @@ ALT_TEXT:
                             "items": {
                                 "type": "string"
                             }
+                        },
+                        "src_warn": {
+                            "type": "array",
+                            "items": {
+                                "type": "string"
+                            }
                         }
                     },
                     "required": [
@@ -257,7 +263,8 @@ ALT_TEXT:
                         "ppl_first",
                         "unsup_infer",
                         "safety_consist",
-                        "concerns"
+                        "concerns",
+                        "src_warn"
                     ],
                     "additionalProperties": False
                 }

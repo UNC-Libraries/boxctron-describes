@@ -187,7 +187,12 @@ class ReviewAssessment(BaseModel):
 
     concerns_for_review: List[str] = Field(
         ...,
-        description="List of specific concerns that may require human review"
+        description="List of specific concerns about the model's language that may require human review"
+    )
+
+    source_content_warnings: List[str] = Field(
+        ...,
+        description="List of content warnings about problematic material in the source image or its embedded text"
     )
 
     risk_score: Optional[int] = Field(

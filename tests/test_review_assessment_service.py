@@ -113,7 +113,8 @@ def test_generate_review_assessment_success(mock_completion, service, mock_setti
         "ppl_first": "NA",
         "unsup_infer": "N",
         "safety_consist": "CON",
-        "concerns": []
+        "concerns": [],
+        "src_warn": []
     })
     mock_completion.return_value = mock_response
 
@@ -130,8 +131,7 @@ def test_generate_review_assessment_success(mock_completion, service, mock_setti
     assert result["stereotyping"] == "NO"
     assert result["safety_assessment_consistency"] == "CONSISTENT"
     assert result["concerns_for_review"] == []
-
-    # Verify completion was called with correct parameters
+    assert result["source_content_warnings"] == []
     mock_completion.assert_called_once()
     call_args = mock_completion.call_args[1]
 
@@ -167,7 +167,8 @@ def test_generate_review_assessment_with_concerns(mock_completion, service, samp
         "ppl_first": "NU",
         "unsup_infer": "P",
         "safety_consist": "INCON",
-        "concerns": ["Possible stereotyping in description", "Safety assessment inconsistent with content"]
+        "concerns": ["Possible stereotyping in description", "Safety assessment inconsistent with content"],
+        "src_warn": ["Historical text contains dated language"]
     })
     mock_completion.return_value = mock_response
 
@@ -185,6 +186,7 @@ def test_generate_review_assessment_with_concerns(mock_completion, service, samp
     assert result["safety_assessment_consistency"] == "INCONSISTENT"
     assert len(result["concerns_for_review"]) == 2
     assert "stereotyping" in result["concerns_for_review"][0].lower()
+    assert result["source_content_warnings"] == ["Historical text contains dated language"]
 
 
 @patch("app.services.review_assessment_service.completion")
@@ -304,7 +306,7 @@ def test_get_response_format(service):
     assert "stereo" in required_fields
     assert "safety_consist" in required_fields
     assert "concerns" in required_fields
-    assert len(required_fields) == 12
+    assert len(required_fields) == 13
 
     # Verify enum constraints (abbreviated values)
     assert schema["properties"]["bias"]["enum"] == ["N", "P", "Y"]
@@ -314,6 +316,10 @@ def test_get_response_format(service):
     # Verify concerns is an array
     assert schema["properties"]["concerns"]["type"] == "array"
     assert schema["properties"]["concerns"]["items"]["type"] == "string"
+
+    # Verify src_warn is an array
+    assert schema["properties"]["src_warn"]["type"] == "array"
+    assert schema["properties"]["src_warn"]["items"]["type"] == "string"
 
 
 @patch("app.services.review_assessment_service.completion")
@@ -329,7 +335,8 @@ def test_retries_on_invalid_response_then_succeeds(mock_completion, service, sam
         "bias": "N", "stereo": "N", "val_judg": "N",
         "contra_btwn": "N", "contra_within": "N", "offensive": "N",
         "incon_demog": "N", "euphemism": "N", "ppl_first": "NA",
-        "unsup_infer": "N", "safety_consist": "CON", "concerns": []
+        "unsup_infer": "N", "safety_consist": "CON", "concerns": [],
+        "src_warn": []
     })
 
     mock_completion.side_effect = [bad_response, bad_response, good_response]

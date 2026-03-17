@@ -28,6 +28,7 @@ def make_assessment(**overrides) -> ReviewAssessment:
         unsupported_inferential_claims="NO",
         safety_assessment_consistency="CONSISTENT",
         concerns_for_review=[],
+        source_content_warnings=[],
     )
     defaults.update(overrides)
     return ReviewAssessment(**defaults)
@@ -209,3 +210,12 @@ def test_concerns_for_review_does_not_affect_score():
         concerns_for_review=["Biased framing", "Offensive terminology detected"]
     )
     assert calculate_review_risk_score(without_concerns) == calculate_review_risk_score(with_concerns)
+
+
+def test_source_content_warnings_does_not_affect_score():
+    """Source content warnings should have no impact on the numeric score."""
+    without_warnings = make_assessment(source_content_warnings=[])
+    with_warnings = make_assessment(
+        source_content_warnings=["Contains historically dated racial language", "Offensive imagery"]
+    )
+    assert calculate_review_risk_score(without_warnings) == calculate_review_risk_score(with_warnings)

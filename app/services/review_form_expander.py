@@ -21,6 +21,7 @@ REVIEW_KEY_MAP: Dict[str, str] = {
     "unsup_infer": "unsupported_inferential_claims",
     "safety_consist": "safety_assessment_consistency",
     "concerns": "concerns_for_review",
+    "src_warn": "source_content_warnings",
 }
 
 # ── Value mappings (short → full) ────────────────────────────────────────────

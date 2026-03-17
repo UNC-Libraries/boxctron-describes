@@ -119,7 +119,8 @@ def mock_llm_responses():
                 "ppl_first": "NA",
                 "unsup_infer": "N",
                 "safety_consist": "CON",
-                "concerns": []
+                "concerns": [],
+                "src_warn": []
             })
             return mock_response
 
