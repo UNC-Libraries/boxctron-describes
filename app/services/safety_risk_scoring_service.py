@@ -101,7 +101,7 @@ TEXT_FIELD_WEIGHTS: dict[str, dict[str, int]] = {
     "sensitivity": {
         "N/A": 0,
         "NONE": 0,
-        "SENSITIVE": 5,
+        "SENSITIVE": 7,
     },
 }
 
