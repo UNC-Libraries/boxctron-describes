@@ -42,7 +42,7 @@ class TextCharacteristics(BaseModel):
         description="How legible the text is"
     )
 
-    text_sensitivity: Literal["N/A", "NONE", "SENSITIVE"] = Field(
+    sensitivity: Literal["N/A", "NONE", "SENSITIVE"] = Field(
         ...,
         description="Whether the text content itself contains sensitive, offensive, or historically problematic material"
     )

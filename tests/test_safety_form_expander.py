@@ -86,7 +86,7 @@ def test_expand_no_concerns(short_form_no_concerns):
         "text_present": "NO",
         "text_type": "N/A",
         "legibility": "N/A",
-        "text_sensitivity": "N/A"
+        "sensitivity": "N/A"
     }
 
 
@@ -114,7 +114,7 @@ def test_expand_with_concerns(short_form_with_concerns):
         "text_present": "YES",
         "text_type": "HANDWRITTEN_CURSIVE",
         "legibility": "DIFFICULT",
-        "text_sensitivity": "SENSITIVE"
+        "sensitivity": "SENSITIVE"
     }
 
 
@@ -288,10 +288,10 @@ def test_expand_all_text_sensitivity_values():
         present = "N" if short == "NA" else "Y"
         form = {**base, "text_chars": {"present": present, "type": text_type, "legib": legib, "sensitiv": short}}
         result = expand_safety_form(form)
-        assert result["text_characteristics"]["text_sensitivity"] == full
+        assert result["text_characteristics"]["sensitivity"] == full
 
 
-def test_expand_unknown_text_sensitivity_value_raises():
+def test_expand_unknown_sensitivity_value_raises():
     """Unknown value in text_chars.sensitiv raises ValueError naming the sub-field."""
     with pytest.raises(ValueError, match="text_chars.sensitiv"):
         expand_safety_form({

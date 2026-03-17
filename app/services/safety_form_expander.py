@@ -34,7 +34,7 @@ TEXT_CHARS_KEY_MAP: Dict[str, str] = {
     "present": "text_present",
     "type": "text_type",
     "legib": "legibility",
-    "sensitiv": "text_sensitivity",
+    "sensitiv": "sensitivity",
 }
 
 # ── Value mappings (short → full) ────────────────────────────────────────────
@@ -106,7 +106,7 @@ LEGIBILITY_VALUE_MAP: Dict[str, str] = {
     "ILL": "ILLEGIBLE",
 }
 
-TEXT_SENSITIVITY_VALUE_MAP: Dict[str, str] = {
+SENSITIVITY_VALUE_MAP: Dict[str, str] = {
     "NA": "N/A",
     "0": "NONE",
     "S": "SENSITIVE",
@@ -193,7 +193,7 @@ def _expand_text_chars(text_chars: Dict[str, Any]) -> Dict[str, Any]:
         "present": BINARY_VALUE_MAP,
         "type": TEXT_TYPE_VALUE_MAP,
         "legib": LEGIBILITY_VALUE_MAP,
-        "sensitiv": TEXT_SENSITIVITY_VALUE_MAP,
+        "sensitiv": SENSITIVITY_VALUE_MAP,
     }
     expanded: Dict[str, Any] = {}
     for short_key, value in text_chars.items():

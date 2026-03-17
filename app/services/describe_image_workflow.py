@@ -150,7 +150,7 @@ class DescribeImageWorkflow:
                 text_present=safety_form.get("text_characteristics", {}).get("text_present", "UNKNOWN"),
                 text_type=safety_form.get("text_characteristics", {}).get("text_type", "N/A"),
                 legibility=safety_form.get("text_characteristics", {}).get("legibility", "N/A"),
-                text_sensitivity=safety_form.get("text_characteristics", {}).get("text_sensitivity", "N/A")
+                sensitivity=safety_form.get("text_characteristics", {}).get("sensitivity", "N/A")
             ),
             reasoning=full_desc_result.get("SAFETY_ASSESSMENT_REASONING", "")
         )

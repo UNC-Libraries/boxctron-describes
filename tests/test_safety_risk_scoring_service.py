@@ -35,7 +35,7 @@ def make_assessment(**overrides) -> SafetyAssessment:
             text_present="NO",
             text_type="N/A",
             legibility="N/A",
-            text_sensitivity="N/A",
+            sensitivity="N/A",
         ),
         reasoning=None,
     )
@@ -81,7 +81,7 @@ def test_score_is_100_for_all_maximum_risk_values():
             text_present="YES",
             text_type="HANDWRITTEN_CURSIVE",
             legibility="DIFFICULT",
-            text_sensitivity="SENSITIVE",
+            sensitivity="SENSITIVE",
         ),
     )
     assert calculate_risk_score(assessment) == 100
@@ -122,7 +122,7 @@ def test_medium_risk_score_for_moderately_sensitive_image():
             text_present="YES",
             text_type="PRINTED",
             legibility="CLEAR",
-            text_sensitivity="NONE",
+            sensitivity="NONE",
         ),
     )
     score = calculate_risk_score(assessment)
@@ -205,7 +205,7 @@ def test_handwritten_cursive_scores_higher_than_printed():
             text_present="YES",
             text_type="PRINTED",
             legibility="CLEAR",
-            text_sensitivity="NONE",
+            sensitivity="NONE",
         )
     )
     cursive = make_assessment(
@@ -213,7 +213,7 @@ def test_handwritten_cursive_scores_higher_than_printed():
             text_present="YES",
             text_type="HANDWRITTEN_CURSIVE",
             legibility="CLEAR",
-            text_sensitivity="NONE",
+            sensitivity="NONE",
         )
     )
     assert calculate_risk_score(cursive) > calculate_risk_score(printed)
@@ -226,7 +226,7 @@ def test_illegible_text_scores_higher_than_clear():
             text_present="YES",
             text_type="PRINTED",
             legibility="CLEAR",
-            text_sensitivity="NONE",
+            sensitivity="NONE",
         )
     )
     illegible = make_assessment(
@@ -234,7 +234,7 @@ def test_illegible_text_scores_higher_than_clear():
             text_present="YES",
             text_type="PRINTED",
             legibility="ILLEGIBLE",
-            text_sensitivity="NONE",
+            sensitivity="NONE",
         )
     )
     assert calculate_risk_score(illegible) > calculate_risk_score(clear)
@@ -266,7 +266,7 @@ def test_score_is_always_within_valid_range():
             atrocities_depicted="YES",
             text_characteristics=TextCharacteristics(
                 text_present="YES", text_type="HANDWRITTEN_CURSIVE", legibility="DIFFICULT",
-                text_sensitivity="SENSITIVE"
+                sensitivity="SENSITIVE"
             ),
         ),
     ]
@@ -308,23 +308,23 @@ def test_sensitive_text_scores_higher_than_none():
     """Text marked as sensitive should contribute more risk than non-sensitive text."""
     no_sensitivity = make_assessment(
         text_characteristics=TextCharacteristics(
-            text_present="YES", text_type="PRINTED", legibility="CLEAR", text_sensitivity="NONE"
+            text_present="YES", text_type="PRINTED", legibility="CLEAR", sensitivity="NONE"
         )
     )
     sensitive = make_assessment(
         text_characteristics=TextCharacteristics(
-            text_present="YES", text_type="PRINTED", legibility="CLEAR", text_sensitivity="SENSITIVE"
+            text_present="YES", text_type="PRINTED", legibility="CLEAR", sensitivity="SENSITIVE"
         )
     )
     assert calculate_risk_score(sensitive) > calculate_risk_score(no_sensitivity)
 
 
-def test_text_sensitivity_na_scores_same_as_none():
+def test_sensitivity_na_scores_same_as_none():
     """N/A sensitivity (no text) should produce the same score contribution as NONE."""
-    na = make_assessment()  # text_present=NO, text_sensitivity=N/A
+    na = make_assessment()  # text_present=NO, sensitivity=N/A
     none_sensitivity = make_assessment(
         text_characteristics=TextCharacteristics(
-            text_present="YES", text_type="PRINTED", legibility="CLEAR", text_sensitivity="NONE"
+            text_present="YES", text_type="PRINTED", legibility="CLEAR", sensitivity="NONE"
         )
     )
     # They may differ on text_present/type/legibility weights, but sensitivity contribution is equal
