@@ -97,7 +97,8 @@ def mock_llm_responses():
                     "text_chars": {
                         "present": "N",
                         "type": "NA",
-                        "legib": "NA"
+                        "legib": "NA",
+                        "sensitiv": "NA"
                     }
                 },
                 "SAR": "Test reasoning"

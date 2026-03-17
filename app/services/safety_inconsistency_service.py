@@ -53,5 +53,7 @@ def count_safety_inconsistencies(assessment: SafetyAssessment) -> int:
             count += 1
         if assessment.text_characteristics.legibility == "N/A":
             count += 1
+        if assessment.text_characteristics.text_sensitivity == "N/A":
+            count += 1
 
     return count

@@ -98,6 +98,11 @@ TEXT_FIELD_WEIGHTS: dict[str, dict[str, int]] = {
         "DIFFICULT": 10,
         "ILLEGIBLE": 10,
     },
+    "text_sensitivity": {
+        "N/A": 0,
+        "NONE": 0,
+        "SENSITIVE": 5,
+    },
 }
 
 # Pre-computed maximum possible score across all fields.

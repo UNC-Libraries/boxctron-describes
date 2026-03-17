@@ -80,7 +80,8 @@ def mock_llm_responses():
                     "text_chars": {
                         "present": "N",
                         "type": "NA",
-                        "legib": "NA"
+                        "legib": "NA",
+                        "sensitiv": "NA"
                     }
                 },
                 "SAR": "This is a nature photograph with no concerning content. The blurriness affects image quality but not safety assessment."
