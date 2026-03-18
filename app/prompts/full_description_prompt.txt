@@ -9,6 +9,7 @@ Analyze this image and provide a comprehensive response with the following compo
        - For important short phrases (less than 8 words), you may directly quote IF you are confident in the reading.
        - For longer text or uncertain readings, describe general content without quoting
        - Describe legibility: "clearly legible," "partially legible," "illegible," "difficult cursive handwriting"
+       - Incidental text on objects — brand names on instruments, manufacturer labels on equipment, logos on clothing — that are peripheral to the image's primary subject do not require legibility characterization and may be omitted from the description unless clearly legible and relevant to understanding the image.
        - CRITICAL: When text contains sensitive language, be specific about WHO or WHAT the text refers to
          * Identify which specific people, groups, or subjects the text describes or labels
          * Do NOT generalize descriptions to apply to all people or elements in the image if the text does not support this
@@ -204,6 +205,7 @@ Analyze this image and provide a comprehensive response with the following compo
             - People are visible but not identified by name
             - Names are mentioned in historical context but those people aren't visually present
                 * "A letter discussing Ada Lovelace" (no image of Ada Lovelace)
+    - text_chars.present - Mark "Y" only for text that meaningfully contributes to understanding the image: document content, labels identifying people/places, visible signage, captions. Incidental branding or labeling on peripheral objects may be treated as "N" if it is the only text present.
     - If text_chars.present is N, then type, legib, and sensitiv should all be "NA"
     - text_chars.sensitiv (text sensitivity) - Assess whether the text content itself contains sensitive, offensive, or historically problematic language:
         - "NA": No text present (text_chars.present is "N")
