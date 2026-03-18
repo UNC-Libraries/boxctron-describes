@@ -19,7 +19,8 @@ def short_form_no_concerns():
         "ppl_first": "NA",
         "unsup_infer": "N",
         "safety_consist": "CON",
-        "concerns": []
+        "concerns": [],
+        "src_warn": []
     }
 
 
@@ -38,7 +39,8 @@ def short_form_with_concerns():
         "ppl_first": "NU",
         "unsup_infer": "Y",
         "safety_consist": "INCON",
-        "concerns": ["Stereotyping detected", "Offensive language found"]
+        "concerns": ["Stereotyping detected", "Offensive language found"],
+        "src_warn": ["Contains historically dated racial language"]
     }
 
 
@@ -58,6 +60,7 @@ def test_expand_no_concerns(short_form_no_concerns):
     assert result["unsupported_inferential_claims"] == "NO"
     assert result["safety_assessment_consistency"] == "CONSISTENT"
     assert result["concerns_for_review"] == []
+    assert result["source_content_warnings"] == []
 
 
 def test_expand_with_concerns(short_form_with_concerns):
@@ -76,6 +79,7 @@ def test_expand_with_concerns(short_form_with_concerns):
     assert result["unsupported_inferential_claims"] == "YES"
     assert result["safety_assessment_consistency"] == "INCONSISTENT"
     assert result["concerns_for_review"] == ["Stereotyping detected", "Offensive language found"]
+    assert result["source_content_warnings"] == ["Contains historically dated racial language"]
 
 
 def test_expand_people_first_used():
@@ -84,7 +88,8 @@ def test_expand_people_first_used():
         "bias": "N", "stereo": "N", "val_judg": "N",
         "contra_btwn": "N", "contra_within": "N", "offensive": "N",
         "incon_demog": "N", "euphemism": "N", "ppl_first": "U",
-        "unsup_infer": "N", "safety_consist": "CON", "concerns": []
+        "unsup_infer": "N", "safety_consist": "CON", "concerns": [],
+        "src_warn": []
     }
     result = expand_review_form(short)
     assert result["people_first_language"] == "USED"
@@ -97,7 +102,8 @@ def test_expand_preserves_concerns_list():
         "contra_btwn": "N", "contra_within": "N", "offensive": "N",
         "incon_demog": "N", "euphemism": "N", "ppl_first": "NA",
         "unsup_infer": "N", "safety_consist": "CON",
-        "concerns": ["Issue one", "Issue two", "Issue three"]
+        "concerns": ["Issue one", "Issue two", "Issue three"],
+        "src_warn": []
     }
     result = expand_review_form(short)
     assert result["concerns_for_review"] == ["Issue one", "Issue two", "Issue three"]
@@ -117,5 +123,6 @@ def test_expand_unknown_value_raises():
             "stereo": "N", "val_judg": "N",
             "contra_btwn": "N", "contra_within": "N", "offensive": "N",
             "incon_demog": "N", "euphemism": "N", "ppl_first": "NA",
-            "unsup_infer": "N", "safety_consist": "CON", "concerns": []
+            "unsup_infer": "N", "safety_consist": "CON", "concerns": [],
+            "src_warn": []
         })

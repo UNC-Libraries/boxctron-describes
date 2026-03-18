@@ -34,6 +34,7 @@ TEXT_CHARS_KEY_MAP: Dict[str, str] = {
     "present": "text_present",
     "type": "text_type",
     "legib": "legibility",
+    "sensitiv": "sensitivity",
 }
 
 # ── Value mappings (short → full) ────────────────────────────────────────────
@@ -41,6 +42,12 @@ TEXT_CHARS_KEY_MAP: Dict[str, str] = {
 BINARY_VALUE_MAP: Dict[str, str] = {
     "Y": "YES",
     "N": "NO",
+}
+
+BINARY_UNKNOWN_VALUE_MAP: Dict[str, str] = {
+    "Y": "YES",
+    "N": "NO",
+    "U": "UNKNOWN",
 }
 
 RISK_VALUE_MAP: Dict[str, str] = {
@@ -99,12 +106,18 @@ LEGIBILITY_VALUE_MAP: Dict[str, str] = {
     "ILL": "ILLEGIBLE",
 }
 
+SENSITIVITY_VALUE_MAP: Dict[str, str] = {
+    "NA": "N/A",
+    "0": "NONE",
+    "S": "SENSITIVE",
+}
+
 # Map each short key to its value expansion map
 _FIELD_VALUE_MAPS: Dict[str, Dict[str, str]] = {
-    "people": BINARY_VALUE_MAP,
+    "people": BINARY_UNKNOWN_VALUE_MAP,
     "demog": BINARY_VALUE_MAP,
     "misid_risk": RISK_VALUE_MAP,
-    "minors": BINARY_VALUE_MAP,
+    "minors": BINARY_UNKNOWN_VALUE_MAP,
     "named_indiv": BINARY_VALUE_MAP,
     "violence": VIOLENCE_VALUE_MAP,
     "racial_viol": VIOLENCE_VALUE_MAP,
@@ -180,6 +193,7 @@ def _expand_text_chars(text_chars: Dict[str, Any]) -> Dict[str, Any]:
         "present": BINARY_VALUE_MAP,
         "type": TEXT_TYPE_VALUE_MAP,
         "legib": LEGIBILITY_VALUE_MAP,
+        "sensitiv": SENSITIVITY_VALUE_MAP,
     }
     expanded: Dict[str, Any] = {}
     for short_key, value in text_chars.items():

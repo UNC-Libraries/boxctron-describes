@@ -262,9 +262,13 @@ class ImageDescriptionService:
                                         "legib": {
                                             "type": "string",
                                             "enum": ["NA", "CL", "PC", "DIF", "ILL"]
+                                        },
+                                        "sensitiv": {
+                                            "type": "string",
+                                            "enum": ["NA", "0", "S"]
                                         }
                                     },
-                                    "required": ["present", "type", "legib"],
+                                    "required": ["present", "type", "legib", "sensitiv"],
                                     "additionalProperties": False
                                 }
                             },

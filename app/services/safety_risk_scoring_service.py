@@ -7,6 +7,7 @@ SAFETY_FIELD_WEIGHTS: dict[str, dict[str, int]] = {
     "people_visible": {
         "YES": 20,
         "NO": 0,
+        "UNKNOWN": 10,
     },
     "demographics_described": {
         "YES": 10,
@@ -20,6 +21,7 @@ SAFETY_FIELD_WEIGHTS: dict[str, dict[str, int]] = {
     "minors_present": {
         "YES": 10,
         "NO": 0,
+        "UNKNOWN": 5,
     },
     "named_individuals_claimed": {
         "YES": 10,
@@ -95,6 +97,11 @@ TEXT_FIELD_WEIGHTS: dict[str, dict[str, int]] = {
         "PARTIALLY_CLEAR": 2,
         "DIFFICULT": 10,
         "ILLEGIBLE": 10,
+    },
+    "sensitivity": {
+        "N/A": 0,
+        "NONE": 0,
+        "SENSITIVE": 7,
     },
 }
 

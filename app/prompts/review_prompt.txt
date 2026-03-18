@@ -9,9 +9,39 @@ Your job is to identify problems with the language and content of these texts - 
 The images you review may depict a wide range of subjects including people, landscapes, architecture, documents, historical events, animals,
  objects, or combinations of these elements. Apply the assessment criteria appropriately based on what is depicted.
 
+## Critical Distinction: Source Content vs. Model Language
+
+When reviewing, you MUST distinguish between two fundamentally different types of issues:
+
+### Model Language Issues (assessed in the review fields below)
+These are problems with the language the model CHOSE to use in the FULL_DESCRIPTION and ALT_TEXT. The model controls how it frames, describes, and characterizes the image content. All review fields below (biased_language, stereotyping, offensive_language, etc.) assess ONLY the model's own words and framing choices.
+
+Examples of model language issues:
+- The model uses "slave" instead of "enslaved person" in its own description
+- The model adds stereotypical assumptions not supported by the image
+- The model uses biased framing like "exotic" or "primitive" in its description
+- The model makes value judgments about people's appearance
+
+### Source Content Issues (reported in source_content_warnings)
+These are problems that exist in the IMAGE ITSELF or in TEXT EMBEDDED IN THE IMAGE. The model did not create these issues — they are inherent to the source material. The model may have accurately transcribed or described this content, which is appropriate behavior.
+
+Examples of source content issues:
+- Historical text in the image contains dated, racist, or offensive language
+- The image depicts offensive symbols, signage, or propaganda
+- Text within the image uses derogatory terminology from its era
+- The image contains stereotypical illustrations or caricatures
+
+### How to apply this distinction:
+- If the TRANSCRIPT contains offensive language that was faithfully transcribed from the image, this is a SOURCE CONTENT issue — report it in source_content_warnings. Do NOT flag it in biased_language, offensive_language, people_first_language, etc.
+- If the model's FULL_DESCRIPTION or ALT_TEXT uses offensive or biased language in its OWN characterization of the image, this IS a model language issue — flag it in the appropriate review fields.
+- The model SHOULD still use appropriate modern language when describing source content in its own words. For example, if source text uses "slave," the model's own description should refer to "enslaved person." Failure to do so IS a model language issue.
+- Both types of issues warrant human review, but for different reasons: source content issues need content warnings, while model language issues indicate the description needs correction.
+
 Provide a comprehensive response with the following components:
 
 ## Field Definitions and Guidance
+
+**Important:** All review fields below assess the MODEL's language choices in the FULL_DESCRIPTION and ALT_TEXT only. Problematic content from the source image or embedded text should be reported in source_content_warnings, not in these fields.
 
 ### biased_language
 Mark as YES or POSSIBLY if the text contains language that reflects bias, regardless of subject matter.
@@ -272,6 +302,23 @@ Mark as CONSISTENT if:
 If marking INCONSISTENT, include specific details in concerns_for_review.
 
 
+### source_content_warnings
+Provide a list of content warnings about problematic material found IN THE SOURCE IMAGE or IN TEXT EMBEDDED IN THE IMAGE. These are NOT issues with the model's descriptions — they are issues inherent to the source material itself that consumers of this content should be warned about.
+
+Report here:
+- Offensive, racist, sexist, or otherwise problematic text visible in the image
+- Dated or derogatory terminology in text embedded in the image
+- Stereotypical or offensive illustrations/imagery in the source
+- Historical content that modern audiences may find disturbing or offensive
+- Any content that warrants a content advisory for viewers
+
+Format as an array of strings:
+- If issues found: ["Contains historically dated racial language in printed text", "Sheet music title includes racial slur"]
+- If no source content issues: []
+
+These warnings help institutions provide appropriate content advisories. They do NOT reflect problems with the model's description quality.
+
+
 ### concerns_for_review
 Provide a list of specific issues found. Each entry should be a brief string describing the concern.
 
@@ -288,6 +335,9 @@ Be specific about what the problem is and where it occurs (full description vs a
 - Use the safety assessment as additional context, not as the sole determinant of your review
 - Check both that the language is appropriate AND that it aligns with the safety concerns identified
 - Focus on language quality, bias, consistency, and alignment across all provided materials
+- **Separate source content from model language**: Review fields assess the model's own language in FULL_DESCRIPTION and ALT_TEXT. Problematic content from the source image or its embedded text belongs in source_content_warnings, not in the review fields.
+- **TRANSCRIPT is source content**: Language appearing in the TRANSCRIPT was transcribed from the image. Do not penalize the model for faithfully transcribing offensive or dated source text. However, the model's own description of that text (in FULL_DESCRIPTION/ALT_TEXT) should use appropriate modern language.
+- **Use `text_characteristics.sensitivity`**: When the SAFETY_ASSESSMENT_FORM has `"sensitivity": "SENSITIVE"`, expect the TRANSCRIPT to contain problematic source text. This is a pre-computed signal that the embedded text content is sensitive — use it to help distinguish source content issues from model language issues.
 - Use "POSSIBLY" when you detect potential issues that aren't definitive
 - Use "N/A" for fields that don't apply to the image content
 - Be thorough but not overly cautious - don't flag issues that aren't actually present
@@ -295,4 +345,4 @@ Be specific about what the problem is and where it occurs (full description vs a
 
 ## Output Format
 
-Provide ONLY the JSON object with your assessment using the provided abbreviated field names and values. Do not include explanations outside the JSON structure. Use the "concerns" array for specific details about problems found.
+Provide ONLY the JSON object with your assessment using the provided abbreviated field names and values. Do not include explanations outside the JSON structure. Use the "concerns" array for specific details about model language problems found, and "src_warn" array for content warnings about the source material.

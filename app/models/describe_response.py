@@ -42,11 +42,16 @@ class TextCharacteristics(BaseModel):
         description="How legible the text is"
     )
 
+    sensitivity: Literal["N/A", "NONE", "SENSITIVE"] = Field(
+        ...,
+        description="Whether the text content itself contains sensitive, offensive, or historically problematic material"
+    )
+
 
 class SafetyAssessment(BaseModel):
     """Safety assessment of the image content."""
 
-    people_visible: Literal["YES", "NO"] = Field(
+    people_visible: Literal["YES", "NO", "UNKNOWN"] = Field(
         ...,
         description="Whether people are visible in the image"
     )
@@ -61,7 +66,7 @@ class SafetyAssessment(BaseModel):
         description="Risk level of misidentifying people"
     )
 
-    minors_present: Literal["YES", "NO"] = Field(
+    minors_present: Literal["YES", "NO", "UNKNOWN"] = Field(
         ...,
         description="Whether minors are present in the image"
     )
@@ -187,7 +192,12 @@ class ReviewAssessment(BaseModel):
 
     concerns_for_review: List[str] = Field(
         ...,
-        description="List of specific concerns that may require human review"
+        description="List of specific concerns about the model's language that may require human review"
+    )
+
+    source_content_warnings: List[str] = Field(
+        ...,
+        description="List of content warnings about problematic material in the source image or its embedded text"
     )
 
     risk_score: Optional[int] = Field(
