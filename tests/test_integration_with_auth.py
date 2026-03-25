@@ -97,7 +97,8 @@ def mock_llm_responses():
                     "text_chars": {
                         "present": "N",
                         "type": "NA",
-                        "legib": "NA"
+                        "legib": "NA",
+                        "sensitiv": "NA"
                     }
                 },
                 "SAR": "Test reasoning"
@@ -119,7 +120,8 @@ def mock_llm_responses():
                 "ppl_first": "NA",
                 "unsup_infer": "N",
                 "safety_consist": "CON",
-                "concerns": []
+                "concerns": [],
+                "src_warn": []
             })
             return mock_response
 

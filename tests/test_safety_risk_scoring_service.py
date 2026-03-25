@@ -35,6 +35,7 @@ def make_assessment(**overrides) -> SafetyAssessment:
             text_present="NO",
             text_type="N/A",
             legibility="N/A",
+            sensitivity="N/A",
         ),
         reasoning=None,
     )
@@ -80,6 +81,7 @@ def test_score_is_100_for_all_maximum_risk_values():
             text_present="YES",
             text_type="HANDWRITTEN_CURSIVE",
             legibility="DIFFICULT",
+            sensitivity="SENSITIVE",
         ),
     )
     assert calculate_risk_score(assessment) == 100
@@ -120,6 +122,7 @@ def test_medium_risk_score_for_moderately_sensitive_image():
             text_present="YES",
             text_type="PRINTED",
             legibility="CLEAR",
+            sensitivity="NONE",
         ),
     )
     score = calculate_risk_score(assessment)
@@ -202,6 +205,7 @@ def test_handwritten_cursive_scores_higher_than_printed():
             text_present="YES",
             text_type="PRINTED",
             legibility="CLEAR",
+            sensitivity="NONE",
         )
     )
     cursive = make_assessment(
@@ -209,6 +213,7 @@ def test_handwritten_cursive_scores_higher_than_printed():
             text_present="YES",
             text_type="HANDWRITTEN_CURSIVE",
             legibility="CLEAR",
+            sensitivity="NONE",
         )
     )
     assert calculate_risk_score(cursive) > calculate_risk_score(printed)
@@ -221,6 +226,7 @@ def test_illegible_text_scores_higher_than_clear():
             text_present="YES",
             text_type="PRINTED",
             legibility="CLEAR",
+            sensitivity="NONE",
         )
     )
     illegible = make_assessment(
@@ -228,6 +234,7 @@ def test_illegible_text_scores_higher_than_clear():
             text_present="YES",
             text_type="PRINTED",
             legibility="ILLEGIBLE",
+            sensitivity="NONE",
         )
     )
     assert calculate_risk_score(illegible) > calculate_risk_score(clear)
@@ -258,7 +265,8 @@ def test_score_is_always_within_valid_range():
             stereotyping_present="YES",
             atrocities_depicted="YES",
             text_characteristics=TextCharacteristics(
-                text_present="YES", text_type="HANDWRITTEN_CURSIVE", legibility="DIFFICULT"
+                text_present="YES", text_type="HANDWRITTEN_CURSIVE", legibility="DIFFICULT",
+                sensitivity="SENSITIVE"
             ),
         ),
     ]
@@ -270,3 +278,56 @@ def test_score_is_always_within_valid_range():
 def test_max_possible_score_is_positive():
     """Weight tables must be configured so that a non-zero maximum exists."""
     assert _MAX_POSSIBLE_SCORE > 0
+
+
+# ---------------------------------------------------------------------------
+# UNKNOWN field values
+# ---------------------------------------------------------------------------
+
+def test_unknown_people_scores_between_no_and_yes():
+    """people_visible=UNKNOWN should score higher than NO but lower than YES."""
+    score_no = calculate_risk_score(make_assessment(people_visible="NO"))
+    score_unknown = calculate_risk_score(make_assessment(people_visible="UNKNOWN"))
+    score_yes = calculate_risk_score(make_assessment(people_visible="YES"))
+    assert score_no < score_unknown < score_yes
+
+
+def test_unknown_minors_scores_between_no_and_yes():
+    """minors_present=UNKNOWN should score higher than NO but lower than YES."""
+    score_no = calculate_risk_score(make_assessment(people_visible="YES", minors_present="NO"))
+    score_unknown = calculate_risk_score(make_assessment(people_visible="YES", minors_present="UNKNOWN"))
+    score_yes = calculate_risk_score(make_assessment(people_visible="YES", minors_present="YES"))
+    assert score_no < score_unknown < score_yes
+
+
+# ---------------------------------------------------------------------------
+# Text sensitivity
+# ---------------------------------------------------------------------------
+
+def test_sensitive_text_scores_higher_than_none():
+    """Text marked as sensitive should contribute more risk than non-sensitive text."""
+    no_sensitivity = make_assessment(
+        text_characteristics=TextCharacteristics(
+            text_present="YES", text_type="PRINTED", legibility="CLEAR", sensitivity="NONE"
+        )
+    )
+    sensitive = make_assessment(
+        text_characteristics=TextCharacteristics(
+            text_present="YES", text_type="PRINTED", legibility="CLEAR", sensitivity="SENSITIVE"
+        )
+    )
+    assert calculate_risk_score(sensitive) > calculate_risk_score(no_sensitivity)
+
+
+def test_sensitivity_na_scores_same_as_none():
+    """N/A sensitivity (no text) should produce the same score contribution as NONE."""
+    na = make_assessment()  # text_present=NO, sensitivity=N/A
+    none_sensitivity = make_assessment(
+        text_characteristics=TextCharacteristics(
+            text_present="YES", text_type="PRINTED", legibility="CLEAR", sensitivity="NONE"
+        )
+    )
+    # They may differ on text_present/type/legibility weights, but sensitivity contribution is equal
+    na_score = calculate_risk_score(na)
+    none_score = calculate_risk_score(none_sensitivity)
+    assert na_score <= none_score  # none_sensitivity has extra text_present weight

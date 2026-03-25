@@ -314,6 +314,8 @@ def _assert_default_response_populated(response, expected_filename):
     assert review["safety_assessment_consistency"] == "CONSISTENT"
     assert review["concerns_for_review"] == []
     assert isinstance(review["concerns_for_review"], list)
+    assert review["source_content_warnings"] == []
+    assert isinstance(review["source_content_warnings"], list)
     assert review["risk_score"] == 0
 
     assert result_data["overall_risk_Score"] == 0

@@ -44,7 +44,8 @@ def sample_llm_response():
             "text_chars": {
                 "present": "N",
                 "type": "NA",
-                "legib": "NA"
+                "legib": "NA",
+                "sensitiv": "NA"
             }
         },
         "SAR": "No safety concerns detected."

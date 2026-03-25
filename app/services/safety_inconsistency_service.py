@@ -30,6 +30,13 @@ def count_safety_inconsistencies(assessment: SafetyAssessment) -> int:
         if assessment.nudity != "NONE":
             count += 1
 
+    # When people presence is unknown, minors being YES is contradictory
+    if assessment.people_visible == "UNKNOWN":
+        if assessment.minors_present == "YES":
+            count += 1
+        if assessment.named_individuals_claimed == "YES":
+            count += 1
+
     # NONE cannot coexist with other symbol types.
     if "NONE" in assessment.symbols_present.types and len(assessment.symbols_present.types) > 1:
         count += 1
@@ -45,6 +52,8 @@ def count_safety_inconsistencies(assessment: SafetyAssessment) -> int:
         if assessment.text_characteristics.text_type == "N/A":
             count += 1
         if assessment.text_characteristics.legibility == "N/A":
+            count += 1
+        if assessment.text_characteristics.sensitivity == "N/A":
             count += 1
 
     return count

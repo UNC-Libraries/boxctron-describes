@@ -64,7 +64,8 @@ def mock_description_result():
             text_characteristics=TextCharacteristics(
                 text_present="NO",
                 text_type="N/A",
-                legibility="N/A"
+                legibility="N/A",
+                sensitivity="N/A"
             ),
             reasoning="Test reasoning",
             risk_score=0,
@@ -83,6 +84,7 @@ def mock_description_result():
             unsupported_inferential_claims="NO",
             safety_assessment_consistency="CONSISTENT",
             concerns_for_review=[],
+            source_content_warnings=[],
             risk_score=0
         ),
         overall_risk_Score=0,

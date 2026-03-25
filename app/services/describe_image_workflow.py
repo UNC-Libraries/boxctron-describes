@@ -149,7 +149,8 @@ class DescribeImageWorkflow:
             text_characteristics=TextCharacteristics(
                 text_present=safety_form.get("text_characteristics", {}).get("text_present", "UNKNOWN"),
                 text_type=safety_form.get("text_characteristics", {}).get("text_type", "N/A"),
-                legibility=safety_form.get("text_characteristics", {}).get("legibility", "N/A")
+                legibility=safety_form.get("text_characteristics", {}).get("legibility", "N/A"),
+                sensitivity=safety_form.get("text_characteristics", {}).get("sensitivity", "N/A")
             ),
             reasoning=full_desc_result.get("SAFETY_ASSESSMENT_REASONING", "")
         )
@@ -180,7 +181,8 @@ class DescribeImageWorkflow:
             people_first_language=review_result.get("people_first_language", "N/A"),
             unsupported_inferential_claims=review_result.get("unsupported_inferential_claims", "NO"),
             safety_assessment_consistency=review_result.get("safety_assessment_consistency", "CONSISTENT"),
-            concerns_for_review=review_result.get("concerns_for_review", [])
+            concerns_for_review=review_result.get("concerns_for_review", []),
+            source_content_warnings=review_result.get("source_content_warnings", [])
         )
         assessment.risk_score = calculate_review_risk_score(assessment)
         return assessment

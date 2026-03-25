@@ -32,6 +32,7 @@ def make_assessment(**overrides) -> SafetyAssessment:
             text_present="NO",
             text_type="N/A",
             legibility="N/A",
+            sensitivity="N/A",
         ),
         reasoning=None,
     )
@@ -65,7 +66,7 @@ def test_consistent_text_fields_do_not_trigger_inconsistency():
     """Valid text field combinations should produce no inconsistencies."""
     has_text = make_assessment(
         text_characteristics=TextCharacteristics(
-            text_present="YES", text_type="PRINTED", legibility="CLEAR"
+            text_present="YES", text_type="PRINTED", legibility="CLEAR", sensitivity="NONE"
         )
     )
     assert count_safety_inconsistencies(has_text) == 0
@@ -159,12 +160,16 @@ def test_non_none_symbol_types_with_names_is_consistent():
 
 @pytest.mark.parametrize("text_chars,description", [
     (
-        TextCharacteristics(text_present="YES", text_type="N/A", legibility="CLEAR"),
+        TextCharacteristics(text_present="YES", text_type="N/A", legibility="CLEAR", sensitivity="NONE"),
         "text_present=YES but text_type=N/A",
     ),
     (
-        TextCharacteristics(text_present="YES", text_type="PRINTED", legibility="N/A"),
+        TextCharacteristics(text_present="YES", text_type="PRINTED", legibility="N/A", sensitivity="NONE"),
         "text_present=YES but legibility=N/A",
+    ),
+    (
+        TextCharacteristics(text_present="YES", text_type="PRINTED", legibility="CLEAR", sensitivity="N/A"),
+        "text_present=YES but sensitivity=N/A",
     ),
 ])
 def test_each_text_inconsistency_counts_once(text_chars, description):
@@ -175,14 +180,14 @@ def test_each_text_inconsistency_counts_once(text_chars, description):
     )
 
 
-def test_both_text_sub_fields_na_with_text_present_counts_two():
-    """Both text sub-fields being N/A when text is present should add 2 to the count."""
+def test_all_text_sub_fields_na_with_text_present_counts_three():
+    """All three text sub-fields being N/A when text is present should add 3 to the count."""
     assessment = make_assessment(
         text_characteristics=TextCharacteristics(
-            text_present="YES", text_type="N/A", legibility="N/A"
+            text_present="YES", text_type="N/A", legibility="N/A", sensitivity="N/A"
         )
     )
-    assert count_safety_inconsistencies(assessment) == 2
+    assert count_safety_inconsistencies(assessment) == 3
 
 
 # ---------------------------------------------------------------------------
@@ -198,6 +203,48 @@ def test_multiple_people_inconsistencies_compound():
     assert count_safety_inconsistencies(assessment) == 2
 
 
+# ---------------------------------------------------------------------------
+# UNKNOWN people_visible inconsistencies
+# ---------------------------------------------------------------------------
+
+def test_unknown_people_visible_with_minors_yes_counts_once():
+    """minors_present=YES while people_visible=UNKNOWN is contradictory."""
+    assessment = make_assessment(
+        people_visible="UNKNOWN",
+        minors_present="YES",
+    )
+    assert count_safety_inconsistencies(assessment) == 1
+
+
+def test_unknown_people_visible_with_named_individuals_counts_once():
+    """named_individuals_claimed=YES while people_visible=UNKNOWN is contradictory."""
+    assessment = make_assessment(
+        people_visible="UNKNOWN",
+        named_individuals_claimed="YES",
+    )
+    assert count_safety_inconsistencies(assessment) == 1
+
+
+def test_unknown_people_visible_with_minors_unknown_is_consistent():
+    """people_visible=UNKNOWN with minors_present=UNKNOWN should not flag inconsistencies."""
+    assessment = make_assessment(
+        people_visible="UNKNOWN",
+        minors_present="UNKNOWN",
+    )
+    assert count_safety_inconsistencies(assessment) == 0
+
+
+def test_unknown_people_visible_with_demographics_and_misid_risk_is_consistent():
+    """demographics and elevated misid_risk are not contradictions when people presence is UNKNOWN."""
+    assessment = make_assessment(
+        people_visible="UNKNOWN",
+        demographics_described="YES",
+        misidentification_risk_people="HIGH",
+        minors_present="UNKNOWN",
+    )
+    assert count_safety_inconsistencies(assessment) == 0
+
+
 def test_inconsistencies_across_groups_compound():
     """Inconsistencies from different groups (people, symbols, text) all accumulate."""
     assessment = make_assessment(
@@ -206,7 +253,7 @@ def test_inconsistencies_across_groups_compound():
             types=["NONE", "HATE"], names=["angryface"], misidentification_risk="LOW"
         ),  # symbol group: +2 (NONE+other)
         text_characteristics=TextCharacteristics(
-            text_present="YES", text_type="N/A", legibility="N/A"
+            text_present="YES", text_type="N/A", legibility="N/A", sensitivity="NONE"
         ),  # text group: +2
     )
     assert count_safety_inconsistencies(assessment) == 4

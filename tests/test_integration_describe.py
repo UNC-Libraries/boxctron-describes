@@ -80,7 +80,8 @@ def mock_llm_responses():
                     "text_chars": {
                         "present": "N",
                         "type": "NA",
-                        "legib": "NA"
+                        "legib": "NA",
+                        "sensitiv": "NA"
                     }
                 },
                 "SAR": "This is a nature photograph with no concerning content. The blurriness affects image quality but not safety assessment."
@@ -103,7 +104,8 @@ def mock_llm_responses():
                 "ppl_first": "NA",
                 "unsup_infer": "N",
                 "safety_consist": "CON",
-                "concerns": []
+                "concerns": [],
+                "src_warn": []
             })
             return mock_response
 
@@ -170,6 +172,7 @@ def test_integration_upload_real_image(client, blurry_owl_data, mock_llm_respons
     review = result_data["review_assessment"]
     assert review["safety_assessment_consistency"] == "CONSISTENT"
     assert isinstance(review["concerns_for_review"], list)
+    assert isinstance(review["source_content_warnings"], list)
     assert review["risk_score"] is not None
     assert isinstance(review["risk_score"], int)
 
@@ -401,6 +404,7 @@ def test_integration_all_result_fields_populated(client, blurry_owl_data, mock_l
     assert review["biased_language"] in ["NO", "POSSIBLY", "YES"]
     assert review["safety_assessment_consistency"] in ["CONSISTENT", "INCONSISTENT"]
     assert isinstance(review["concerns_for_review"], list)
+    assert isinstance(review["source_content_warnings"], list)
     assert review["risk_score"] is not None
     assert isinstance(review["risk_score"], int)
 
