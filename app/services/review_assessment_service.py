@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Dict, Any
 
 from litellm import completion
+from toon import encode as toon_encode
 
 from app.config import Settings
 from app.services.review_form_expander import expand_review_form, REVIEW_KEY_MAP
@@ -38,6 +39,11 @@ class ReviewAssessmentService:
             "inconsistencies, and potential problems that require human attention."
         )
 
+        self.toon_addendum = (
+            "Note: The SAFETY_ASSESSMENT_FORM is provided in TOON format, "
+            "a compact key:value notation using indentation for nesting."
+        )
+
     def generate_review_assessment(
         self,
         full_description: str,
@@ -64,16 +70,67 @@ class ReviewAssessmentService:
         """
         logger.info("Generating review assessment")
 
-        # Format the content for review
-        content_to_review = self._format_content_for_review(
-            full_description,
-            transcript,
-            safety_assessment,
-            safety_assessment_reasoning,
-            alt_text
+        # Run JSON-formatted review (primary)
+        result = self._call_review_llm(
+            full_description, transcript, safety_assessment,
+            safety_assessment_reasoning, alt_text, use_toon=False
         )
 
-        # Build messages
+        # Run TOON-formatted review (experimental comparison)
+        try:
+            self._call_review_llm(
+                full_description, transcript, safety_assessment,
+                safety_assessment_reasoning, alt_text, use_toon=True
+            )
+        except Exception as e:
+            logger.warning(f"TOON comparison call failed (non-fatal): {e}")
+
+        return result
+
+    def _call_review_llm(
+        self,
+        full_description: str,
+        transcript: str,
+        safety_assessment: Dict[str, Any],
+        safety_assessment_reasoning: str,
+        alt_text: str,
+        use_toon: bool = False
+    ) -> Dict[str, Any]:
+        """
+        Execute a single review LLM call.
+
+        Args:
+            full_description: The full image description
+            transcript: The text transcript from the image
+            safety_assessment: The safety assessment form data
+            safety_assessment_reasoning: The reasoning for the safety assessment
+            alt_text: The generated alt text
+            use_toon: If True, encode safety_assessment in TOON format
+
+        Returns:
+            Dictionary containing expanded review assessment fields
+
+        Raises:
+            Exception: If LLM call fails or response is invalid
+        """
+        format_label = "TOON" if use_toon else "JSON"
+
+        if use_toon:
+            content_to_review = self._format_content_for_review_toon(
+                full_description, transcript, safety_assessment,
+                safety_assessment_reasoning, alt_text
+            )
+        else:
+            content_to_review = self._format_content_for_review(
+                full_description, transcript, safety_assessment,
+                safety_assessment_reasoning, alt_text
+            )
+
+        # Build user prompt, prepending TOON addendum when applicable
+        user_prompt = self.review_prompt
+        if use_toon:
+            user_prompt = f"{self.toon_addendum}\n\n{user_prompt}"
+
         messages = [
             {
                 "role": "system",
@@ -81,16 +138,13 @@ class ReviewAssessmentService:
             },
             {
                 "role": "user",
-                "content": f"{self.review_prompt}\n\n{content_to_review}"
+                "content": f"{user_prompt}\n\n{content_to_review}"
             }
         ]
 
-        # Define structured output schema
         response_format = self._get_response_format()
 
-        # Call LiteLLM
         try:
-            # Build completion parameters
             completion_params = {
                 "model": self.settings.litellm_review_model,
                 "messages": messages,
@@ -100,7 +154,6 @@ class ReviewAssessmentService:
                 "num_retries": self.settings.litellm_num_retries
             }
 
-            # Specify reasoning effort for models that support it
             if self.settings.litellm_review_reasoning_effort:
                 completion_params["reasoning_effort"] = self.settings.litellm_review_reasoning_effort
 
@@ -109,21 +162,18 @@ class ReviewAssessmentService:
                 try:
                     response = completion(**completion_params)
 
-                    # Parse response
                     if not response.choices or not response.choices[0].message.content:
                         raise ValueError("Empty response from LLM")
 
                     result = json.loads(response.choices[0].message.content)
 
-                    # Validate required fields
                     self._validate_response(result)
 
-                    # Expand abbreviated keys/values to full forms
                     result = expand_review_form(result)
 
-                    log_token_usage(logger, "review assessment", response.usage)
+                    log_token_usage(logger, f"review assessment ({format_label})", response.usage)
 
-                    logger.info("Successfully generated review assessment")
+                    logger.info(f"Successfully generated review assessment ({format_label})")
                     return result
 
                 except (ValueError, json.JSONDecodeError) as e:
@@ -137,7 +187,7 @@ class ReviewAssessmentService:
             raise last_exc
 
         except Exception as e:
-            logger.error(f"Error generating review assessment: {e}")
+            logger.error(f"Error generating review assessment ({format_label}): {e}")
             raise
 
     def _format_content_for_review(
@@ -163,6 +213,37 @@ class ReviewAssessmentService:
         """
         # Convert safety assessment to formatted JSON string
         safety_assessment_str = json.dumps(safety_assessment, indent=2)
+
+        return f"""FULL_DESCRIPTION:
+{full_description}
+
+TRANSCRIPT:
+{transcript}
+
+SAFETY_ASSESSMENT_FORM:
+{safety_assessment_str}
+
+SAFETY_ASSESSMENT_REASONING:
+{safety_assessment_reasoning}
+
+ALT_TEXT:
+{alt_text}"""
+
+    def _format_content_for_review_toon(
+        self,
+        full_description: str,
+        transcript: str,
+        safety_assessment: Dict[str, Any],
+        safety_assessment_reasoning: str,
+        alt_text: str
+    ) -> str:
+        """
+        Format content for review with safety assessment in TOON format.
+
+        Identical to _format_content_for_review except the SAFETY_ASSESSMENT_FORM
+        section uses TOON encoding for token efficiency.
+        """
+        safety_assessment_str = toon_encode(safety_assessment)
 
         return f"""FULL_DESCRIPTION:
 {full_description}

@@ -188,7 +188,7 @@ def test_integration_upload_real_image(client, blurry_owl_data, mock_llm_respons
     image_desc_llm_mock, alt_text_llm_mock, review_llm_mock = mock_llm_responses
     assert image_desc_llm_mock.call_count == 1
     assert alt_text_llm_mock.call_count == 1
-    assert review_llm_mock.call_count == 1
+    assert review_llm_mock.call_count == 2  # JSON + TOON comparison
 
 
 def test_integration_file_uri(client, blurry_owl_path, mock_llm_responses):
@@ -220,7 +220,7 @@ def test_integration_file_uri(client, blurry_owl_path, mock_llm_responses):
     image_desc_llm_mock, alt_text_llm_mock, review_llm_mock = mock_llm_responses
     assert image_desc_llm_mock.call_count == 1
     assert alt_text_llm_mock.call_count == 1
-    assert review_llm_mock.call_count == 1
+    assert review_llm_mock.call_count == 2  # JSON + TOON comparison
 
 
 @respx.mock
@@ -264,7 +264,7 @@ def test_integration_http_uri(client, blurry_owl_data, mock_llm_responses):
     image_desc_llm_mock, alt_text_llm_mock, review_llm_mock = mock_llm_responses
     assert image_desc_llm_mock.call_count == 1
     assert alt_text_llm_mock.call_count == 1
-    assert review_llm_mock.call_count == 1
+    assert review_llm_mock.call_count == 2  # JSON + TOON comparison
 
 
 def test_integration_no_context(client, blurry_owl_data, mock_llm_responses):

@@ -132,8 +132,10 @@ def test_generate_review_assessment_success(mock_completion, service, mock_setti
     assert result["safety_assessment_consistency"] == "CONSISTENT"
     assert result["concerns_for_review"] == []
     assert result["source_content_warnings"] == []
-    mock_completion.assert_called_once()
-    call_args = mock_completion.call_args[1]
+    # JSON call + TOON comparison call
+    assert mock_completion.call_count == 2
+    # Verify the first (JSON) call's parameters
+    call_args = mock_completion.call_args_list[0][1]
 
     assert call_args["model"] == mock_settings.litellm_review_model
     assert call_args["temperature"] == mock_settings.litellm_review_temperature
@@ -339,7 +341,8 @@ def test_retries_on_invalid_response_then_succeeds(mock_completion, service, sam
         "src_warn": []
     })
 
-    mock_completion.side_effect = [bad_response, bad_response, good_response]
+    # JSON call: bad, bad, good (3 calls), then TOON comparison call: good (1 call)
+    mock_completion.side_effect = [bad_response, bad_response, good_response, good_response]
 
     result = service.generate_review_assessment(
         full_description="Test", transcript="Test",
@@ -347,7 +350,7 @@ def test_retries_on_invalid_response_then_succeeds(mock_completion, service, sam
         safety_assessment_reasoning="Test", alt_text="Test"
     )
 
-    assert mock_completion.call_count == 3
+    assert mock_completion.call_count == 4  # 3 JSON retries + 1 TOON
     assert result["biased_language"] == "NO"
     assert result["safety_assessment_consistency"] == "CONSISTENT"
 
@@ -367,6 +370,7 @@ def test_all_retries_exhausted_raises_error(mock_completion, service, sample_saf
             safety_assessment_reasoning="Test", alt_text="Test"
         )
 
+    # JSON exhausts retries and raises before TOON runs
     assert mock_completion.call_count == ReviewAssessmentService._MAX_PARSE_RETRIES
 
 
@@ -382,4 +386,107 @@ def test_non_parse_error_is_not_retried(mock_completion, service, sample_safety_
             safety_assessment_reasoning="Test", alt_text="Test"
         )
 
+    # JSON fails immediately on first attempt, raises before TOON runs
     assert mock_completion.call_count == 1
+
+
+def test_format_content_for_review_toon(service, sample_safety_assessment):
+    """Test that TOON formatting encodes safety assessment in TOON format."""
+    full_description = "A detailed description of an image"
+    transcript = "Text visible in the image"
+    safety_reasoning = "The image appears safe"
+    alt_text = "A person standing in a field"
+
+    result = service._format_content_for_review_toon(
+        full_description,
+        transcript,
+        sample_safety_assessment,
+        safety_reasoning,
+        alt_text
+    )
+
+    # Verify all labels are present
+    assert "FULL_DESCRIPTION:" in result
+    assert "TRANSCRIPT:" in result
+    assert "SAFETY_ASSESSMENT_FORM:" in result
+    assert "SAFETY_ASSESSMENT_REASONING:" in result
+    assert "ALT_TEXT:" in result
+
+    # Verify content is present
+    assert full_description in result
+    assert transcript in result
+    assert safety_reasoning in result
+    assert alt_text in result
+
+    # Verify safety assessment is NOT in JSON format (no braces/quotes)
+    assert '"people_visible": "YES"' not in result
+    # Verify TOON key:value format is present
+    assert "people_visible: YES" in result or "people: Y" in result
+
+
+def test_toon_addendum_present(service):
+    """Test that TOON addendum is initialized on the service."""
+    assert "TOON format" in service.toon_addendum
+    assert "key:value" in service.toon_addendum
+
+
+@patch("app.services.review_assessment_service.completion")
+def test_generate_review_assessment_dual_call(mock_completion, service, sample_safety_assessment):
+    """Test that generate_review_assessment makes both JSON and TOON calls."""
+    mock_response = Mock()
+    mock_response.choices = [Mock()]
+    mock_response.choices[0].message.content = json.dumps({
+        "bias": "N", "stereo": "N", "val_judg": "N",
+        "contra_btwn": "N", "contra_within": "N", "offensive": "N",
+        "incon_demog": "N", "euphemism": "N", "ppl_first": "NA",
+        "unsup_infer": "N", "safety_consist": "CON", "concerns": [],
+        "src_warn": []
+    })
+    mock_completion.return_value = mock_response
+
+    result = service.generate_review_assessment(
+        full_description="Test", transcript="Test",
+        safety_assessment=sample_safety_assessment,
+        safety_assessment_reasoning="Test", alt_text="Test"
+    )
+
+    # Both JSON and TOON calls should be made
+    assert mock_completion.call_count == 2
+
+    # First call (JSON) should NOT have TOON addendum in user content
+    json_call_messages = mock_completion.call_args_list[0][1]["messages"]
+    assert "TOON format" not in json_call_messages[1]["content"].split("FULL_DESCRIPTION")[0]
+
+    # Second call (TOON) should have TOON addendum in user content
+    toon_call_messages = mock_completion.call_args_list[1][1]["messages"]
+    assert "TOON format" in toon_call_messages[1]["content"]
+
+    # Result should come from the JSON call
+    assert result["biased_language"] == "NO"
+
+
+@patch("app.services.review_assessment_service.completion")
+def test_toon_comparison_failure_is_non_fatal(mock_completion, service, sample_safety_assessment):
+    """Test that TOON comparison failure doesn't affect the JSON result."""
+    good_response = Mock()
+    good_response.choices = [Mock()]
+    good_response.choices[0].message.content = json.dumps({
+        "bias": "N", "stereo": "N", "val_judg": "N",
+        "contra_btwn": "N", "contra_within": "N", "offensive": "N",
+        "incon_demog": "N", "euphemism": "N", "ppl_first": "NA",
+        "unsup_infer": "N", "safety_consist": "CON", "concerns": [],
+        "src_warn": []
+    })
+
+    # First call (JSON) succeeds, second call (TOON) fails
+    mock_completion.side_effect = [good_response, RuntimeError("TOON call failed")]
+
+    result = service.generate_review_assessment(
+        full_description="Test", transcript="Test",
+        safety_assessment=sample_safety_assessment,
+        safety_assessment_reasoning="Test", alt_text="Test"
+    )
+
+    # JSON result is still returned despite TOON failure
+    assert result["biased_language"] == "NO"
+    assert mock_completion.call_count == 2
