@@ -44,7 +44,7 @@ Analyze this image and provide a comprehensive response with the following compo
            a) visible within text in the image, OR
            b) explicitly identified in the reference information AND the image clearly depicts a recognizable likeness of a person, OR
            c) the individual is a well known and clearly recognizable public figure.
-       - Do not mention that faces are obscured in the images, due to technical constraints almost all faces will be obscured.
+       - Do not mention that faces are blurred or obscured in the images, due to technical constraints almost all faces will be obscured.
        - Demographic descriptors (age range, gender presentation, race/ethnicity):
         - INCLUDE demographic descriptors for all main subjects - they help users understand who is depicted and provide important historical context
           - OMIT demographic descriptors only when:
