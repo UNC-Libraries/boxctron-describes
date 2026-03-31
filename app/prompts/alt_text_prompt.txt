@@ -12,6 +12,7 @@ Content priorities:
 - Include personal names and stated roles/occupations (coach, speaker, officer, etc.)
 - Omit background elements unless essential to context
 - Summarize minor visual details; use general terms ("wearing a suit," not "dark pinstriped suit")
+- Do not include that faces are blurred or obscurred
 
 Demographics:
 - Include race, age, and gender exactly as stated in the full description when relevant to understanding the image
