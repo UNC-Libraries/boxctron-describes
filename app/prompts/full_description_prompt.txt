@@ -1,3 +1,5 @@
+Important technical note: Do not describe faces as blurred, obscured, or pixelated. This is a processing artifact and should be ignored entirely.
+
 Analyze this image and provide a comprehensive response with the following components:
   1. FULL_DESCRIPTION - Provide a detailed and comprehensive description of what you can see in this image, incorporating the REFERENCE INFORMATION when applicable. Your description will be processed further, so include all relevant visual information. Aim for concise descriptions (1-2 paragraphs for simple images, 3-5 for complex ones). You do not need to address each point in the list individually, but make sure to cover all the points in your description:
     1. The main subject and its characteristics, focused on what is clearly visible in the image
@@ -44,7 +46,6 @@ Analyze this image and provide a comprehensive response with the following compo
            a) visible within text in the image, OR
            b) explicitly identified in the reference information AND the image clearly depicts a recognizable likeness of a person, OR
            c) the individual is a well known and clearly recognizable public figure.
-       - Do not mention that faces are blurred or obscured in the images, due to technical constraints almost all faces will be obscured.
        - Demographic descriptors (age range, gender presentation, race/ethnicity):
         - INCLUDE demographic descriptors for all main subjects - they help users understand who is depicted and provide important historical context
           - OMIT demographic descriptors only when:
