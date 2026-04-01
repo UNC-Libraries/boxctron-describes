@@ -9,3 +9,7 @@ Limited testing (using two images around 10 times each) showed a reduction of ro
 ## TOON Format (March 2026)
 
 We attempted to use the TOON format instead of JSON for encoding the safety assessment form when passing it to the review assessment step. The goal was to cut down on the number of input tokens, which is the goal of the format. With the current set of fields being passed in, we saw a reduction of 33 input tokens, about 0.66% of input tokens for the request. We concluded it was not worth the added complexity at this point. If we end up sending a lot more JSON to the models in the future we should revisit this, or if the LLMs start supporting it or other similar formats natively, in which case we could use it in responses for a larger gain.
+
+## Prompt garbage collection revisions (March 2026)
+
+We revisited all the base prompts to check for redundancies and unnecessary directives. This resulted in reducing the number of input tokens per prompt: full description from 4,793 to 4,376 tokens, alt text from 1,860 to 522 tokens, review from 3,995 to 1,791. No changes were made to how generated content was submitted back to the models.
