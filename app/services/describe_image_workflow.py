@@ -96,7 +96,7 @@ class DescribeImageWorkflow:
         review_assessment = self._parse_review_assessment(review_assessment_result)
 
         scores = [s for s in [safety_assessment.risk_score, review_assessment.risk_score] if s is not None]
-        overall_risk_Score = round(sum(scores) / len(scores)) if scores else None
+        overall_risk_score = round(sum(scores) / len(scores)) if scores else None
 
         return DescriptionResult(
             full_description=full_description,
@@ -104,7 +104,7 @@ class DescribeImageWorkflow:
             transcript=transcript,
             safety_assessment=safety_assessment,
             review_assessment=review_assessment,
-            overall_risk_Score=overall_risk_Score,
+            overall_risk_score=overall_risk_score,
             version=VersionInfo(
                 version=self.settings.app_version,
                 models={

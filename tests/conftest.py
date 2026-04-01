@@ -87,7 +87,7 @@ def mock_description_result():
             source_content_warnings=[],
             risk_score=0
         ),
-        overall_risk_Score=0,
+        overall_risk_score=0,
         version=VersionInfo(
             version="0.1.0",
             models={

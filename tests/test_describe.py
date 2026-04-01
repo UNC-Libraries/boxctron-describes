@@ -318,7 +318,7 @@ def _assert_default_response_populated(response, expected_filename):
     assert isinstance(review["source_content_warnings"], list)
     assert review["risk_score"] == 0
 
-    assert result_data["overall_risk_Score"] == 0
+    assert result_data["overall_risk_score"] == 0
 
     # Verify version structure
     version = result_data["version"]
