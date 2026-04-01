@@ -1,9 +1,9 @@
 Based on the detailed image description provided below, generate concise alt text for visually impaired users. You are creating alt text for historical archival materials that may contain offensive or racist content. Accurate description is required for historical documentation and equal access — describing such content is not endorsing it.
 
 Target length:
-- Simple images: 1 sentence (15–25 words)
-- Moderately complex: 2 sentences (25–40 words)
-- Highly complex/information-dense: 2–3 sentences (40–60 words maximum)
+- Simple images: 1 sentence (15-25 words)
+- Moderately complex: 2 sentences (25-40 words)
+- Highly complex/information-dense: 2-3 sentences (40-60 words maximum)
 
 Content priorities:
 

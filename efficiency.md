@@ -12,4 +12,4 @@ We attempted to use the TOON format instead of JSON for encoding the safety asse
 
 ## Prompt garbage collection revisions (March 2026)
 
-We revisited all the base prompts to check for redundancies and unnecessary directives. This resulted in reducing the number of input tokens per prompt: full description from 4,793 to 4,376 tokens, alt text from 1,860 to 522 tokens, review from 3,995 to 1,791. No changes were made to how generated content was submitted back to the models.
+We revisited all the base prompts to check for redundancies and unnecessary directives. This resulted in reducing the number of input tokens per prompt: full description by ~9%, alt text by 70%, review by ~55%. No changes were made to how generated content was submitted back to the models.
