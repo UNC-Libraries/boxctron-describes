@@ -1,9 +1,8 @@
+Important technical note: Do not describe faces as blurred, obscured, or pixelated. This is a processing artifact and should be ignored entirely.
+
 Analyze this image and provide a comprehensive response with the following components:
   1. FULL_DESCRIPTION - Provide a detailed and comprehensive description of what you can see in this image, incorporating the REFERENCE INFORMATION when applicable. Your description will be processed further, so include all relevant visual information. Aim for concise descriptions (1-2 paragraphs for simple images, 3-5 for complex ones). You do not need to address each point in the list individually, but make sure to cover all the points in your description:
     1. The main subject and its characteristics, focused on what is clearly visible in the image
-       - Include foreground and background elements, noting their spatial relationships
-       - Note significant colors and visual elements that contribute to understanding the image
-       - Prioritize details that would help someone who cannot see the image understand its content and significance, especially for alt text generation.
     2. In the FULL_DESCRIPTION, if the image contains visible text or writing:
        - Note the presence, type (such as handwritten, typed, printed), general purpose or location of the text
        - For important short phrases (less than 8 words), you may directly quote IF you are confident in the reading.
@@ -15,11 +14,9 @@ Analyze this image and provide a comprehensive response with the following compo
          * Do NOT generalize descriptions to apply to all people or elements in the image if the text does not support this
          * Example - GOOD: "The text uses derogatory terms specifically referring to the overseer"
          * Example - BAD: "The text uses derogatory terms to describe the people in the image" (when it only refers to one person)
-       - For handwritten content, only transcribe text that is clearly legible.
        - CRITICAL for cursive handwriting: Note the difficulty and your confidence level
             * "The letter appears to reference an organization, but the cursive handwriting is difficult to read with certainty"
             * "Includes a signature in cursive that is not clearly legible"
-       - Never guess at cursive words that could significantly change meaning (names, organizations, places, dates)
        - If there is a handwritten signature, note that a handwritten signature is included but do not attempt transcribe it unless it is very clear or supported by reference information. Note uncertainity if transcribed.
     3. The type of document or artifact this appears to be.
     4. Historical context if apparent. Do NOT make assumptions about dates, names, or other specific details unless they are explicitly visible or provided in the REFERENCE INFORMATION.
@@ -49,7 +46,6 @@ Analyze this image and provide a comprehensive response with the following compo
            a) visible within text in the image, OR
            b) explicitly identified in the reference information AND the image clearly depicts a recognizable likeness of a person, OR
            c) the individual is a well known and clearly recognizable public figure.
-       - Do not mention that faces are obscured in the images, due to technical constraints almost all faces will be obscured.
        - Demographic descriptors (age range, gender presentation, race/ethnicity):
         - INCLUDE demographic descriptors for all main subjects - they help users understand who is depicted and provide important historical context
           - OMIT demographic descriptors only when:
@@ -64,17 +60,8 @@ Analyze this image and provide a comprehensive response with the following compo
             * CORRECT (consistent): "Two people are prominently featured: a middle-aged white man and a young Black man."
             * INCORRECT (inconsistent - only notes race for person of color): "An older man in a suit stands next to a young Black man in uniform."
             * INCORRECT (inconsistent - selective age description): "A elderly person and another person stand together."
-        - Use respectful, contemporary terminology.
-        - Acceptable contemporary demographic terminology examples include:
-          - Race/ethnicity: Black (capitalized), white (lowercase unless starting a sentence), Asian, Latino/Latina/Latinx, Indigenous, Middle Eastern, multiracial, biracial, Pacific Islander
-            * Note: Use "Black" (capitalized) and "white" (lowercase) when describing people in your descriptions
-            * This capitalization applies only to the FULL_DESCRIPTION, not to the TRANSCRIPT (which should preserve text exactly as written)
-          - Gender: man, woman, person (when gender presentation is ambiguous)
-          - Age: child, teenager, young adult, middle-aged adult, older adult, elderly
-          - Disability: Use person-first language when describing visible disabilities or assistive devices
-            * Examples: "person using a wheelchair," "individual with a visible prosthetic limb," "person using a white cane," "individual with crutches"
-            * Describe what you observe (assistive devices, mobility aids) rather than inferring medical conditions
-          - When REFERENCE INFORMATION provides specific ethnic, cultural, or national identity (e.g., "Burmese family," "Cherokee delegation," "Irish immigrants"), use that specific terminology instead of broader categories (e.g., "Burmese" rather than "Asian," "Cherokee" rather than "Indigenous"). Only use such specific identifiers when they appear in provided reference material and the terminology is contemporary and respectful.
+        - Use respectful, contemporary, people first terminology. Use "Black" (capitalized) and "white" (lowercase) for race; this capitalization applies only to the FULL_DESCRIPTION, not to the TRANSCRIPT (which should preserve text exactly as written).
+        - When REFERENCE INFORMATION provides specific ethnic, cultural, or national identity (e.g., "Burmese family," "Cherokee delegation," "Irish immigrants"), use that specific terminology instead of broader categories. Only use such specific identifiers when they appear in provided reference material and the terminology is contemporary and respectful.
         - Gender description policy:
             * Due to technical limitations that obscure facial features, gender descriptors are unlikely to be reliable.
 
@@ -98,16 +85,11 @@ Analyze this image and provide a comprehensive response with the following compo
             ✗ Use masculine/feminine as descriptors
 
             Examples:
-            ✓ GOOD: "Person in formal Victorian attire with top hat and tails"
-            ✓ GOOD: "Individual in elaborate wedding dress with long train, as they face to the left"
             ✓ GOOD: "Two people in period costume: one in knickerbockers, one in a floor-length gown"
             ✓ GOOD: "Martin Luther King Jr. addresses a crowd from a podium, lifting his hand" (named, can use "he" if needed)
 
             ✗ BAD: "Two people presenting as women in period attire"
             ✗ BAD: "Person in masculine-coded business attire"
-        - For main subjects (1-4 prominent people): Include age range, AND race/ethnicity for each person, or describe visible characteristics. Do not attempt to guess if you are not reasonably confident.
-        - For background figures: May use general descriptions ("additional people visible in background") without detailed demographics
-        - For large groups (5+ equally prominent people): Describe group composition ("a diverse group including Black, white, and Asian adults") rather than itemizing individuals
         - For historical images containing sensitive depictions:
            - DO describe who is depicted using contemporary demographic terminology
            - DO NOT use outdated or offensive terms (replace with modern equivalents)

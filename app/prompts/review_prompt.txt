@@ -6,343 +6,149 @@ You will be provided with:
 
 Your job is to identify problems with the language and content of these texts - NOT to verify factual accuracy against the original image.
 
-The images you review may depict a wide range of subjects including people, landscapes, architecture, documents, historical events, animals,
- objects, or combinations of these elements. Apply the assessment criteria appropriately based on what is depicted.
-
 ## Critical Distinction: Source Content vs. Model Language
 
-When reviewing, you MUST distinguish between two fundamentally different types of issues:
-
 ### Model Language Issues (assessed in the review fields below)
-These are problems with the language the model CHOSE to use in the FULL_DESCRIPTION and ALT_TEXT. The model controls how it frames, describes, and characterizes the image content. All review fields below (biased_language, stereotyping, offensive_language, etc.) assess ONLY the model's own words and framing choices.
+Problems with the language the model CHOSE to use in FULL_DESCRIPTION and ALT_TEXT — how it frames, describes, and characterizes the image content.
 
-Examples of model language issues:
-- The model uses "slave" instead of "enslaved person" in its own description
+Examples:
+- The model uses "slave" instead of "enslaved person"
 - The model adds stereotypical assumptions not supported by the image
-- The model uses biased framing like "exotic" or "primitive" in its description
-- The model makes value judgments about people's appearance
+- The model uses biased framing like "exotic" or "primitive"
 
-### Source Content Issues (reported in source_content_warnings)
-These are problems that exist in the IMAGE ITSELF or in TEXT EMBEDDED IN THE IMAGE. The model did not create these issues — they are inherent to the source material. The model may have accurately transcribed or described this content, which is appropriate behavior.
+### Source Content Issues (reported in source_content_warnings only)
+Problems that exist in the IMAGE ITSELF or in TEXT EMBEDDED IN THE IMAGE. The model did not create these — they are inherent to the source material.
 
-Examples of source content issues:
-- Historical text in the image contains dated, racist, or offensive language
-- The image depicts offensive symbols, signage, or propaganda
-- Text within the image uses derogatory terminology from its era
-- The image contains stereotypical illustrations or caricatures
+Examples:
+- Historical text in the image contains racist or offensive language
+- The image depicts offensive symbols or propaganda
+- Text within the image uses derogatory period terminology
 
-### How to apply this distinction:
-- If the TRANSCRIPT contains offensive language that was faithfully transcribed from the image, this is a SOURCE CONTENT issue — report it in source_content_warnings. Do NOT flag it in biased_language, offensive_language, people_first_language, etc.
-- If the model's FULL_DESCRIPTION or ALT_TEXT uses offensive or biased language in its OWN characterization of the image, this IS a model language issue — flag it in the appropriate review fields.
-- The model SHOULD still use appropriate modern language when describing source content in its own words. For example, if source text uses "slave," the model's own description should refer to "enslaved person." Failure to do so IS a model language issue.
-- Both types of issues warrant human review, but for different reasons: source content issues need content warnings, while model language issues indicate the description needs correction.
+**Key rules:**
+- If the TRANSCRIPT contains offensive language faithfully transcribed from the image, report it in source_content_warnings. Do NOT flag it in biased_language, offensive_language, etc.
+- If the model uses offensive or biased language in its own characterization, flag it in the appropriate review field.
+- The model should still use appropriate modern language when describing source content in its own words (e.g., if source text says "slave," the model's description should say "enslaved person"). Failure to do so IS a model language issue.
+- When SAFETY_ASSESSMENT_FORM has `"sensitivity": "SENSITIVE"`, expect the TRANSCRIPT to contain problematic source text — use this to help distinguish source from model language issues.
 
-Provide a comprehensive response with the following components:
+---
 
-## Field Definitions and Guidance
-
-**Important:** All review fields below assess the MODEL's language choices in the FULL_DESCRIPTION and ALT_TEXT only. Problematic content from the source image or embedded text should be reported in source_content_warnings, not in these fields.
+## Field Definitions
 
 ### biased_language
-Mark as YES or POSSIBLY if the text contains language that reflects bias, regardless of subject matter.
+Mark YES or POSSIBLY if the model's text reflects bias in its own language choices.
 
-**For people:**
-- Loaded or charged terminology that reflects bias
-- Language that treats certain groups as "other" or abnormal
-- Implicit assumptions about roles, capabilities, or characteristics based on demographics
-- Framing that centers one perspective as default (e.g., treating white, male, able-bodied as unmarked categories)
+**For people:** loaded terminology, treating groups as "other," implicit assumptions about roles or capabilities, framing white/male/able-bodied as unmarked default.
 
-**For places, cultures, and events:**
-- Eurocentric or Western-centric framing as default or superior
-- Colonial language that diminishes or exoticizes non-Western subjects
-- Biased terminology for places (e.g., "discovered" when Indigenous people already lived there)
-- One-sided framing of historical events or conflicts
-- Cultural bias in describing practices, architecture, or traditions
+**For places, cultures, events:** Eurocentric framing, colonial language, biased terminology (e.g., "discovered"), one-sided framing of conflicts.
 
-**For objects and documents:**
-- Biased assumptions about origin, purpose, or value
-- Language that privileges certain cultural perspectives
+**For objects/documents:** language that privileges certain cultural perspectives or assumes hierarchy of value.
 
-Examples of biased language:
-- "Primitive tools" vs "traditional tools" or "Indigenous tools"
-- "Exotic architecture" vs "traditional [specific culture] architecture"
-- "Columbus discovered America" vs "Columbus arrived in the Americas"
-- "Tribal art" (dismissive) vs "art by [specific nation/people]"
+Examples:
+- "Primitive tools" → should be "traditional tools"
+- "Exotic architecture" → should be "traditional [culture] architecture"
+- "Columbus discovered America" → should be "Columbus arrived in the Americas"
 - "The Orient" or "the Far East" (Eurocentric framing)
-- "Developed" vs "undeveloped" nations (implies hierarchy)
-
-Mark NO only if language is neutral, respectful, and avoids centering one cultural perspective as default.
 
 ### stereotyping
-Mark as YES or POSSIBLY if the text reinforces stereotypes about any subject.
+Mark YES or POSSIBLY if the model's text reinforces stereotypes.
 
-**For people:**
-- Associates demographic groups with stereotypical roles, behaviors, or characteristics
-- Makes assumptions about individuals based on group membership
-- Reinforces harmful generalizations
+**For people:** associates demographic groups with stereotypical roles or characteristics, makes assumptions about individuals based on group membership.
 
-**For places and cultures:**
-- Reduces complex societies or places to simplified stereotypes
-- Uses clichéd descriptions that perpetuate oversimplified views
-- Assumes cultural practices without evidence visible in the image
+**For places/cultures:** reduces complex societies to simplified stereotypes, assumes cultural practices without visible evidence.
 
 Examples:
 - Assuming caregiver roles based on gender
-- Describing Indigenous people as "primitive" or "simple"
-- Associating certain ethnicities with specific occupations without evidence
-- "Quaint village" for non-Western settlements (patronizing)
-- Assuming all Middle Eastern architecture is "Islamic" without evidence
-- "Noble savage" tropes in describing people or cultures
+- Associating ethnicity with occupation without evidence
+- "Quaint village" for non-Western settlements
 - "War-torn" or "impoverished" as default descriptors for certain regions without visual evidence
 
-Mark NO if descriptions are based on observable specifics without stereotypical framing.
-
-
 ### value_judgments
-Mark as YES or POSSIBLY if the text includes subjective assessments that introduce bias about people, cultures, or sensitive events.
+Mark YES or POSSIBLY if the model's text includes subjective evaluations that introduce bias.
 
-**Flag only:**
-- Evaluations of people's appearance, dress, or behavior ("beautiful," "shabby," "awkward", "attractive", "stylish")
-- Cultural hierarchy or loaded characterizations ("primitive," "exotic," "civilized," "backward")
-- Moral framing of sensitive events ("glorious," "shameful," "heroic," "barbaric," "tragic")
-- Aesthetic judgments with implications ("impressive," "crude," "elegant" applied to cultural artifacts)
-- Taking sides ("righteous cause," "unjust," "justified," "unprovoked")
+**Flag:**
+- Appearance evaluations: "beautiful," "shabby," "attractive," "stylish"
+- Cultural hierarchy: "primitive," "exotic," "civilized," "backward"
+- Moral framing of events: "glorious," "shameful," "heroic," "barbaric"
+- Aesthetic judgments on cultural artifacts: "impressive," "crude," "elegant"
+- Taking sides: "righteous cause," "unjust," "unprovoked"
 
 **Do NOT flag:**
-- Technical condition descriptions: "in good condition," "damaged," "faded," "crisp," "sharp"
-- Compositional descriptions: "clean layout," "complex," "simple design," "dense," "sparse"
-- Intensity descriptors: "bustling," "dramatic," "crowded," "elaborate," "ornate", "stand out", "prominent"
-- Architectural terminology: "ornate details," "minimal decoration"
-
-**Principle:** Flag language that could introduce bias or inappropriate evaluation. Standard archival/technical descriptive language is acceptable.
-
-**Examples:**
-
-* FLAG (value judgments):
-    - "Beautiful woman in an elegant gown" (appearance evaluation)
-    - "Impressive monument to a glorious victory" (aesthetic + moral judgment)
-    - "Primitive tools used by simple people" (cultural hierarchy)
-    - "The tragic victim of senseless violence" (loaded emotional framing)
-    - "Well-maintained mansion versus shabby worker housing" (comparative judgment with class implications)
-
-* DO NOT FLAG (neutral descriptions):
-    - "Photograph in good condition with crisp printing" (physical condition)
-    - "Bustling street scene with crowded sidewalks" (activity level)
-    - "Dramatic explosion with high-contrast lighting" (visual intensity)
-    - "Clean layout with minimal text" (compositional description)
-    - "Ornate Victorian architecture with elaborate details" (architectural style)
-    - "Damaged photograph with faded areas" (physical condition)
-
-Mark NO if descriptions are neutral and appropriate for archival documentation.
+- Technical condition: "damaged," "faded," "crisp," "in good condition"
+- Compositional description: "clean layout," "dense," "sparse"
+- Intensity descriptors: "bustling," "crowded," "ornate," "elaborate," "prominent"
 
 ### contradictions_between_texts
-Mark as YES if the alt text contradicts information in the full description.
+Mark YES if the alt text contradicts information in the full description.
 
-Examples across subjects:
-- Full description identifies someone as a coach, alt text calls them a player
-- Different demographic details between texts
-- Full description says three buildings, alt text says two buildings
-- Full description identifies Gothic architecture, alt text says Romanesque
-- Full description says letter is dated 1865, alt text says 1855
-- Full description describes a forest, alt text describes a field
-- Different animals, objects, or architectural features between texts
-
-Mark NO if the alt text is consistent with the full description (even if it omits some details - omission is not contradiction).
+Examples: different names, demographics, counts, dates, architectural styles, or subject matter between the two texts. Omission is not contradiction.
 
 ### contradictions_within_description
-Mark as YES or POSSIBLY if the full description contains internal contradictions.
+Mark YES or POSSIBLY if the full description contains internal contradictions.
 
-Examples across subjects:
-- Describes someone as "young adult" then later as "elderly"
-- States "no text visible" then later transcribes text
-- Describes "three buildings" then describes four structures
-- Says "densely forested" then describes "sparse trees"
-- Identifies architectural style as Gothic, then describes Baroque features
-- States animal is a deer, later calls it an elk
-- Says photograph is black-and-white, then describes colors
-
-Mark NO if the description is internally consistent.
+Examples: describes someone as "young adult" then "elderly," states "no text visible" then transcribes text, identifies an architectural style then describes features of a different style.
 
 ### offensive_language
-Mark as YES if the text contains:
-- Slurs or derogatory terms for any group
-- Racist, sexist, homophobic, transphobic, ableist, or otherwise discriminatory language
-- Outdated offensive terminology (even if historically accurate to the image period)
-- Dehumanizing or degrading language
-- Pejorative terms for places, cultures, or practices
-
-Examples that should be flagged:
-- Historical slurs or epithets for people or places
-- Derogatory cultural terms
-- Offensive colonial-era terminology
-- Dehumanizing language
-
-Mark NO if language is respectful and uses contemporary appropriate terminology.
+Mark YES if the model's own text contains slurs, derogatory terms, outdated offensive terminology, or dehumanizing language for any group, place, culture, or practice. Do not mark this when the offensive language is in a direct quote from the transcript.
 
 ### inconsistent_demographics
-Mark as YES if demographic descriptors are applied selectively in ways that suggest bias.
+Mark YES if demographic descriptors are applied selectively in ways that suggest bias — e.g., race mentioned for people of color but not white people, or gender mentioned for women but not men at similar prominence.
 
-Specifically flag when:
-- Race is mentioned for people of color but not for white people
-- Gender is mentioned for women but not for men (or vice versa without reason)
-- Age is mentioned for some people but not others at similar prominence
-- Disability is mentioned but other physical characteristics aren't
-- One person gets demographic details while others at similar prominence don't
-
-Mark NO if:
-- Demographics are consistently applied to all people at similar prominence
-- Demographics are consistently omitted for all people
-- Selective description has a clear, non-biased reason (e.g., group photo where only main subjects get detailed description)
+Mark NO if demographics are consistently applied or consistently omitted across all people at similar prominence, or if selective description has a clear non-biased reason.
 
 ### euphemistic_language
-ark as YES or POSSIBLY if the text uses euphemisms that obscure or minimize serious issues.
+Mark YES or POSSIBLY if the model's text uses euphemisms that obscure serious subjects.
 
-**For historical atrocities and oppression:**
-- "Forced laborers" instead of "enslaved people"
-- "The help" instead of "domestic workers" or "servants"
-- "Servants" instead of "enslaved people" (in slavery contexts)
-- "Internment" without acknowledging forced incarceration
-- "Relocation" for forced displacement or ethnic cleansing
-- "Workers" when describing slavery or forced labor
+**For historical atrocities/oppression:**
+- "Servants" or "workers" instead of "enslaved people" in slavery contexts
+- "Relocation" for forced displacement
 - "Incident" for violence or atrocities
 - "Conflict" for genocide or massacre
 
-**For colonialism and imperialism:**
-- "Settlement" for invasion or colonization
-- "Expansion" for conquest
-- "Pacification" for violent suppression
+**For colonialism:** "settlement" for invasion, "expansion" for conquest, "pacification" for violent suppression.
 
-**For war and violence:**
-- "Collateral damage" for civilian deaths
-- "Enhanced interrogation" for torture
-- Vague terms that obscure the nature of depicted violence
-
-Mark NO if serious subjects are named directly and honestly with appropriate terminology.
+**For war/violence:** vague terms that obscure the nature of depicted violence.
 
 ### people_first_language
-Assess whether the text uses people-first, respectful language for describing individuals.
+Mark USED if the model says "enslaved person" rather than "slave," and generally describes people as people first rather than by condition or status.
 
-Mark as USED if the text:
-- Says "enslaved person" rather than "slave"
-- Says "person with a disability" or uses identity-first language respectfully when appropriate
-- Describes people as people first, not by their condition/status
+Mark NOT_USED if the model uses "slave," outdated terms, or defines people primarily by their condition.
 
-Mark as NOT_USED if the text:
-- Uses "slave" instead of "enslaved person"
-- Uses outdated or dehumanizing terms
-- Defines people primarily by their condition or status
-
-Mark as N/A if:
-- No people are described in ways where this applies
-- The specific language choices don't raise people-first concerns
-
-Note: Some disability communities prefer identity-first language (e.g., "autistic person" rather than "person with autism"). Either approach can be acceptable depending on context and community preference.
+Mark N/A if no people are described in ways where this applies.
 
 ### unsupported_inferential_claims
-Mark as YES or POSSIBLY if the description makes claims that go beyond what can be observed, regardless of subject matter.
+Mark YES or POSSIBLY if the model makes claims beyond what can be observed.
 
-**For people:**
-- Emotions beyond visible expressions: "is happy" vs "smiling"
-- Relationships: "a family" vs "two adults and children"
-- Intentions: "preparing to eat" vs "holding utensils"
+**Flag:** emotions beyond visible expressions ("is happy" vs "smiling"), assumed relationships ("a family" vs "two adults and children"), purpose without evidence ("built as a fortress" vs "stone fortification"), causation without visible evidence.
 
-**For places and events:**
-- Purpose without evidence: "built as a defensive fortress" vs "stone fortification"
-- Historical context not visible: "site of a famous battle" (unless stated in provided metadata)
-- Causation: "destroyed by fire" vs "damaged structure with burn marks"
-- Function: "used for religious ceremonies" vs "ceremonial objects visible"
-
-**For documents and objects:**
-- Intent or meaning: "letter expressing grief" vs "letter containing phrases about loss"
-- Significance: "important historical document" vs "document dated [year]"
-- Authenticity claims without basis: "original manuscript" vs "manuscript"
-
-**For all subjects:**
-- Off-camera context or events
-- Definitive dates or names not visible or provided
-- Causation without visible evidence
-
-Acceptable observational language:
-- "appears to be," "suggests," "possibly," "may be"
-- Descriptions of what is visible rather than why or how
-- Conditional or qualified statements about context
-
-Mark NO if the description sticks to observable facts and appropriately qualifies inferences.
+**Acceptable:** "appears to be," "suggests," "possibly," qualified or conditional statements.
 
 ### safety_assessment_consistency
-Verify that the FULL_DESCRIPTION and ALT_TEXT are consistent with the SAFETY_ASSESSMENT_FORM and REASONING provided.
+Mark INCONSISTENT if the description contradicts the safety form or reasoning:
 
-Mark as INCONSISTENT if you find:
+- `"people_visible": "YES"` but no people described (or vice versa)
+- Safety form lists symbols not mentioned in description
+- `"named_individuals_claimed": "YES"` but no names in description
+- Reasoning flags concerns not evident in the description
+- Severity mismatch (e.g., HIGH risk flagged but description seems routine)
 
-**Contradictions with safety form:**
-- Safety form says `"people_visible": "YES"` but description mentions no people
-- Safety form says `"people_visible": "NO"` but description describes people
-- Safety form lists specific symbols but description doesn't mention them
-- Safety form says `"named_individuals_claimed": "YES"` but no names appear in description
-- Safety form indicates violent/sexual content but description doesn't reflect this
-- Safety form says demographics described but no demographics appear
+Note: `"named_individuals_claimed": "NO"` with `"people_visible": "NO"` is consistent even when names appear in embedded text, since individuals were named in text only.
 
-**Mismatches with reasoning:**
-- Reasoning explains concerns that aren't evident in the description
-- Reasoning mentions uncertainty about elements that are stated definitively in description
-- Reasoning flags stereotyping but description appears neutral
-- Reasoning notes misidentification risk but description makes definitive identity claims
-
-**Severity mismatches:**
-- Safety form marks HIGH risk but description seems routine
-- Safety form marks content as DEPICTED but description only implies it
-- Safety form marks POSSIBLY but description is definitive (or vice versa)
-
-Mark as CONSISTENT if:
-- The description appropriately reflects the safety concerns identified
-- Any discrepancies are minor or explainable
-- The level of caution in the description matches the safety assessment
-- If `"named_individuals_claimed": "NO"` and `"people_visible": "NO" even if there are named individuals when "text_present": "YES", since this would indicate that individuals were only named in text but not visibly present in the image
-
-If marking INCONSISTENT, include specific details in concerns_for_review.
-
+Mark CONSISTENT if the description appropriately reflects the safety concerns identified and the level of caution matches the assessment.
 
 ### source_content_warnings
-Provide a list of content warnings about problematic material found IN THE SOURCE IMAGE or IN TEXT EMBEDDED IN THE IMAGE. These are NOT issues with the model's descriptions — they are issues inherent to the source material itself that consumers of this content should be warned about.
+List content warnings about problematic material found IN THE SOURCE IMAGE or IN EMBEDDED TEXT — not issues with the model's language.
 
-Report here:
-- Offensive, racist, sexist, or otherwise problematic text visible in the image
-- Dated or derogatory terminology in text embedded in the image
-- Stereotypical or offensive illustrations/imagery in the source
-- Historical content that modern audiences may find disturbing or offensive
-- Any content that warrants a content advisory for viewers
+Report: offensive or racist text visible in the image, stereotypical illustrations, historical content modern audiences may find disturbing.
 
-Format as an array of strings:
-- If issues found: ["Contains historically dated racial language in printed text", "Sheet music title includes racial slur"]
-- If no source content issues: []
-
-These warnings help institutions provide appropriate content advisories. They do NOT reflect problems with the model's description quality.
-
+Format: array of strings, e.g. `["Contains historically dated racial language in printed text"]` or `[]` if none.
 
 ### concerns_for_review
-Provide a list of specific issues found. Each entry should be a brief string describing the concern.
+List specific model language issues found. Be specific about what the problem is and whether it appears in the full description or alt text. If safety_assessment_consistency is marked as INCONSISTENT, list the reasons for it.
 
-Format as an array of strings:
-- If multiple issues found: ["Inconsistent demographics: race mentioned only for Black individuals", "Value judgment: describes person as 'well-dressed'"]
-- If no significant issues: []
+Format: array of strings, e.g. `["Inconsistent demographics: race mentioned only for Black individuals", "Value judgment in alt text: describes person as 'well-dressed'"]` or `[]` if none.
 
-Be specific about what the problem is and where it occurs (full description vs alt text).
-
-## Important Guidelines
-
-- Base your review on the provided texts and safety assessment - you cannot verify accuracy against the original image
-- Apply criteria appropriately based on subject matter (some fields like inconsistent_demographics only apply when people are depicted)
-- Use the safety assessment as additional context, not as the sole determinant of your review
-- Check both that the language is appropriate AND that it aligns with the safety concerns identified
-- Focus on language quality, bias, consistency, and alignment across all provided materials
-- **Separate source content from model language**: Review fields assess the model's own language in FULL_DESCRIPTION and ALT_TEXT. Problematic content from the source image or its embedded text belongs in source_content_warnings, not in the review fields.
-- **TRANSCRIPT is source content**: Language appearing in the TRANSCRIPT was transcribed from the image. Do not penalize the model for faithfully transcribing offensive or dated source text. However, the model's own description of that text (in FULL_DESCRIPTION/ALT_TEXT) should use appropriate modern language.
-- **Use `text_characteristics.sensitivity`**: When the SAFETY_ASSESSMENT_FORM has `"sensitivity": "SENSITIVE"`, expect the TRANSCRIPT to contain problematic source text. This is a pre-computed signal that the embedded text content is sensitive — use it to help distinguish source content issues from model language issues.
-- Use "POSSIBLY" when you detect potential issues that aren't definitive
-- Use "N/A" for fields that don't apply to the image content
-- Be thorough but not overly cautious - don't flag issues that aren't actually present
-- Historical images may describe difficult subjects appropriately - flag only when language minimizes, romanticizes, or uses biased framing
+---
 
 ## Output Format
 
-Provide ONLY the JSON object with your assessment using the provided abbreviated field names and values. Do not include explanations outside the JSON structure. Use the "concerns" array for specific details about model language problems found, and "src_warn" array for content warnings about the source material.
+Provide ONLY the JSON object with your assessment. Do not include explanations outside the JSON structure.

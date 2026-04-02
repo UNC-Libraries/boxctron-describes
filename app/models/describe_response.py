@@ -253,7 +253,7 @@ class DescriptionResult(BaseModel):
         description="Analysis for determining if the image needs human review"
     )
 
-    overall_risk_Score: Optional[int] = Field(
+    overall_risk_score: Optional[int] = Field(
         None,
         description="Average of all available risk scores (safety and review), normalized to 0-100"
     )
@@ -344,7 +344,7 @@ class DescribeResponse(BaseModel):
                         "concerns_for_review": [],
                         "risk_score": 0
                     },
-                    "overall_risk_Score": 0,
+                    "overall_risk_score": 0,
                     "version": {
                         "version": "0.1.0",
                         "models": {
