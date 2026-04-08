@@ -78,12 +78,10 @@ class DescribeImageWorkflow:
         safety_assessment = self._parse_safety_assessment(full_desc_result)
 
         full_description = full_desc_result.get("FULL_DESCRIPTION", "")
+        alt_text = full_desc_result.get("ALT_TEXT", "")
         transcript = full_desc_result.get("TRANSCRIPT", "")
         safety_form = full_desc_result.get("SAFETY_ASSESSMENT_FORM", {})
         safety_reasoning = full_desc_result.get("SAFETY_ASSESSMENT_REASONING", "")
-
-        # Summarize the full description into alt text
-        alt_text = self.alt_text_service.generate_alt_text(full_description)
 
         # Generate review assessment
         review_assessment_result = self.review_service.generate_review_assessment(

@@ -150,7 +150,46 @@ Analyze this image and provide a comprehensive response with the following compo
     - If you can read some words in a handwritten passage but not others, transcribe what you can and mark the rest:
         "Dear [illegible], I hope this letter finds you well..."
 
-3. SAF (safety assessment form) - Assess the content of this image for later evaluation by humans or agents to help determine if the image itself contains unsafe content or is likely to produce a description that may be unreliable or subjective. This will be provided as a structured object with abbreviated field names and values.
+3. ALT_TEXT - Generate concise alt text for visually impaired users. You are creating alt text for historical archival materials that may contain offensive or racist content. Accurate description is required for historical documentation and equal access — describing such content is not endorsing it.
+
+  Base the alt text on what you observe directly in the image, and ensure it is consistent with your FULL_DESCRIPTION and TRANSCRIPT above.
+
+  Target length:
+  - Simple images: 1 sentence (15-25 words)
+  - Moderately complex: 2 sentences (25-40 words)
+  - Highly complex/information-dense: 2-3 sentences (40-60 words maximum)
+
+  Content priorities:
+  - Lead with the main subject and primary action
+  - Include spatial relationships when meaningful (foreground/background, beside/behind)
+  - Include personal names and stated roles/occupations (coach, speaker, officer, etc.)
+  - Omit background elements unless essential to context
+  - Summarize minor visual details; use general terms ("wearing a suit," not "dark pinstriped suit")
+
+  Demographics:
+  - Include race, age, and demographic descriptors consistent with what you included in FULL_DESCRIPTION
+  - Apply consistently: if you describe one person's demographics, describe all people at similar prominence
+  - For named individuals, race/ethnicity descriptors are not required directly before the name (e.g., "An elderly Frederick Douglass" not "An elderly Black Frederick Douglass"), though you may describe demographics separately
+
+  Text in images:
+  - Quote short, significant text verbatim (titles, captions, signs) using the exact wording from your TRANSCRIPT; paraphrase longer text without quotation marks
+  - Never alter quoted text — if you can't quote exactly, paraphrase without quotes
+  - Identify the source type: printed caption, handwritten annotation, or text embedded in the scene
+
+  Symbols and brands:
+  - Include when they identify the subject or provide essential context ("UNC player in uniform," "Confederate flag in parade")
+  - Omit when incidental ("person wearing a jacket," not "person wearing a Columbia jacket")
+
+  Historical sensitivity:
+  - Document offensive content factually and neutrally ("cartoon uses racist caricatures") without extensive description of the caricatures themselves
+
+  Style:
+  - Write complete sentences in natural, flowing language. Do not use bullets or numbering.
+  - Do not start with "The image shows" or "This image depicts"
+  - You may start with "A photograph of..." when the medium is relevant
+  - Do not describe images as "vintage"
+
+4. SAF (safety assessment form) - Assess the content of this image for later evaluation by humans or agents to help determine if the image itself contains unsafe content or is likely to produce a description that may be unreliable or subjective. This will be provided as a structured object with abbreviated field names and values.
 
   Notes on field values:
     - "people" (people visible) and "minors" (minors present) accept "Y", "N", or "U" (unknown):
@@ -201,7 +240,7 @@ Analyze this image and provide a comprehensive response with the following compo
         - Note: This field assesses the CONTENT of the source text, not your description of it. Mark "S" even if you handle the content appropriately in your description.
     - sexual (sexual content) - Medical/anatomical images would be "0". Historical/ethnographic documentation would be "0". Fine art would be "0" unless the pose or context is explicitly sexual.
 
-4. SAR (safety assessment reasoning) - Explain ONLY the reasons for positive identifications, elevated risks, or uncertain assessments.
+5. SAR (safety assessment reasoning) - Explain ONLY the reasons for positive identifications, elevated risks, or uncertain assessments.
   - Address only fields marked with concerning values:
     - Why specific fields were marked (e.g., why "P" for stereotyping, why "M" or "H" risk)
     - What elements created uncertainty
