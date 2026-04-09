@@ -77,6 +77,7 @@ def mock_llm_responses():
             mock_response.choices[0].message.content = json.dumps({
                 "FULL_DESCRIPTION": "A test image description",
                 "TRANSCRIPT": "No text visible.",
+                "ALT_TEXT": "A short description.",
                 "SAF": {
                     "people": "N",
                     "demog": "N",
@@ -137,7 +138,6 @@ def mock_llm_responses():
         return mock_response
 
     with patch("app.services.image_description_service.completion", side_effect=completion_side_effect), \
-         patch("app.services.alt_text_generation_service.completion", side_effect=completion_side_effect), \
          patch("app.services.review_assessment_service.completion", side_effect=completion_side_effect):
         yield
 

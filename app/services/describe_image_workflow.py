@@ -6,7 +6,6 @@ import logging
 
 from app.services.image_normalizer import ImageNormalizer
 from app.services.image_description_service import ImageDescriptionService
-from app.services.alt_text_generation_service import AltTextGenerationService
 from app.services.review_assessment_service import ReviewAssessmentService
 from app.services.safety_risk_scoring_service import calculate_risk_score
 from app.services.safety_inconsistency_service import count_safety_inconsistencies
@@ -24,7 +23,6 @@ class DescribeImageWorkflow:
         settings: Settings,
         image_normalizer: ImageNormalizer,
         image_description_service: ImageDescriptionService,
-        alt_text_service: AltTextGenerationService,
         review_service: ReviewAssessmentService
     ):
         """
@@ -34,13 +32,11 @@ class DescribeImageWorkflow:
             settings: Application settings
             image_normalizer: Service for normalizing images
             image_description_service: Service for generating image descriptions
-            alt_text_service: Service for generating alt text
             review_service: Service for reviewing generated content
         """
         self.settings = settings
         self.image_normalizer = image_normalizer
         self.image_description_service = image_description_service
-        self.alt_text_service = alt_text_service
         self.review_service = review_service
 
     async def process_image(
@@ -78,12 +74,10 @@ class DescribeImageWorkflow:
         safety_assessment = self._parse_safety_assessment(full_desc_result)
 
         full_description = full_desc_result.get("FULL_DESCRIPTION", "")
+        alt_text = full_desc_result.get("ALT_TEXT", "")
         transcript = full_desc_result.get("TRANSCRIPT", "")
         safety_form = full_desc_result.get("SAFETY_ASSESSMENT_FORM", {})
         safety_reasoning = full_desc_result.get("SAFETY_ASSESSMENT_REASONING", "")
-
-        # Summarize the full description into alt text
-        alt_text = self.alt_text_service.generate_alt_text(full_description)
 
         # Generate review assessment
         review_assessment_result = self.review_service.generate_review_assessment(
@@ -109,7 +103,7 @@ class DescribeImageWorkflow:
                 version=self.settings.app_version,
                 models={
                     "full_desc": self.settings.litellm_full_desc_model,
-                    "alt_text": self.settings.litellm_alt_text_model,
+                    "alt_text": self.settings.litellm_full_desc_model,
                     "review": self.settings.litellm_review_model
                 },
                 timestamp=datetime.now(timezone.utc).isoformat()

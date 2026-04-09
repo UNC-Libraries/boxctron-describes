@@ -36,7 +36,8 @@ class ImageDescriptionService:
             "You are a specialized visual content analyzer creating detailed descriptive metadata for archival and accessibility purposes.\n"
             "You generate clear, factual descriptions that document everything visible without interpretation.\n"
             "You use precise language appropriate to the content domain, while avoiding unnecessary jargon.\n"
-            "Your descriptions are well-structured and prioritize factual documentation over stylistic concerns."
+            "Your descriptions are well-structured and prioritize factual documentation over stylistic concerns.\n"
+            "You also generate concise, screen-reader-friendly alt text by selecting only the most contextually relevant elements from what you observe."
         )
 
     def generate_description(
@@ -136,6 +137,7 @@ class ImageDescriptionService:
                     # Expand abbreviated safety form keys/values and rename top-level keys
                     result["SAFETY_ASSESSMENT_FORM"] = expand_safety_form(result.pop("SAF"))
                     result["SAFETY_ASSESSMENT_REASONING"] = result.pop("SAR")
+                    result["ALT_TEXT"] = result.pop("ALT_TEXT")
 
                     log_token_usage(logger, "image description", response.usage)
 
@@ -172,6 +174,9 @@ class ImageDescriptionService:
                     "type": "object",
                     "properties": {
                         "FULL_DESCRIPTION": {
+                            "type": "string"
+                        },
+                        "ALT_TEXT": {
                             "type": "string"
                         },
                         "TRANSCRIPT": {
@@ -293,7 +298,7 @@ class ImageDescriptionService:
                             "type": "string"
                         }
                     },
-                    "required": ["FULL_DESCRIPTION", "TRANSCRIPT", "SAF", "SAR"],
+                    "required": ["FULL_DESCRIPTION", "ALT_TEXT", "TRANSCRIPT", "SAF", "SAR"],
                     "additionalProperties": False
                 }
             }
@@ -309,7 +314,7 @@ class ImageDescriptionService:
         Raises:
             ValueError: If response is missing required fields
         """
-        required_fields = ["FULL_DESCRIPTION", "TRANSCRIPT", "SAF", "SAR"]
+        required_fields = ["FULL_DESCRIPTION", "ALT_TEXT", "TRANSCRIPT", "SAF", "SAR"]
         for field in required_fields:
             if field not in response:
                 raise ValueError(f"Missing required field: {field}")

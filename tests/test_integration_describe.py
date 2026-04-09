@@ -60,6 +60,7 @@ def mock_llm_responses():
             mock_response.choices[0].message.content = json.dumps({
                 "FULL_DESCRIPTION": "A detailed photograph showing a blurry owl perched on a branch in low light conditions. The owl appears to be a species with mottled brown and white plumage.",
                 "TRANSCRIPT": "No visible text in image.",
+                "ALT_TEXT": "A short description.",
                 "SAF": {
                     "people": "N",
                     "demog": "N",
@@ -124,10 +125,9 @@ def mock_llm_responses():
 
     # Patch at the import locations in each service module
     with patch("app.services.image_description_service.completion", side_effect=completion_side_effect) as mock1, \
-         patch("app.services.alt_text_generation_service.completion", side_effect=completion_side_effect) as mock2, \
-         patch("app.services.review_assessment_service.completion", side_effect=completion_side_effect) as mock3:
-        # Yield all three mocks so tests can check individual or total call counts
-        yield (mock1, mock2, mock3)
+         patch("app.services.review_assessment_service.completion", side_effect=completion_side_effect) as mock2:
+        # Yield all mocks so tests can check individual or total call counts
+        yield (mock1, mock2)
 
 
 def test_integration_upload_real_image(client, blurry_owl_data, mock_llm_responses):
@@ -157,7 +157,7 @@ def test_integration_upload_real_image(client, blurry_owl_data, mock_llm_respons
     # Verify complete result structure with real data
     result_data = result["result"]
     assert "blurry owl" in result_data["full_description"].lower()
-    assert "blurry owl" in result_data["alt_text"].lower()
+    assert "a short description." in result_data["alt_text"].lower()
     assert result_data["transcript"] == "No visible text in image."
 
     # Verify safety assessment was processed
@@ -185,9 +185,8 @@ def test_integration_upload_real_image(client, blurry_owl_data, mock_llm_respons
     assert "timestamp" in version
 
     # Verify LLM mocks were called
-    image_desc_llm_mock, alt_text_llm_mock, review_llm_mock = mock_llm_responses
+    image_desc_llm_mock, review_llm_mock = mock_llm_responses
     assert image_desc_llm_mock.call_count == 1
-    assert alt_text_llm_mock.call_count == 1
     assert review_llm_mock.call_count == 1
 
 
@@ -214,12 +213,11 @@ def test_integration_file_uri(client, blurry_owl_path, mock_llm_responses):
     result = response.json()
     assert result["success"] is True
     assert "blurry owl" in result["result"]["full_description"].lower()
-    assert "blurry owl" in result["result"]["alt_text"].lower()
+    assert "a short description." in result["result"]["alt_text"].lower()
 
     # Verify LLM mocks were called
-    image_desc_llm_mock, alt_text_llm_mock, review_llm_mock = mock_llm_responses
+    image_desc_llm_mock, review_llm_mock = mock_llm_responses
     assert image_desc_llm_mock.call_count == 1
-    assert alt_text_llm_mock.call_count == 1
     assert review_llm_mock.call_count == 1
 
 
@@ -261,9 +259,8 @@ def test_integration_http_uri(client, blurry_owl_data, mock_llm_responses):
     assert respx.calls.call_count == 1
 
     # Verify LLM mocks were called
-    image_desc_llm_mock, alt_text_llm_mock, review_llm_mock = mock_llm_responses
+    image_desc_llm_mock, review_llm_mock = mock_llm_responses
     assert image_desc_llm_mock.call_count == 1
-    assert alt_text_llm_mock.call_count == 1
     assert review_llm_mock.call_count == 1
 
 
