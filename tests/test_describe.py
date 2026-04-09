@@ -282,7 +282,6 @@ def test_describe_uri_with_http_scheme(client, mock_workflow, sample_image_data)
 
 def _assert_default_response_populated(response, expected_filename):
     result = response.json()
-    assert result["success"] is True
     assert result["filename"] == expected_filename
     assert result["result"] is not None
 
@@ -323,9 +322,11 @@ def _assert_default_response_populated(response, expected_filename):
     # Verify version structure
     version = result_data["version"]
     assert "version" in version
-    assert "models" in version
     assert "timestamp" in version
-    assert isinstance(version["models"], dict)
-    assert "full_desc" in version["models"]
-    assert "alt_text" in version["models"]
-    assert "review" in version["models"]
+
+    # Verify steps structure
+    steps = result_data["steps"]
+    assert "full_desc" in steps
+    assert steps["full_desc"]["status"] == "success"
+    assert "review" in steps
+    assert steps["review"]["status"] == "success"

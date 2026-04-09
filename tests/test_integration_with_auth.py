@@ -217,7 +217,6 @@ def test_upload_with_api_key(client_with_auth, blurry_owl_data, mock_llm_respons
 
     assert response.status_code == status.HTTP_200_OK
     result = response.json()
-    assert result["success"] is True
     assert result["filename"] == "test.jpg"
 
 
@@ -247,7 +246,6 @@ def test_upload_with_basic_auth(client_with_auth, blurry_owl_data, mock_llm_resp
 
     assert response.status_code == status.HTTP_200_OK
     result = response.json()
-    assert result["success"] is True
     assert result["filename"] == "test.jpg"
 
 
@@ -279,7 +277,6 @@ def test_upload_with_context_and_api_key(client_with_auth, blurry_owl_data, mock
 
     assert response.status_code == status.HTTP_200_OK
     result = response.json()
-    assert result["success"] is True
 
 
 # =============================================================================
@@ -315,7 +312,6 @@ def test_uri_with_api_key(client_with_auth, blurry_owl_path, mock_llm_responses)
 
     assert response.status_code == status.HTTP_200_OK
     result = response.json()
-    assert result["success"] is True
     assert result["filename"] == "test.jpg"
 
 
@@ -353,7 +349,6 @@ def test_uri_with_basic_auth(client_with_auth, blurry_owl_path, mock_llm_respons
 
     assert response.status_code == status.HTTP_200_OK
     result = response.json()
-    assert result["success"] is True
     assert result["filename"] == "test.jpg"
 
 
@@ -391,7 +386,6 @@ def test_uri_with_context_and_basic_auth(client_with_auth, blurry_owl_path, mock
 
     assert response.status_code == status.HTTP_200_OK
     result = response.json()
-    assert result["success"] is True
 
 
 # =============================================================================

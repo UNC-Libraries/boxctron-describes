@@ -10,7 +10,7 @@ from app.services.review_assessment_service import ReviewAssessmentService
 from app.services.safety_risk_scoring_service import calculate_risk_score
 from app.services.safety_inconsistency_service import count_safety_inconsistencies
 from app.services.review_risk_scoring_service import calculate_review_risk_score
-from app.models import DescriptionResult, SafetyAssessment, ReviewAssessment, VersionInfo, SymbolsPresent, TextCharacteristics
+from app.models import DescriptionResult, SafetyAssessment, ReviewAssessment, VersionInfo, SymbolsPresent, TextCharacteristics, StepOutcome
 from app.config import Settings
 
 logger = logging.getLogger(__name__)
@@ -67,7 +67,9 @@ class DescribeImageWorkflow:
         base64_image = self.image_normalizer.normalize_image(image_path)
 
         # Generate full description, transcript, and safety assessment
+        full_desc_start = datetime.now(timezone.utc)
         full_desc_result = self.image_description_service.generate_description(base64_image, context)
+        full_desc_duration = (datetime.now(timezone.utc) - full_desc_start).total_seconds() * 1000
         logger.info(f"Generated description for {filename}")
 
         # Parse safety assessment from LLM response
@@ -79,17 +81,44 @@ class DescribeImageWorkflow:
         safety_form = full_desc_result.get("SAFETY_ASSESSMENT_FORM", {})
         safety_reasoning = full_desc_result.get("SAFETY_ASSESSMENT_REASONING", "")
 
-        # Generate review assessment
-        review_assessment_result = self.review_service.generate_review_assessment(
-            full_description,
-            transcript,
-            safety_form,
-            safety_reasoning,
-            alt_text
-        )
-        review_assessment = self._parse_review_assessment(review_assessment_result)
+        steps = {
+            "full_desc": StepOutcome(
+                    status="success",
+                    model=self.settings.litellm_full_desc_model,
+                    duration_ms=full_desc_duration
+                )
+        }
 
-        scores = [s for s in [safety_assessment.risk_score, review_assessment.risk_score] if s is not None]
+        # Generate review assessment
+        review_assessment = None
+        threshold = self.settings.review_skip_threshold
+        if threshold is not None and safety_assessment.risk_score is not None and safety_assessment.risk_score < threshold:
+            logger.info(
+                f"Skipping review assessment for {filename}: safety risk score "
+                f"{safety_assessment.risk_score} is below threshold {threshold}"
+            )
+            steps["review"] = StepOutcome(
+                    status="skipped",
+                    reason=f"safety_risk_score below threshold {threshold}"
+                )
+        else:
+            review_start = datetime.now(timezone.utc)
+            review_assessment_result = self.review_service.generate_review_assessment(
+                full_description,
+                transcript,
+                safety_form,
+                safety_reasoning,
+                alt_text
+            )
+            review_duration = (datetime.now(timezone.utc) - review_start).total_seconds() * 1000
+            review_assessment = self._parse_review_assessment(review_assessment_result)
+            steps["review"] = StepOutcome(
+                    status="success",
+                    model=self.settings.litellm_review_model,
+                    duration_ms=review_duration
+                )
+
+        scores = [s for s in [safety_assessment.risk_score, review_assessment.risk_score if review_assessment else None] if s is not None]
         overall_risk_score = round(sum(scores) / len(scores)) if scores else None
 
         return DescriptionResult(
@@ -98,14 +127,10 @@ class DescribeImageWorkflow:
             transcript=transcript,
             safety_assessment=safety_assessment,
             review_assessment=review_assessment,
+            steps=steps,
             overall_risk_score=overall_risk_score,
             version=VersionInfo(
                 version=self.settings.app_version,
-                models={
-                    "full_desc": self.settings.litellm_full_desc_model,
-                    "alt_text": self.settings.litellm_full_desc_model,
-                    "review": self.settings.litellm_review_model
-                },
                 timestamp=datetime.now(timezone.utc).isoformat()
             )
         )
