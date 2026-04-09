@@ -77,6 +77,7 @@ def mock_llm_responses():
             mock_response.choices[0].message.content = json.dumps({
                 "FULL_DESCRIPTION": "A test image description",
                 "TRANSCRIPT": "No text visible.",
+                "ALT_TEXT": "A short description.",
                 "SAF": {
                     "people": "N",
                     "demog": "N",
