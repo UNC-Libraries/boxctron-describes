@@ -8,7 +8,6 @@ from app.services import (
     ImageNormalizer,
     DescribeImageWorkflow,
     ImageDescriptionService,
-    AltTextGenerationService,
     ReviewAssessmentService,
     AuthenticationService
 )
@@ -36,15 +35,6 @@ def get_image_description_service() -> ImageDescriptionService:
     """
     return ImageDescriptionService(settings)
 
-def get_alt_text_generation_service() -> AltTextGenerationService:
-    """
-    Provide an AltTextGenerationService instance.
-
-    Returns:
-        AltTextGenerationService: Configured alt text generation service
-    """
-    return AltTextGenerationService(settings)
-
 def get_review_assessment_service() -> ReviewAssessmentService:
     """
     Provide a ReviewAssessmentService instance.
@@ -57,7 +47,6 @@ def get_review_assessment_service() -> ReviewAssessmentService:
 def get_describe_workflow(
     normalizer: ImageNormalizer = Depends(get_image_normalizer),
     image_description_service: ImageDescriptionService = Depends(get_image_description_service),
-    alt_text_service: AltTextGenerationService = Depends(get_alt_text_generation_service),
     review_service: ReviewAssessmentService = Depends(get_review_assessment_service)
 ) -> DescribeImageWorkflow:
     """
@@ -66,13 +55,12 @@ def get_describe_workflow(
     Args:
         normalizer: Image normalizer service
         image_description_service: Image description service
-        alt_text_service: Alt text generation service
         review_service: Review assessment service
 
     Returns:
         DescribeImageWorkflow: Configured workflow service
     """
-    return DescribeImageWorkflow(settings, normalizer, image_description_service, alt_text_service, review_service)
+    return DescribeImageWorkflow(settings, normalizer, image_description_service, review_service)
 
 
 def get_authentication_service() -> AuthenticationService:
