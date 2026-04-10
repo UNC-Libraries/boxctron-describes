@@ -62,7 +62,7 @@ def mock_llm_responses():
                 "TRANSCRIPT": "No visible text in image.",
                 "ALT_TEXT": "A short description.",
                 "SAF": {
-                    "people": "N",
+                    "people": "Y",
                     "demog": "N",
                     "misid_risk": "L",
                     "minors": "N",
@@ -161,7 +161,7 @@ def test_integration_upload_real_image(client, blurry_owl_data, mock_llm_respons
 
     # Verify safety assessment was processed
     safety = result_data["safety_assessment"]
-    assert safety["people_visible"] == "NO"
+    assert safety["people_visible"] == "YES"
     assert safety["risk_score"] is not None
     assert safety["inconsistency_count"] is not None
     assert isinstance(safety["risk_score"], int)

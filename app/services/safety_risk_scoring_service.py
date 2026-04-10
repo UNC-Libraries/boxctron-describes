@@ -114,6 +114,10 @@ _MAX_POSSIBLE_SCORE: int = (
     + sum(max(weights.values()) for weights in TEXT_FIELD_WEIGHTS.values())
 )
 
+_PRACTICAL_MAX_FRACTION: float = 0.60
+
+_EFFECTIVE_MAX_SCORE: float = _MAX_POSSIBLE_SCORE * _PRACTICAL_MAX_FRACTION
+
 
 def calculate_risk_score(assessment: SafetyAssessment) -> int:
     """Calculate a normalized risk score from a SafetyAssessment.
@@ -152,4 +156,4 @@ def calculate_risk_score(assessment: SafetyAssessment) -> int:
         value = getattr(assessment.text_characteristics, field)
         raw_score += weights.get(value, 0)
 
-    return round((raw_score / _MAX_POSSIBLE_SCORE) * 100)
+    return min(100, round((raw_score / _EFFECTIVE_MAX_SCORE) * 100))
