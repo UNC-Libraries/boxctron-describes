@@ -35,8 +35,8 @@ def make_assessment(**overrides) -> ReviewAssessment:
 
 
 # Thresholds used throughout — deliberately loose so tests survive weight tuning.
-LOW_SCORE_THRESHOLD = 34
-HIGH_SCORE_THRESHOLD = 66
+LOW_SCORE_THRESHOLD = 40
+HIGH_SCORE_THRESHOLD = 90
 
 
 # ---------------------------------------------------------------------------

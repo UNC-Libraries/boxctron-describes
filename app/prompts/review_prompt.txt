@@ -127,11 +127,11 @@ Mark INCONSISTENT if the description contradicts the safety form or reasoning:
 
 - `"people_visible": "YES"` but no people described (or vice versa)
 - Safety form lists symbols not mentioned in description
-- `"named_individuals_claimed": "YES"` but no names in description
+- `"named_individuals_claimed": "YES"` but no names in description.
 - Reasoning flags concerns not evident in the description
 - Severity mismatch (e.g., HIGH risk flagged but description seems routine)
 
-Note: `"named_individuals_claimed": "NO"` with `"people_visible": "NO"` is consistent even when names appear in embedded text, since individuals were named in text only.
+Note on `"named_individuals_claimed"`: This field refers specifically to names that are asserted to identify a person visually depicted in the image. It is NOT triggered by names that appear in embedded text unless those names are explicitly linked to a pictured individual.
 
 Mark CONSISTENT if the description appropriately reflects the safety concerns identified and the level of caution matches the assessment.
 
