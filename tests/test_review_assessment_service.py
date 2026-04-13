@@ -46,7 +46,7 @@ def sample_safety_assessment():
         "stereotyping_present": "NO",
         "atrocities_depicted": "NO",
         "text_characteristics": {
-            "text_present": "NO",
+            "text_present": "NONE",
             "text_type": "N/A",
             "legibility": "N/A"
         }

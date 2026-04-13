@@ -54,7 +54,7 @@ def short_form_with_concerns():
         "stereotyping": "P",
         "atrocities": "Y",
         "text_chars": {
-            "present": "Y",
+            "present": "SIG",
             "type": "HWCU",
             "legib": "DIF",
             "sensitiv": "S"
@@ -83,7 +83,7 @@ def test_expand_no_concerns(short_form_no_concerns):
     assert result["stereotyping_present"] == "NO"
     assert result["atrocities_depicted"] == "NO"
     assert result["text_characteristics"] == {
-        "text_present": "NO",
+        "text_present": "NONE",
         "text_type": "N/A",
         "legibility": "N/A",
         "sensitivity": "N/A"
@@ -111,11 +111,35 @@ def test_expand_with_concerns(short_form_with_concerns):
     assert result["stereotyping_present"] == "POSSIBLY"
     assert result["atrocities_depicted"] == "YES"
     assert result["text_characteristics"] == {
-        "text_present": "YES",
+        "text_present": "SIGNIFICANT",
         "text_type": "HANDWRITTEN_CURSIVE",
         "legibility": "DIFFICULT",
         "sensitivity": "SENSITIVE"
     }
+
+
+def test_expand_text_present_values():
+    """Each text_chars.present abbreviation maps correctly to the new three-value enum."""
+    base = {
+        "people": "N", "demog": "N", "misid_risk": "L", "minors": "N",
+        "named_indiv": "N", "violence": "0", "racial_viol": "0",
+        "nudity": "0", "sexual": "0",
+        "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
+        "stereotyping": "N", "atrocities": "N",
+    }
+
+    present_map = {
+        "N": "NONE",
+        "INC": "INCIDENTAL",
+        "SIG": "SIGNIFICANT",
+    }
+    for short, full in present_map.items():
+        type_val = "NA" if short == "N" else "PR"
+        legib_val = "NA" if short == "N" else "CL"
+        sensitiv_val = "NA" if short == "N" else "0"
+        form = {**base, "text_chars": {"present": short, "type": type_val, "legib": legib_val, "sensitiv": sensitiv_val}}
+        result = expand_safety_form(form)
+        assert result["text_characteristics"]["text_present"] == full
 
 
 def test_expand_all_text_types():
@@ -133,7 +157,7 @@ def test_expand_all_text_types():
         "HWCU": "HANDWRITTEN_CURSIVE", "MX": "MIXED",
     }
     for short, full in type_map.items():
-        form = {**base, "text_chars": {"present": "Y", "type": short, "legib": "CL", "sensitiv": "0"}}
+        form = {**base, "text_chars": {"present": "SIG", "type": short, "legib": "CL", "sensitiv": "0"}}
         result = expand_safety_form(form)
         assert result["text_characteristics"]["text_type"] == full
 
@@ -152,7 +176,7 @@ def test_expand_all_legibility_values():
         "CL": "CLEAR", "PC": "PARTIALLY_CLEAR", "DIF": "DIFFICULT", "ILL": "ILLEGIBLE",
     }
     for short, full in legib_map.items():
-        form = {**base, "text_chars": {"present": "Y", "type": "PR", "legib": short, "sensitiv": "0"}}
+        form = {**base, "text_chars": {"present": "SIG", "type": "PR", "legib": short, "sensitiv": "0"}}
         result = expand_safety_form(form)
         assert result["text_characteristics"]["legibility"] == full
 
@@ -249,7 +273,7 @@ def test_expand_unknown_text_chars_value_raises():
             "nudity": "0", "sexual": "0",
             "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
             "stereotyping": "N", "atrocities": "N",
-            "text_chars": {"present": "Y", "type": "PR", "legib": "UNCLEAR", "sensitiv": "0"},
+            "text_chars": {"present": "SIG", "type": "PR", "legib": "UNCLEAR", "sensitiv": "0"},
         })
 
 
@@ -285,7 +309,7 @@ def test_expand_all_text_sensitivity_values():
     for short, full in sensitiv_map.items():
         legib = "NA" if short == "NA" else "CL"
         text_type = "NA" if short == "NA" else "PR"
-        present = "N" if short == "NA" else "Y"
+        present = "N" if short == "NA" else "SIG"
         form = {**base, "text_chars": {"present": present, "type": text_type, "legib": legib, "sensitiv": short}}
         result = expand_safety_form(form)
         assert result["text_characteristics"]["sensitivity"] == full
@@ -300,5 +324,5 @@ def test_expand_unknown_sensitivity_value_raises():
             "nudity": "0", "sexual": "0",
             "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
             "stereotyping": "N", "atrocities": "N",
-            "text_chars": {"present": "Y", "type": "PR", "legib": "CL", "sensitiv": "MAYBE"},
+            "text_chars": {"present": "SIG", "type": "PR", "legib": "CL", "sensitiv": "MAYBE"},
         })

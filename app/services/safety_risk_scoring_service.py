@@ -80,8 +80,9 @@ SYMBOL_MISIDENTIFICATION_RISK_WEIGHTS: dict[str, int] = {
 # Weights for fields nested inside TextCharacteristics.
 TEXT_FIELD_WEIGHTS: dict[str, dict[str, int]] = {
     "text_present": {
-        "YES": 1,
-        "NO": 0,
+        "NONE": 0,
+        "INCIDENTAL": 1,
+        "SIGNIFICANT": 1,
     },
     "text_type": {
         "N/A": 0,

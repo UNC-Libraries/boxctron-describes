@@ -29,7 +29,7 @@ def make_assessment(**overrides) -> SafetyAssessment:
         stereotyping_present="NO",
         atrocities_depicted="NO",
         text_characteristics=TextCharacteristics(
-            text_present="NO",
+            text_present="NONE",
             text_type="N/A",
             legibility="N/A",
             sensitivity="N/A",
@@ -66,7 +66,7 @@ def test_consistent_text_fields_do_not_trigger_inconsistency():
     """Valid text field combinations should produce no inconsistencies."""
     has_text = make_assessment(
         text_characteristics=TextCharacteristics(
-            text_present="YES", text_type="PRINTED", legibility="CLEAR", sensitivity="NONE"
+            text_present="SIGNIFICANT", text_type="PRINTED", legibility="CLEAR", sensitivity="NONE"
         )
     )
     assert count_safety_inconsistencies(has_text) == 0
@@ -160,16 +160,16 @@ def test_non_none_symbol_types_with_names_is_consistent():
 
 @pytest.mark.parametrize("text_chars,description", [
     (
-        TextCharacteristics(text_present="YES", text_type="N/A", legibility="CLEAR", sensitivity="NONE"),
-        "text_present=YES but text_type=N/A",
+        TextCharacteristics(text_present="SIGNIFICANT", text_type="N/A", legibility="CLEAR", sensitivity="NONE"),
+        "text_present=SIG but text_type=N/A",
     ),
     (
-        TextCharacteristics(text_present="YES", text_type="PRINTED", legibility="N/A", sensitivity="NONE"),
-        "text_present=YES but legibility=N/A",
+        TextCharacteristics(text_present="SIGNIFICANT", text_type="PRINTED", legibility="N/A", sensitivity="NONE"),
+        "text_present=SIG but legibility=N/A",
     ),
     (
-        TextCharacteristics(text_present="YES", text_type="PRINTED", legibility="CLEAR", sensitivity="N/A"),
-        "text_present=YES but sensitivity=N/A",
+        TextCharacteristics(text_present="SIGNIFICANT", text_type="PRINTED", legibility="CLEAR", sensitivity="N/A"),
+        "text_present=SIG but sensitivity=N/A",
     ),
 ])
 def test_each_text_inconsistency_counts_once(text_chars, description):
@@ -184,7 +184,7 @@ def test_all_text_sub_fields_na_with_text_present_counts_three():
     """All three text sub-fields being N/A when text is present should add 3 to the count."""
     assessment = make_assessment(
         text_characteristics=TextCharacteristics(
-            text_present="YES", text_type="N/A", legibility="N/A", sensitivity="N/A"
+            text_present="SIGNIFICANT", text_type="N/A", legibility="N/A", sensitivity="N/A"
         )
     )
     assert count_safety_inconsistencies(assessment) == 3
@@ -253,7 +253,7 @@ def test_inconsistencies_across_groups_compound():
             types=["NONE", "HATE"], names=["angryface"], misidentification_risk="LOW"
         ),  # symbol group: +2 (NONE+other)
         text_characteristics=TextCharacteristics(
-            text_present="YES", text_type="N/A", legibility="N/A", sensitivity="NONE"
+            text_present="SIGNIFICANT", text_type="N/A", legibility="N/A", sensitivity="NONE"
         ),  # text group: +2
     )
     assert count_safety_inconsistencies(assessment) == 4

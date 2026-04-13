@@ -27,9 +27,9 @@ class SymbolsPresent(BaseModel):
 class TextCharacteristics(BaseModel):
     """Characteristics of text present in the image."""
 
-    text_present: Literal["YES", "NO"] = Field(
+    text_present: Literal["NONE", "INCIDENTAL", "SIGNIFICANT"] = Field(
         ...,
-        description="Whether text is present in the image"
+        description="Whether text is present in the image and its significance"
     )
 
     text_type: Literal["N/A", "PRINTED", "TYPED", "HANDWRITTEN_PRINT", "HANDWRITTEN_CURSIVE", "MIXED"] = Field(
@@ -339,7 +339,7 @@ class DescribeResponse(BaseModel):
                         "stereotyping_present": "NO",
                         "atrocities_depicted": "NO",
                         "text_characteristics": {
-                            "text_present": "NO",
+                            "text_present": "NONE",
                             "text_type": "N/A",
                             "legibility": "N/A"
                         },
