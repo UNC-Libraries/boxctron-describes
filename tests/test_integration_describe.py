@@ -62,7 +62,7 @@ def mock_llm_responses():
                 "TRANSCRIPT": "No visible text in image.",
                 "ALT_TEXT": "A short description.",
                 "SAF": {
-                    "people": "N",
+                    "people": "Y",
                     "demog": "N",
                     "misid_risk": "L",
                     "minors": "N",
@@ -150,7 +150,6 @@ def test_integration_upload_real_image(client, blurry_owl_data, mock_llm_respons
     assert response.status_code == status.HTTP_200_OK
 
     result = response.json()
-    assert result["success"] is True
     assert result["filename"] == "blurry_owl.jpg"
     assert result["result"] is not None
 
@@ -162,7 +161,7 @@ def test_integration_upload_real_image(client, blurry_owl_data, mock_llm_respons
 
     # Verify safety assessment was processed
     safety = result_data["safety_assessment"]
-    assert safety["people_visible"] == "NO"
+    assert safety["people_visible"] == "YES"
     assert safety["risk_score"] is not None
     assert safety["inconsistency_count"] is not None
     assert isinstance(safety["risk_score"], int)
@@ -211,7 +210,6 @@ def test_integration_file_uri(client, blurry_owl_path, mock_llm_responses):
     assert response.status_code == status.HTTP_200_OK
 
     result = response.json()
-    assert result["success"] is True
     assert "blurry owl" in result["result"]["full_description"].lower()
     assert "a short description." in result["result"]["alt_text"].lower()
 
@@ -248,7 +246,6 @@ def test_integration_http_uri(client, blurry_owl_data, mock_llm_responses):
     assert response.status_code == status.HTTP_200_OK
 
     result = response.json()
-    assert result["success"] is True
     assert result["filename"] == "owl.jpg"
 
     # Verify the image was actually processed
@@ -280,7 +277,6 @@ def test_integration_no_context(client, blurry_owl_data, mock_llm_responses):
 
     assert response.status_code == status.HTTP_200_OK
     result = response.json()
-    assert result["success"] is True
 
     # Should still produce full results
     assert len(result["result"]["full_description"]) > 0
@@ -312,7 +308,6 @@ def test_integration_large_context(client, blurry_owl_data, mock_llm_responses):
 
     assert response.status_code == status.HTTP_200_OK
     result = response.json()
-    assert result["success"] is True
 
 
 @respx.mock
@@ -408,11 +403,14 @@ def test_integration_all_result_fields_populated(client, blurry_owl_data, mock_l
     # Version info
     version = result["version"]
     assert version["version"] is not None
-    assert isinstance(version["models"], dict)
-    assert "full_desc" in version["models"]
-    assert "alt_text" in version["models"]
-    assert "review" in version["models"]
     assert version["timestamp"] is not None
+
+    # Steps info
+    steps = result["steps"]
+    assert "full_desc" in steps
+    assert steps["full_desc"]["status"] == "success"
+    assert "review" in steps
+    assert steps["review"]["status"] == "success"
 
 
 def test_integration_file_cleanup(client, blurry_owl_data, mock_llm_responses, tmp_path):
@@ -440,3 +438,48 @@ def test_integration_file_cleanup(client, blurry_owl_data, mock_llm_responses, t
     # Some system temp files might exist, but shouldn't be from our process
     # This is a basic check - in production you'd track specific file handles
     assert len(new_files) == 0 or all(not f.name.startswith("tmp") for f in new_files)
+
+
+def test_integration_review_skipped_when_below_threshold(client, blurry_owl_data, mock_llm_responses):
+    """
+    Integration test: Verify review assessment is skipped when safety risk score is below threshold.
+
+    Tests:
+    - review_skip_threshold setting is respected
+    - review step outcome reports status=skipped with a reason
+    - review_assessment is absent from result
+    - overall_risk_score is derived from safety only
+    - review LLM service is never called
+    """
+    from app.config import settings
+
+    original_threshold = settings.review_skip_threshold
+    settings.review_skip_threshold = 30
+
+    try:
+        files = {"file": ("owl.jpg", io.BytesIO(blurry_owl_data), "image/jpeg")}
+        response = client.post("/api/v1/describe/upload", files=files, data={})
+
+        assert response.status_code == status.HTTP_200_OK
+        result = response.json()
+        result_data = result["result"]
+
+        # Review assessment should be absent
+        assert result_data["review_assessment"] is None
+
+        # Steps: full_desc succeeded, review was skipped
+        steps = result_data["steps"]
+        assert steps["full_desc"]["status"] == "success"
+        assert steps["full_desc"]["model"] is not None
+        assert steps["review"]["status"] == "skipped"
+        assert "30" in steps["review"]["reason"]  # threshold value appears in reason
+
+        # overall_risk_score should be the safety score alone (0)
+        assert result_data["overall_risk_score"] == result_data["safety_assessment"]["risk_score"]
+
+        # Review LLM should not have been called
+        image_desc_llm_mock, review_llm_mock = mock_llm_responses
+        assert image_desc_llm_mock.call_count == 1
+        assert review_llm_mock.call_count == 0
+    finally:
+        settings.review_skip_threshold = original_threshold

@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     litellm_review_temperature: float = 0.3
     litellm_review_max_tokens: int = 500
     litellm_review_reasoning_effort: Optional[str] = None
+    review_skip_threshold: Optional[int] = None  # Skip review if safety risk score is below this value (0-100); None means always review
 
     # File Upload Configuration
     max_upload_size: int = 10 * 1024 * 1024  # 10 MB

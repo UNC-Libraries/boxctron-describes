@@ -94,7 +94,6 @@ async def describe_uploaded_image(
         processing_time = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
 
         return DescribeResponse(
-            success=True,
             filename=filename,
             result=result,
             processing_time_ms=processing_time
@@ -197,7 +196,6 @@ async def describe_image_from_uri(
         processing_time = (datetime.now(timezone.utc) - start_time).total_seconds() * 1000
 
         return DescribeResponse(
-            success=True,
             filename=request.filename,
             result=result,
             processing_time_ms=processing_time

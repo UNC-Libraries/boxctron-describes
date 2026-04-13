@@ -206,17 +206,36 @@ class ReviewAssessment(BaseModel):
     )
 
 
+class StepOutcome(BaseModel):
+    """Outcome information for a single processing step."""
+
+    status: Literal["success", "skipped"] = Field(
+        ...,
+        description="Whether the step completed successfully or was skipped"
+    )
+
+    model: Optional[str] = Field(
+        None,
+        description="Name of the model used for this step"
+    )
+
+    duration_ms: Optional[float] = Field(
+        None,
+        description="Time taken to complete this step in milliseconds"
+    )
+
+    reason: Optional[str] = Field(
+        None,
+        description="Explanation for why this step was skipped"
+    )
+
+
 class VersionInfo(BaseModel):
     """Version information about the processing."""
 
     version: str = Field(
         ...,
         description="Version of the application"
-    )
-
-    models: Dict[str, str] = Field(
-        ...,
-        description="Map of task names to model names used for processing"
     )
 
     timestamp: str = Field(
@@ -248,9 +267,14 @@ class DescriptionResult(BaseModel):
         description="Safety information about the image content"
     )
 
-    review_assessment: ReviewAssessment = Field(
-        ...,
+    review_assessment: Optional[ReviewAssessment] = Field(
+        None,
         description="Analysis for determining if the image needs human review"
+    )
+
+    steps: Dict[str, StepOutcome] = Field(
+        default_factory=dict,
+        description="Per-step processing outcomes including status, model used, and duration"
     )
 
     overall_risk_score: Optional[int] = Field(
@@ -268,11 +292,6 @@ class DescribeResponse(BaseModel):
     """
     Response model for the describe endpoints.
     """
-
-    success: bool = Field(
-        ...,
-        description="Indicates whether the request was successful"
-    )
 
     filename: str = Field(
         ...,
@@ -297,7 +316,6 @@ class DescribeResponse(BaseModel):
     model_config = ConfigDict(
         json_schema_extra={
             "example": {
-                "success": True,
                 "filename": "photo.jpg",
                 "result": {
                     "full_description": "A scenic mountain landscape with snow-capped peaks rising above a forested valley",
@@ -344,12 +362,21 @@ class DescribeResponse(BaseModel):
                         "concerns_for_review": [],
                         "risk_score": 0
                     },
+                    "steps": {
+                        "full_desc": {
+                            "status": "success",
+                            "model": "azure/gpt-4o",
+                            "duration_ms": 980.0
+                        },
+                        "review": {
+                            "status": "success",
+                            "model": "azure/gpt-4o",
+                            "duration_ms": 270.0
+                        }
+                    },
                     "overall_risk_score": 0,
                     "version": {
                         "version": "0.1.0",
-                        "models": {
-                            "full_desc": "gpt-4o-2024-08-06"
-                        },
                         "timestamp": "2024-08-15T10:30:00Z"
                     }
                 },

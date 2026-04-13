@@ -16,6 +16,7 @@ from app.models import (
     ReviewAssessment,
     SymbolsPresent,
     TextCharacteristics,
+    StepOutcome,
     VersionInfo
 )
 
@@ -88,13 +89,12 @@ def mock_description_result():
             risk_score=0
         ),
         overall_risk_score=0,
+        steps={
+            "full_desc": StepOutcome(status="success", model="test-model", duration_ms=100.0),
+            "review": StepOutcome(status="success", model="test-model", duration_ms=50.0)
+        },
         version=VersionInfo(
             version="0.1.0",
-            models={
-                "full_desc": "test-model",
-                "alt_text": "test-model",
-                "review": "test-model"
-            },
             timestamp=datetime.now(timezone.utc).isoformat()
         )
     )
