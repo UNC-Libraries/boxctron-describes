@@ -240,6 +240,29 @@ def test_illegible_text_scores_higher_than_clear():
     assert calculate_risk_score(illegible) > calculate_risk_score(clear)
 
 
+def test_incidental_text_scores_lower_than_significant_text():
+    """Incidental text should score lower than significant text for the same type and legibility."""
+    incidental = make_assessment(
+        people_visible="YES",
+        text_characteristics=TextCharacteristics(
+            text_present="INCIDENTAL",
+            text_type="HANDWRITTEN_CURSIVE",
+            legibility="ILLEGIBLE",
+            sensitivity="NONE",
+        )
+    )
+    significant = make_assessment(
+        people_visible="YES",
+        text_characteristics=TextCharacteristics(
+            text_present="SIGNIFICANT",
+            text_type="HANDWRITTEN_CURSIVE",
+            legibility="ILLEGIBLE",
+            sensitivity="NONE",
+        )
+    )
+    assert calculate_risk_score(incidental) < calculate_risk_score(significant)
+
+
 # ---------------------------------------------------------------------------
 # Score properties
 # ---------------------------------------------------------------------------
