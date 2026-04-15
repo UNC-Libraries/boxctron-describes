@@ -389,7 +389,7 @@ def test_integration_all_result_fields_populated(client, blurry_owl_data, mock_l
     assert safety["reasoning"] is not None
     assert isinstance(safety["symbols_present"]["types"], list)
     assert isinstance(safety["symbols_present"]["names"], list)
-    assert safety["text_characteristics"]["text_present"] in ["YES", "NO"]
+    assert safety["text_characteristics"]["text_present"] in ["NONE", "INCIDENTAL", "SIGNIFICANT"]
 
     # Review assessment fields
     review = result["review_assessment"]

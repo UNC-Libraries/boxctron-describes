@@ -300,7 +300,7 @@ def _assert_default_response_populated(response, expected_filename):
     assert safety["violent_content"] == "NONE"
     assert safety["symbols_present"]["types"] == ["NONE"]
     assert safety["symbols_present"]["names"] == []
-    assert safety["text_characteristics"]["text_present"] == "NO"
+    assert safety["text_characteristics"]["text_present"] == "NONE"
     assert safety["text_characteristics"]["text_type"] == "N/A"
     assert safety["risk_score"] == 0
     assert safety["inconsistency_count"] == 0

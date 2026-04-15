@@ -44,6 +44,12 @@ BINARY_VALUE_MAP: Dict[str, str] = {
     "N": "NO",
 }
 
+TEXT_PRESENT_VALUE_MAP: Dict[str, str] = {
+    "N": "NONE",
+    "INC": "INCIDENTAL",
+    "SIG": "SIGNIFICANT",
+}
+
 BINARY_UNKNOWN_VALUE_MAP: Dict[str, str] = {
     "Y": "YES",
     "N": "NO",
@@ -190,7 +196,7 @@ def _expand_symbols(symbols: Dict[str, Any]) -> Dict[str, Any]:
 def _expand_text_chars(text_chars: Dict[str, Any]) -> Dict[str, Any]:
     """Expand the text_chars sub-object."""
     _value_maps: Dict[str, Dict[str, str]] = {
-        "present": BINARY_VALUE_MAP,
+        "present": TEXT_PRESENT_VALUE_MAP,
         "type": TEXT_TYPE_VALUE_MAP,
         "legib": LEGIBILITY_VALUE_MAP,
         "sensitiv": SENSITIVITY_VALUE_MAP,

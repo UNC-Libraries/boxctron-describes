@@ -32,7 +32,7 @@ def make_assessment(**overrides) -> SafetyAssessment:
         stereotyping_present="NO",
         atrocities_depicted="NO",
         text_characteristics=TextCharacteristics(
-            text_present="NO",
+            text_present="NONE",
             text_type="N/A",
             legibility="N/A",
             sensitivity="N/A",
@@ -78,7 +78,7 @@ def test_score_is_100_for_all_maximum_risk_values():
         stereotyping_present="YES",
         atrocities_depicted="YES",
         text_characteristics=TextCharacteristics(
-            text_present="YES",
+            text_present="SIGNIFICANT",
             text_type="HANDWRITTEN_CURSIVE",
             legibility="DIFFICULT",
             sensitivity="SENSITIVE",
@@ -119,7 +119,7 @@ def test_medium_risk_score_for_moderately_sensitive_image():
             misidentification_risk="MEDIUM",
         ),
         text_characteristics=TextCharacteristics(
-            text_present="YES",
+            text_present="SIGNIFICANT",
             text_type="PRINTED",
             legibility="CLEAR",
             sensitivity="NONE",
@@ -202,7 +202,7 @@ def test_handwritten_cursive_scores_higher_than_printed():
     """Handwritten cursive text should contribute more risk than printed text."""
     printed = make_assessment(
         text_characteristics=TextCharacteristics(
-            text_present="YES",
+            text_present="SIGNIFICANT",
             text_type="PRINTED",
             legibility="CLEAR",
             sensitivity="NONE",
@@ -210,7 +210,7 @@ def test_handwritten_cursive_scores_higher_than_printed():
     )
     cursive = make_assessment(
         text_characteristics=TextCharacteristics(
-            text_present="YES",
+            text_present="SIGNIFICANT",
             text_type="HANDWRITTEN_CURSIVE",
             legibility="CLEAR",
             sensitivity="NONE",
@@ -223,7 +223,7 @@ def test_illegible_text_scores_higher_than_clear():
     """Difficult-to-read text should contribute more risk than clearly legible text."""
     clear = make_assessment(
         text_characteristics=TextCharacteristics(
-            text_present="YES",
+            text_present="SIGNIFICANT",
             text_type="PRINTED",
             legibility="CLEAR",
             sensitivity="NONE",
@@ -231,13 +231,36 @@ def test_illegible_text_scores_higher_than_clear():
     )
     illegible = make_assessment(
         text_characteristics=TextCharacteristics(
-            text_present="YES",
+            text_present="SIGNIFICANT",
             text_type="PRINTED",
             legibility="ILLEGIBLE",
             sensitivity="NONE",
         )
     )
     assert calculate_risk_score(illegible) > calculate_risk_score(clear)
+
+
+def test_incidental_text_scores_lower_than_significant_text():
+    """Incidental text should score lower than significant text for the same type and legibility."""
+    incidental = make_assessment(
+        people_visible="YES",
+        text_characteristics=TextCharacteristics(
+            text_present="INCIDENTAL",
+            text_type="HANDWRITTEN_CURSIVE",
+            legibility="ILLEGIBLE",
+            sensitivity="NONE",
+        )
+    )
+    significant = make_assessment(
+        people_visible="YES",
+        text_characteristics=TextCharacteristics(
+            text_present="SIGNIFICANT",
+            text_type="HANDWRITTEN_CURSIVE",
+            legibility="ILLEGIBLE",
+            sensitivity="NONE",
+        )
+    )
+    assert calculate_risk_score(incidental) < calculate_risk_score(significant)
 
 
 # ---------------------------------------------------------------------------
@@ -265,7 +288,7 @@ def test_score_is_always_within_valid_range():
             stereotyping_present="YES",
             atrocities_depicted="YES",
             text_characteristics=TextCharacteristics(
-                text_present="YES", text_type="HANDWRITTEN_CURSIVE", legibility="DIFFICULT",
+                text_present="SIGNIFICANT", text_type="HANDWRITTEN_CURSIVE", legibility="DIFFICULT",
                 sensitivity="SENSITIVE"
             ),
         ),
@@ -308,12 +331,12 @@ def test_sensitive_text_scores_higher_than_none():
     """Text marked as sensitive should contribute more risk than non-sensitive text."""
     no_sensitivity = make_assessment(
         text_characteristics=TextCharacteristics(
-            text_present="YES", text_type="PRINTED", legibility="CLEAR", sensitivity="NONE"
+            text_present="SIGNIFICANT", text_type="PRINTED", legibility="CLEAR", sensitivity="NONE"
         )
     )
     sensitive = make_assessment(
         text_characteristics=TextCharacteristics(
-            text_present="YES", text_type="PRINTED", legibility="CLEAR", sensitivity="SENSITIVE"
+            text_present="SIGNIFICANT", text_type="PRINTED", legibility="CLEAR", sensitivity="SENSITIVE"
         )
     )
     assert calculate_risk_score(sensitive) > calculate_risk_score(no_sensitivity)
@@ -324,7 +347,7 @@ def test_sensitivity_na_scores_same_as_none():
     na = make_assessment()  # text_present=NO, sensitivity=N/A
     none_sensitivity = make_assessment(
         text_characteristics=TextCharacteristics(
-            text_present="YES", text_type="PRINTED", legibility="CLEAR", sensitivity="NONE"
+            text_present="SIGNIFICANT", text_type="PRINTED", legibility="CLEAR", sensitivity="NONE"
         )
     )
     # They may differ on text_present/type/legibility weights, but sensitivity contribution is equal

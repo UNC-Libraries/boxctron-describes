@@ -258,7 +258,7 @@ class ImageDescriptionService:
                                     "properties": {
                                         "present": {
                                             "type": "string",
-                                            "enum": ["Y", "N"]
+                                            "enum": ["N", "INC", "SIG"]
                                         },
                                         "type": {
                                             "type": "string",

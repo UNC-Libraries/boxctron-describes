@@ -80,13 +80,14 @@ SYMBOL_MISIDENTIFICATION_RISK_WEIGHTS: dict[str, int] = {
 # Weights for fields nested inside TextCharacteristics.
 TEXT_FIELD_WEIGHTS: dict[str, dict[str, int]] = {
     "text_present": {
-        "YES": 1,
-        "NO": 0,
+        "NONE": 0,
+        "INCIDENTAL": 1,
+        "SIGNIFICANT": 2,
     },
     "text_type": {
         "N/A": 0,
         "PRINTED": 1,
-        "TYPED": 1,
+        "TYPED": 0,
         "HANDWRITTEN_PRINT": 5,
         "HANDWRITTEN_CURSIVE": 10,
         "MIXED": 5,
@@ -101,7 +102,7 @@ TEXT_FIELD_WEIGHTS: dict[str, dict[str, int]] = {
     "sensitivity": {
         "N/A": 0,
         "NONE": 0,
-        "SENSITIVE": 7,
+        "SENSITIVE": 10,
     },
 }
 
@@ -117,6 +118,10 @@ _MAX_POSSIBLE_SCORE: int = (
 _PRACTICAL_MAX_FRACTION: float = 0.60
 
 _EFFECTIVE_MAX_SCORE: float = _MAX_POSSIBLE_SCORE * _PRACTICAL_MAX_FRACTION
+
+# Scaling factor applied to text_type and legibility weights when text_present is INCIDENTAL.
+# Sensitivity is not scaled — a racial slur on a background sign still carries full weight.
+_INCIDENTAL_TEXT_FACTOR: float = 0.2
 
 
 def calculate_risk_score(assessment: SafetyAssessment) -> int:
@@ -152,8 +157,12 @@ def calculate_risk_score(assessment: SafetyAssessment) -> int:
     )
 
     # text_characteristics fields
-    for field, weights in TEXT_FIELD_WEIGHTS.items():
-        value = getattr(assessment.text_characteristics, field)
-        raw_score += weights.get(value, 0)
+    text_chars = assessment.text_characteristics
+    raw_score += TEXT_FIELD_WEIGHTS["text_present"].get(text_chars.text_present, 0)
+
+    text_scale = _INCIDENTAL_TEXT_FACTOR if text_chars.text_present == "INCIDENTAL" else 1.0
+    raw_score += TEXT_FIELD_WEIGHTS["text_type"].get(text_chars.text_type, 0) * text_scale
+    raw_score += TEXT_FIELD_WEIGHTS["legibility"].get(text_chars.legibility, 0) * text_scale
+    raw_score += TEXT_FIELD_WEIGHTS["sensitivity"].get(text_chars.sensitivity, 0)
 
     return min(100, round((raw_score / _EFFECTIVE_MAX_SCORE) * 100))

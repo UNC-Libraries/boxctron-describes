@@ -48,7 +48,7 @@ def count_safety_inconsistencies(assessment: SafetyAssessment) -> int:
         count += 1
 
     # Text sub-fields should not be N/A when text is present.
-    if assessment.text_characteristics.text_present == "YES":
+    if assessment.text_characteristics.text_present != "NONE":
         if assessment.text_characteristics.text_type == "N/A":
             count += 1
         if assessment.text_characteristics.legibility == "N/A":
