@@ -154,10 +154,12 @@ Analyze this image and provide a comprehensive response with the following compo
 
   Base the alt text on what you observe directly in the image, and ensure it is consistent with your FULL_DESCRIPTION and TRANSCRIPT above.
 
-  Target length:
-  - Simple images: 1 sentence (15-25 words)
-  - Moderately complex: 2 sentences (25-40 words)
-  - Highly complex/information-dense: 2-3 sentences (40-60 words maximum)
+  Target length — strict limits, do NOT exceed:
+  - Hard ceiling: 50 words / 250 characters for any image, regardless of complexity
+  - Simple images: 1 sentence, 15-20 words
+  - Moderately complex: 1-2 sentences, 25-35 words
+  - Complex/information-dense: 2 sentences, 35-50 words
+  When in doubt, aim shorter rather than longer. Most archival images should target 25-35 words. Compress after drafting: if your alt text exceeds 40 words, revise it before outputting.
 
   Content priorities:
   - Lead with the main subject and primary action
