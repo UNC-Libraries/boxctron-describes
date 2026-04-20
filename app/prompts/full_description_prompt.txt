@@ -1,7 +1,16 @@
 Important technical note: Do not describe faces as blurred, obscured, or pixelated. This is a processing artifact and should be ignored entirely.
 
 Analyze this image and provide a comprehensive response with the following components:
-  1. FULL_DESCRIPTION - Provide a detailed and comprehensive description of what you can see in this image, incorporating the REFERENCE INFORMATION when applicable. Your description will be processed further, so include all relevant visual information. Aim for concise descriptions (1-2 paragraphs for simple images, 3-5 for complex ones). You do not need to address each point in the list individually, but make sure to cover all the points in your description:
+  1. FULL_DESCRIPTION - Provide a description of what you can see in this image, incorporating the REFERENCE INFORMATION when applicable. Your description will be processed further, so include all relevant visual information. Write in dense, factual prose — avoid transitional filler, restatements, and unnecessary elaboration.
+
+  Target length — strict limits, do NOT exceed:
+  - Hard ceiling: 300 words for any image, regardless of complexity
+  - Simple images (single subject, portrait, object, brief document): 100-160 words
+  - Moderately complex (group photo, document with content, simple scene): 150-220 words
+  - Complex (multi-subject scenes, significant embedded text, rich historical context): 200-275 words
+  When in doubt, aim shorter. Compress after drafting: if your description exceeds 250 words, revise before outputting.
+
+  You do not need to address each point in the list individually, but make sure to cover all the points in your description:
     1. The main subject and its characteristics, focused on what is clearly visible in the image
     2. In the FULL_DESCRIPTION, if the image contains visible text or writing:
        - Note the presence, type (such as handwritten, typed, printed), general purpose or location of the text
