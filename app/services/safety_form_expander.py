@@ -141,6 +141,33 @@ def _map_value(value: str, value_map: Dict[str, str], field: str) -> str:
     return value_map[value]
 
 
+def _fill_conditional_defaults(short_form: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Fill in default values for fields the LLM is instructed to omit when they
+    are deterministically implied by a parent field value.
+
+    - When people == "N": demog, misid_risk, minors, named_indiv default to N/L/N/N
+    - When text_chars.present == "N": type, legib, sensitiv default to "NA"
+    """
+    form = dict(short_form)
+
+    if form.get("people") == "N":
+        form.setdefault("demog", "N")
+        form.setdefault("misid_risk", "L")
+        form.setdefault("minors", "N")
+        form.setdefault("named_indiv", "N")
+
+    if "text_chars" in form:
+        text_chars = dict(form["text_chars"])
+        if text_chars.get("present") == "N":
+            text_chars.setdefault("type", "NA")
+            text_chars.setdefault("legib", "NA")
+            text_chars.setdefault("sensitiv", "NA")
+        form["text_chars"] = text_chars
+
+    return form
+
+
 def expand_safety_form(short_form: Dict[str, Any]) -> Dict[str, Any]:
     """
     Expand abbreviated safety form keys and values to full forms.
@@ -155,6 +182,7 @@ def expand_safety_form(short_form: Dict[str, Any]) -> Dict[str, Any]:
     Raises:
         ValueError: If a short key or value is not in the mapping.
     """
+    short_form = _fill_conditional_defaults(short_form)
     expanded: Dict[str, Any] = {}
 
     for short_key, value in short_form.items():

@@ -21,3 +21,7 @@ This change resulted in around 17% total token usage reduction, and a 12% input 
 ## Shortening outputs
 
 Our full description and alt text outputs were long, so we revised the limits on each down lower than before and put hard cut offs since the model was frequently exceeding the recommended max length. This resulted in outputs about half the length for each field, which should have a significant impact on the number of output tokens used.
+
+## Exclude dependent safety fields in negative cases
+
+In order to save output tokens, we are asking the model to not return dependent fields like "demographics_described" when people=N or "text_characteristics.sensitivity" when text_present=N, since those dependent fields would always be set to the same negative values. The default values for the fields are added back into the response from our API, so there is no external change.
