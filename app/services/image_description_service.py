@@ -7,7 +7,7 @@ from typing import Optional, Dict, Any
 from litellm import completion
 
 from app.config import Settings
-from app.services.safety_form_expander import expand_safety_form, SAFETY_FORM_KEY_MAP
+from app.services.safety_form_expander import expand_safety_form
 from app.utils.llm_utils import log_token_usage
 
 logger = logging.getLogger(__name__)
@@ -169,7 +169,7 @@ class ImageDescriptionService:
             "type": "json_schema",
             "json_schema": {
                 "name": "image_analysis",
-                "strict": True,
+                "strict": False,
                 "schema": {
                     "type": "object",
                     "properties": {
@@ -273,16 +273,12 @@ class ImageDescriptionService:
                                             "enum": ["NA", "0", "S"]
                                         }
                                     },
-                                    "required": ["present", "type", "legib", "sensitiv"],
+                                    "required": ["present"],
                                     "additionalProperties": False
                                 }
                             },
                             "required": [
                                 "people",
-                                "demog",
-                                "misid_risk",
-                                "minors",
-                                "named_indiv",
                                 "violence",
                                 "racial_viol",
                                 "nudity",
@@ -321,6 +317,23 @@ class ImageDescriptionService:
 
         # Validate nested SAF structure (uses abbreviated keys)
         safety_form = response["SAF"]
-        for short_key in SAFETY_FORM_KEY_MAP:
-            if short_key not in safety_form:
-                raise ValueError(f"Missing required safety assessment field: {short_key}")
+        always_required = [
+            "people", "violence", "racial_viol", "nudity", "sexual",
+            "symbols", "stereotyping", "atrocities", "text_chars",
+        ]
+        for field in always_required:
+            if field not in safety_form:
+                raise ValueError(f"Missing required safety assessment field: {field}")
+
+        # demog/misid_risk/minors/named_indiv are only required when people != "N"
+        if safety_form.get("people") != "N":
+            for field in ["demog", "misid_risk", "minors", "named_indiv"]:
+                if field not in safety_form:
+                    raise ValueError(f"Missing required safety assessment field: {field}")
+
+        # text_chars sub-fields are only required when text_chars.present != "N"
+        text_chars = safety_form.get("text_chars", {})
+        if isinstance(text_chars, dict) and text_chars.get("present") != "N":
+            for field in ["type", "legib", "sensitiv"]:
+                if field not in text_chars:
+                    raise ValueError(f"Missing required safety assessment field: text_chars.{field}")

@@ -80,10 +80,6 @@ def mock_llm_responses():
                 "ALT_TEXT": "A short description.",
                 "SAF": {
                     "people": "N",
-                    "demog": "N",
-                    "misid_risk": "L",
-                    "minors": "N",
-                    "named_indiv": "N",
                     "violence": "0",
                     "racial_viol": "0",
                     "nudity": "0",
@@ -96,10 +92,7 @@ def mock_llm_responses():
                     "stereotyping": "N",
                     "atrocities": "N",
                     "text_chars": {
-                        "present": "N",
-                        "type": "NA",
-                        "legib": "NA",
-                        "sensitiv": "NA"
+                        "present": "N"
                     }
                 },
                 "SAR": "Test reasoning"

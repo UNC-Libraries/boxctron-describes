@@ -6,13 +6,9 @@ from app.services.safety_form_expander import expand_safety_form
 
 @pytest.fixture
 def short_form_no_concerns():
-    """A typical short-form safety assessment with no concerns."""
+    """A typical short-form safety assessment with no concerns (conditional fields omitted)."""
     return {
         "people": "N",
-        "demog": "N",
-        "misid_risk": "L",
-        "minors": "N",
-        "named_indiv": "N",
         "violence": "0",
         "racial_viol": "0",
         "nudity": "0",
@@ -25,10 +21,7 @@ def short_form_no_concerns():
         "stereotyping": "N",
         "atrocities": "N",
         "text_chars": {
-            "present": "N",
-            "type": "NA",
-            "legib": "NA",
-            "sensitiv": "NA"
+            "present": "N"
         }
     }
 
@@ -220,6 +213,60 @@ def test_expand_unknown_key_raises():
     """Unknown short key raises ValueError with the key name in the message."""
     with pytest.raises(ValueError, match="unknown_field"):
         expand_safety_form({"unknown_field": "Y"})
+
+
+def test_people_n_fills_conditional_defaults():
+    """When people=N, omitted demog/misid_risk/minors/named_indiv are filled with defaults."""
+    form = {
+        "people": "N",
+        "violence": "0", "racial_viol": "0", "nudity": "0", "sexual": "0",
+        "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
+        "stereotyping": "N", "atrocities": "N",
+        "text_chars": {"present": "N"},
+    }
+    result = expand_safety_form(form)
+    assert result["demographics_described"] == "NO"
+    assert result["misidentification_risk_people"] == "LOW"
+    assert result["minors_present"] == "NO"
+    assert result["named_individuals_claimed"] == "NO"
+
+
+def test_text_chars_present_n_fills_conditional_defaults():
+    """When text_chars.present=N, omitted type/legib/sensitiv are filled with NA defaults."""
+    form = {
+        "people": "N",
+        "violence": "0", "racial_viol": "0", "nudity": "0", "sexual": "0",
+        "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
+        "stereotyping": "N", "atrocities": "N",
+        "text_chars": {"present": "N"},
+    }
+    result = expand_safety_form(form)
+    assert result["text_characteristics"] == {
+        "text_present": "NONE",
+        "text_type": "N/A",
+        "legibility": "N/A",
+        "sensitivity": "N/A",
+    }
+
+
+def test_people_not_n_explicit_fields_not_overridden():
+    """Explicitly provided conditional fields are never overridden by defaults."""
+    form = {
+        "people": "N",
+        "demog": "Y",  # explicitly provided even though people=N
+        "misid_risk": "H",
+        "minors": "Y",
+        "named_indiv": "Y",
+        "violence": "0", "racial_viol": "0", "nudity": "0", "sexual": "0",
+        "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
+        "stereotyping": "N", "atrocities": "N",
+        "text_chars": {"present": "N"},
+    }
+    result = expand_safety_form(form)
+    assert result["demographics_described"] == "YES"
+    assert result["misidentification_risk_people"] == "HIGH"
+    assert result["minors_present"] == "YES"
+    assert result["named_individuals_claimed"] == "YES"
 
 
 def test_expand_unknown_top_level_value_raises():
