@@ -271,6 +271,9 @@ class ImageDescriptionService:
                                         "sensitiv": {
                                             "type": "string",
                                             "enum": ["NA", "0", "S"]
+                                        },
+                                        "lang": {
+                                            "type": "string"
                                         }
                                     },
                                     "required": ["present"],
@@ -334,6 +337,6 @@ class ImageDescriptionService:
         # text_chars sub-fields are only required when text_chars.present != "N"
         text_chars = safety_form.get("text_chars", {})
         if isinstance(text_chars, dict) and text_chars.get("present") != "N":
-            for field in ["type", "legib", "sensitiv"]:
+            for field in ["type", "legib", "sensitiv", "lang"]:
                 if field not in text_chars:
                     raise ValueError(f"Missing required safety assessment field: text_chars.{field}")

@@ -104,6 +104,9 @@ TEXT_FIELD_WEIGHTS: dict[str, dict[str, int]] = {
         "NONE": 0,
         "SENSITIVE": 10,
     },
+    "language": {
+        "UNKNOWN": 3,
+    },
 }
 
 # Pre-computed maximum possible score across all fields.
@@ -164,5 +167,7 @@ def calculate_risk_score(assessment: SafetyAssessment) -> int:
     raw_score += TEXT_FIELD_WEIGHTS["text_type"].get(text_chars.text_type, 0) * text_scale
     raw_score += TEXT_FIELD_WEIGHTS["legibility"].get(text_chars.legibility, 0) * text_scale
     raw_score += TEXT_FIELD_WEIGHTS["sensitivity"].get(text_chars.sensitivity, 0)
+    if text_chars.language is not None:
+        raw_score += TEXT_FIELD_WEIGHTS["language"].get(text_chars.language, 0)
 
     return min(100, round((raw_score / _EFFECTIVE_MAX_SCORE) * 100))

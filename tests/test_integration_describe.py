@@ -480,3 +480,235 @@ def test_integration_review_skipped_when_below_threshold(client, blurry_owl_data
         assert review_llm_mock.call_count == 0
     finally:
         settings.review_skip_threshold = original_threshold
+
+
+def test_integration_all_safety_and_review_fields_populated_with_positive_values(
+    client, blurry_owl_data
+):
+    """
+    Integration test: Verify every safety and review assessment field is present
+    and correctly propagated through the full stack when the LLM returns elevated values.
+
+    This is an inventory test — it asserts field presence and valid values but does
+    not mandate specific values for every field.
+    """
+    def elevated_side_effect(*args, **kwargs):
+        response_format = kwargs.get("response_format", {})
+        schema_name = ""
+        if isinstance(response_format, dict):
+            json_schema = response_format.get("json_schema", {})
+            if isinstance(json_schema, dict):
+                schema_name = json_schema.get("name", "")
+
+        if schema_name == "image_analysis":
+            mock_response = Mock()
+            mock_response.choices = [Mock()]
+            mock_response.choices[0].message.content = json.dumps({
+                "FULL_DESCRIPTION": "A historical photograph showing people in a crowd.",
+                "TRANSCRIPT": "Rally for justice",
+                "ALT_TEXT": "Crowd at a rally holding signs.",
+                "SAF": {
+                    "people": "Y",
+                    "demog": "Y",
+                    "misid_risk": "M",
+                    "minors": "Y",
+                    "named_indiv": "Y",
+                    "violence": "IMP",
+                    "racial_viol": "IMP",
+                    "nudity": "PAR",
+                    "sexual": "SUG",
+                    "symbols": {
+                        "types": ["POL", "CUL"],
+                        "names": ["American flag", "protest banner"],
+                        "misid_risk": "M",
+                    },
+                    "stereotyping": "P",
+                    "atrocities": "Y",
+                    "text_chars": {
+                        "present": "SIG",
+                        "type": "HWCU",
+                        "legib": "DIF",
+                        "sensitiv": "S",
+                        "lang": "English",
+                    },
+                },
+                "SAR": "Multiple elevated risk factors identified.",
+            })
+            mock_response.usage = Mock()
+            return mock_response
+
+        if schema_name == "review_assessment":
+            mock_response = Mock()
+            mock_response.choices = [Mock()]
+            mock_response.choices[0].message.content = json.dumps({
+                "bias": "Y",
+                "stereo": "P",
+                "val_judg": "Y",
+                "contra_btwn": "Y",
+                "contra_within": "P",
+                "offensive": "Y",
+                "incon_demog": "Y",
+                "euphemism": "P",
+                "ppl_first": "NU",
+                "unsup_infer": "Y",
+                "safety_consist": "INCON",
+                "concerns": ["Biased framing", "Unsupported claim about identity"],
+                "src_warn": ["Text contains historically offensive language"],
+            })
+            mock_response.usage = Mock()
+            return mock_response
+
+        mock_response = Mock()
+        mock_response.choices = [Mock()]
+        mock_response.choices[0].message.content = "Alt text"
+        mock_response.usage = Mock()
+        return mock_response
+
+    with patch("app.services.image_description_service.completion", side_effect=elevated_side_effect), \
+         patch("app.services.review_assessment_service.completion", side_effect=elevated_side_effect):
+        files = {"file": ("crowd.jpg", io.BytesIO(blurry_owl_data), "image/jpeg")}
+        response = client.post("/api/v1/describe/upload", files=files, data={"context": "Historical rally"})
+
+    assert response.status_code == status.HTTP_200_OK
+    result = response.json()["result"]
+
+    # ── Safety assessment — every field must be present ──────────────────────
+    safety = result["safety_assessment"]
+
+    assert safety["people_visible"] == "YES"
+    assert safety["demographics_described"] == "YES"
+    assert safety["misidentification_risk_people"] == "MEDIUM"
+    assert safety["minors_present"] == "YES"
+    assert safety["named_individuals_claimed"] == "YES"
+    assert safety["violent_content"] == "IMPLIED"
+    assert safety["racial_violence_oppression"] == "IMPLIED"
+    assert safety["nudity"] == "PARTIAL"
+    assert safety["sexual_content"] == "SUGGESTIVE"
+
+    symbols = safety["symbols_present"]
+    assert symbols["types"] == ["POLITICAL", "CULTURAL"]
+    assert symbols["names"] == ["American flag", "protest banner"]
+    assert symbols["misidentification_risk"] == "MEDIUM"
+
+    assert safety["stereotyping_present"] == "POSSIBLY"
+    assert safety["atrocities_depicted"] == "YES"
+    assert isinstance(safety["reasoning"], str)
+    assert isinstance(safety["risk_score"], int)
+    assert isinstance(safety["inconsistency_count"], int)
+
+    text = safety["text_characteristics"]
+    assert text["text_present"] == "SIGNIFICANT"
+    assert text["text_type"] == "HANDWRITTEN_CURSIVE"
+    assert text["legibility"] == "DIFFICULT"
+    assert text["sensitivity"] == "SENSITIVE"
+    assert text["language"] == "English"
+
+    # ── Review assessment — every field must be present ───────────────────────
+    review = result["review_assessment"]
+
+    assert review["biased_language"] == "YES"
+    assert review["stereotyping"] == "POSSIBLY"
+    assert review["value_judgments"] == "YES"
+    assert review["contradictions_between_texts"] == "YES"
+    assert review["contradictions_within_description"] == "POSSIBLY"
+    assert review["offensive_language"] == "YES"
+    assert review["inconsistent_demographics"] == "YES"
+    assert review["euphemistic_language"] == "POSSIBLY"
+    assert review["people_first_language"] == "NOT_USED"
+    assert review["unsupported_inferential_claims"] == "YES"
+    assert review["safety_assessment_consistency"] == "INCONSISTENT"
+    assert review["concerns_for_review"] == ["Biased framing", "Unsupported claim about identity"]
+    assert review["source_content_warnings"] == ["Text contains historically offensive language"]
+    assert isinstance(review["risk_score"], int)
+
+
+def test_integration_conditional_safety_fields_default_when_omitted(
+    client, blurry_owl_data
+):
+    """
+    Integration test: Verify that conditional safety assessment fields are present
+    in the final API response with correct defaults even when the LLM omits them.
+
+    Specifically:
+    - When people="N", the LLM omits demog/misid_risk/minors/named_indiv; these
+      must appear in the response as NO/LOW/NO/NO.
+    - When text_chars.present="N", the LLM omits type/legib/sensitiv/lang; these
+      must appear in the response as N/A/N/A/N/A/None.
+    """
+    def minimal_side_effect(*args, **kwargs):
+        response_format = kwargs.get("response_format", {})
+        schema_name = ""
+        if isinstance(response_format, dict):
+            json_schema = response_format.get("json_schema", {})
+            if isinstance(json_schema, dict):
+                schema_name = json_schema.get("name", "")
+
+        if schema_name == "image_analysis":
+            mock_response = Mock()
+            mock_response.choices = [Mock()]
+            # Model omits all conditional fields as instructed
+            mock_response.choices[0].message.content = json.dumps({
+                "FULL_DESCRIPTION": "A photograph of a mountain landscape with no people.",
+                "TRANSCRIPT": "",
+                "ALT_TEXT": "Mountain landscape.",
+                "SAF": {
+                    "people": "N",
+                    # demog, misid_risk, minors, named_indiv intentionally omitted
+                    "violence": "0",
+                    "racial_viol": "0",
+                    "nudity": "0",
+                    "sexual": "0",
+                    "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
+                    "stereotyping": "N",
+                    "atrocities": "N",
+                    "text_chars": {
+                        "present": "N",
+                        # type, legib, sensitiv, lang intentionally omitted
+                    },
+                },
+                "SAR": "No elevated risks identified.",
+            })
+            mock_response.usage = Mock()
+            return mock_response
+
+        if schema_name == "review_assessment":
+            mock_response = Mock()
+            mock_response.choices = [Mock()]
+            mock_response.choices[0].message.content = json.dumps({
+                "bias": "N", "stereo": "N", "val_judg": "N",
+                "contra_btwn": "N", "contra_within": "N", "offensive": "N",
+                "incon_demog": "N", "euphemism": "N", "ppl_first": "NA",
+                "unsup_infer": "N", "safety_consist": "CON",
+                "concerns": [], "src_warn": [],
+            })
+            mock_response.usage = Mock()
+            return mock_response
+
+        mock_response = Mock()
+        mock_response.choices = [Mock()]
+        mock_response.choices[0].message.content = "Mountain landscape."
+        mock_response.usage = Mock()
+        return mock_response
+
+    with patch("app.services.image_description_service.completion", side_effect=minimal_side_effect), \
+         patch("app.services.review_assessment_service.completion", side_effect=minimal_side_effect):
+        files = {"file": ("mountain.jpg", io.BytesIO(blurry_owl_data), "image/jpeg")}
+        response = client.post("/api/v1/describe/upload", files=files, data={})
+
+    assert response.status_code == status.HTTP_200_OK
+    safety = response.json()["result"]["safety_assessment"]
+
+    # ── People is NO — conditional people fields must default ─────────────────
+    assert safety["people_visible"] == "NO"
+    assert safety["demographics_described"] == "NO"
+    assert safety["misidentification_risk_people"] == "LOW"
+    assert safety["minors_present"] == "NO"
+    assert safety["named_individuals_claimed"] == "NO"
+
+    # ── Text not present — conditional text_chars fields must default ─────────
+    text = safety["text_characteristics"]
+    assert text["text_present"] == "NONE"
+    assert text["text_type"] == "N/A"
+    assert text["legibility"] == "N/A"
+    assert text["sensitivity"] == "N/A"
+    assert text["language"] == "N/A"

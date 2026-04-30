@@ -50,7 +50,8 @@ def short_form_with_concerns():
             "present": "SIG",
             "type": "HWCU",
             "legib": "DIF",
-            "sensitiv": "S"
+            "sensitiv": "S",
+            "lang": "English"
         }
     }
 
@@ -79,7 +80,8 @@ def test_expand_no_concerns(short_form_no_concerns):
         "text_present": "NONE",
         "text_type": "N/A",
         "legibility": "N/A",
-        "sensitivity": "N/A"
+        "sensitivity": "N/A",
+        'language': 'N/A'
     }
 
 
@@ -107,7 +109,8 @@ def test_expand_with_concerns(short_form_with_concerns):
         "text_present": "SIGNIFICANT",
         "text_type": "HANDWRITTEN_CURSIVE",
         "legibility": "DIFFICULT",
-        "sensitivity": "SENSITIVE"
+        "sensitivity": "SENSITIVE",
+        "language": "English",
     }
 
 
@@ -246,6 +249,7 @@ def test_text_chars_present_n_fills_conditional_defaults():
         "text_type": "N/A",
         "legibility": "N/A",
         "sensitivity": "N/A",
+        "language": "N/A",
     }
 
 
@@ -373,3 +377,31 @@ def test_expand_unknown_sensitivity_value_raises():
             "stereotyping": "N", "atrocities": "N",
             "text_chars": {"present": "SIG", "type": "PR", "legib": "CL", "sensitiv": "MAYBE"},
         })
+
+
+_TEXT_BASE = {
+    "people": "N",
+    "violence": "0", "racial_viol": "0", "nudity": "0", "sexual": "0",
+    "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
+    "stereotyping": "N", "atrocities": "N",
+}
+
+
+def test_lang_known_language_passed_through():
+    """A known ISO 639 language name is passed through unchanged."""
+    form = {**_TEXT_BASE, "text_chars": {"present": "SIG", "type": "PR", "legib": "CL", "sensitiv": "0", "lang": "Spanish"}}
+    result = expand_safety_form(form)
+    assert result["text_characteristics"]["language"] == "Spanish"
+
+
+def test_lang_u_expands_to_unknown():
+    """The abbreviated 'U' value expands to 'UNKNOWN'."""
+    form = {**_TEXT_BASE, "text_chars": {"present": "SIG", "type": "PR", "legib": "CL", "sensitiv": "0", "lang": "U"}}
+    result = expand_safety_form(form)
+    assert result["text_characteristics"]["language"] == "UNKNOWN"
+
+def test_lang_absent_produces_no_language_key():
+    """When lang is omitted, the language key is omitted."""
+    form = {**_TEXT_BASE, "text_chars": {"present": "SIG", "type": "PR", "legib": "CL", "sensitiv": "0"}}
+    result = expand_safety_form(form)
+    assert "language" not in result["text_characteristics"]
