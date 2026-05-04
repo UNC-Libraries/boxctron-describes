@@ -47,6 +47,11 @@ class TextCharacteristics(BaseModel):
         description="Whether the text content itself contains sensitive, offensive, or historically problematic material"
     )
 
+    language: Optional[str] = Field(
+        None,
+        description="Predominant language of the text, as an ISO 639 language name (e.g. 'English', 'Spanish'), or 'UNKNOWN' if it cannot be determined, or 'N/A' if there is no text"
+    )
+
 
 class SafetyAssessment(BaseModel):
     """Safety assessment of the image content."""

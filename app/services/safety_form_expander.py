@@ -35,6 +35,7 @@ TEXT_CHARS_KEY_MAP: Dict[str, str] = {
     "type": "text_type",
     "legib": "legibility",
     "sensitiv": "sensitivity",
+    "lang": "language",
 }
 
 # ── Value mappings (short → full) ────────────────────────────────────────────
@@ -118,6 +119,11 @@ SENSITIVITY_VALUE_MAP: Dict[str, str] = {
     "S": "SENSITIVE",
 }
 
+LANGUAGE_VALUE_MAP: Dict[str, str] = {
+    "NA": "N/A",
+    "U": "UNKNOWN"
+}
+
 # Map each short key to its value expansion map
 _FIELD_VALUE_MAPS: Dict[str, Dict[str, str]] = {
     "people": BINARY_UNKNOWN_VALUE_MAP,
@@ -163,6 +169,7 @@ def _fill_conditional_defaults(short_form: Dict[str, Any]) -> Dict[str, Any]:
             text_chars.setdefault("type", "NA")
             text_chars.setdefault("legib", "NA")
             text_chars.setdefault("sensitiv", "NA")
+            text_chars.setdefault("lang", "NA")
         form["text_chars"] = text_chars
 
     return form
@@ -229,14 +236,21 @@ def _expand_text_chars(text_chars: Dict[str, Any]) -> Dict[str, Any]:
         "legib": LEGIBILITY_VALUE_MAP,
         "sensitiv": SENSITIVITY_VALUE_MAP,
     }
+    # lang uses a special value: "U" -> "UNKNOWN", anything else is a language name passed through
+    LANG_UNKNOWN = "U"
+    LANG_UNKNOWN_EXPANDED = "UNKNOWN"
     expanded: Dict[str, Any] = {}
     for short_key, value in text_chars.items():
         if short_key not in TEXT_CHARS_KEY_MAP:
             raise ValueError(f"Unknown text_chars key {short_key!r}")
         full_key = TEXT_CHARS_KEY_MAP[short_key]
-        value_map = _value_maps.get(short_key)
-        if value_map and isinstance(value, str):
-            expanded[full_key] = _map_value(value, value_map, f"text_chars.{short_key}")
+        if short_key == "lang":
+            print(f"Short key: {short_key} {short_key in LANGUAGE_VALUE_MAP}")
+            expanded[full_key] = LANGUAGE_VALUE_MAP[value] if value in LANGUAGE_VALUE_MAP else value
         else:
-            expanded[full_key] = value
+            value_map = _value_maps.get(short_key)
+            if value_map and isinstance(value, str):
+                expanded[full_key] = _map_value(value, value_map, f"text_chars.{short_key}")
+            else:
+                expanded[full_key] = value
     return expanded

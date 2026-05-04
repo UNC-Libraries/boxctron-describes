@@ -354,3 +354,50 @@ def test_sensitivity_na_scores_same_as_none():
     na_score = calculate_risk_score(na)
     none_score = calculate_risk_score(none_sensitivity)
     assert na_score <= none_score  # none_sensitivity has extra text_present weight
+
+
+# ---------------------------------------------------------------------------
+# Text language
+# ---------------------------------------------------------------------------
+
+def test_unknown_language_increases_score():
+    """language=Unknown should add risk compared to a known language."""
+    known_lang = make_assessment(
+        text_characteristics=TextCharacteristics(
+            text_present="SIGNIFICANT", text_type="PRINTED", legibility="CLEAR",
+            sensitivity="NONE", language="English",
+        )
+    )
+    unknown_lang = make_assessment(
+        text_characteristics=TextCharacteristics(
+            text_present="SIGNIFICANT", text_type="PRINTED", legibility="CLEAR",
+            sensitivity="NONE", language="UNKNOWN",
+        )
+    )
+    assert calculate_risk_score(unknown_lang) > calculate_risk_score(known_lang)
+
+
+def test_known_language_adds_no_score():
+    """Any known language value should add zero weight."""
+    no_lang = make_assessment(
+        text_characteristics=TextCharacteristics(
+            text_present="SIGNIFICANT", text_type="PRINTED", legibility="CLEAR", sensitivity="NONE",
+        )
+    )
+    known_lang = make_assessment(
+        text_characteristics=TextCharacteristics(
+            text_present="SIGNIFICANT", text_type="PRINTED", legibility="CLEAR",
+            sensitivity="NONE", language="French",
+        )
+    )
+    assert calculate_risk_score(known_lang) == calculate_risk_score(no_lang)
+
+
+def test_none_language_adds_no_score():
+    """language=None (absent) should add zero weight."""
+    baseline = make_assessment(
+        text_characteristics=TextCharacteristics(
+            text_present="SIGNIFICANT", text_type="PRINTED", legibility="CLEAR", sensitivity="NONE",
+        )
+    )
+    assert calculate_risk_score(baseline) == calculate_risk_score(baseline)
