@@ -236,9 +236,6 @@ def _expand_text_chars(text_chars: Dict[str, Any]) -> Dict[str, Any]:
         "legib": LEGIBILITY_VALUE_MAP,
         "sensitiv": SENSITIVITY_VALUE_MAP,
     }
-    # lang uses a special value: "U" -> "UNKNOWN", anything else is a language name passed through
-    LANG_UNKNOWN = "U"
-    LANG_UNKNOWN_EXPANDED = "UNKNOWN"
     expanded: Dict[str, Any] = {}
     for short_key, value in text_chars.items():
         if short_key not in TEXT_CHARS_KEY_MAP:
