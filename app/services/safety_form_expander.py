@@ -22,6 +22,7 @@ SAFETY_FORM_KEY_MAP: Dict[str, str] = {
     "stereotyping": "stereotyping_present",
     "atrocities": "atrocities_depicted",
     "text_chars": "text_characteristics",
+    "img_qual": "image_quality",
 }
 
 SYMBOLS_KEY_MAP: Dict[str, str] = {
@@ -124,6 +125,12 @@ LANGUAGE_VALUE_MAP: Dict[str, str] = {
     "U": "UNKNOWN"
 }
 
+IMAGE_QUALITY_VALUE_MAP: Dict[str, str] = {
+    "0": "UNIMPAIRED",
+    "DGR": "DEGRADED",
+    "IMP": "IMPAIRED",
+}
+
 # Map each short key to its value expansion map
 _FIELD_VALUE_MAPS: Dict[str, Dict[str, str]] = {
     "people": BINARY_UNKNOWN_VALUE_MAP,
@@ -137,6 +144,7 @@ _FIELD_VALUE_MAPS: Dict[str, Dict[str, str]] = {
     "sexual": SEXUAL_VALUE_MAP,
     "stereotyping": TERNARY_NPY_VALUE_MAP,
     "atrocities": BINARY_VALUE_MAP,
+    "img_qual": IMAGE_QUALITY_VALUE_MAP,
 }
 
 

@@ -68,6 +68,7 @@ def mock_description_result():
                 legibility="N/A",
                 sensitivity="N/A"
             ),
+            image_quality="UNIMPAIRED",
             reasoning="Test reasoning",
             risk_score=0,
             inconsistency_count=0

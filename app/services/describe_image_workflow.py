@@ -172,6 +172,7 @@ class DescribeImageWorkflow:
                 sensitivity=safety_form.get("text_characteristics", {}).get("sensitivity", "N/A"),
                 language=safety_form.get("text_characteristics", {}).get("language", "N/A")
             ),
+            image_quality=safety_form.get("image_quality", "UNKNOWN"),
             reasoning=full_desc_result.get("SAFETY_ASSESSMENT_REASONING", "")
         )
 

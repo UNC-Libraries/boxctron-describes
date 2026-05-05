@@ -256,6 +256,11 @@ Analyze this image and provide a comprehensive response with the following compo
         - Use "U" if you cannot determine the language from the text
         - Otherwise, use the fully spelled-out ISO 639 language name (e.g. "English", "Arabic", "Chinese")
     - sexual (sexual content) - Medical/anatomical images would be "0". Historical/ethnographic documentation would be "0". Fine art would be "0" unless the pose or context is explicitly sexual.
+    - img_qual (image quality) - Assess whether the overall image quality is sufficient for reliable description.
+        - "0": No significant quality issues — image is clear enough for reliable description
+        - "DGR": degraded — blur, low resolution, overexposure, or physical damage that reduces confidence in fine detail but a description is still possible
+        - "IMP": severely impaired — image is so blurry, dark/overexposed, low-resolution, or damaged that accurate description is significantly compromised
+        - Do NOT mark "DGR" or "IMP" based on faces appearing blurred or obscured — this is a processing artifact. Quality concerns apply to overall image clarity only.
 
 5. SAR (safety assessment reasoning) - Explain ONLY the reasons for positive identifications, elevated risks, or uncertain assessments.
   - Address only fields marked with concerning values:
@@ -265,6 +270,7 @@ Analyze this image and provide a comprehensive response with the following compo
     - Specific concerns for human reviewers to verify
     - text_chars.legib is "DIF" or "ILL"
     - text_chars.sensitiv is "S" — briefly describe what type of sensitive language is present (e.g., "Printed text contains racial slur referring to a specific person", "Preamble text uses historically offensive terminology for a demographic group")
+    - img_qual is "DGR" or "IMP" — briefly describe what the quality issue is (e.g., blur, low resolution, overexposure, physical damage to the original material)
   - DO NOT mention:
     - Fields marked as "N", "0", "L", "CL", or "PC"
     - The absence of issues

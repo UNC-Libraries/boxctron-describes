@@ -121,6 +121,11 @@ class SafetyAssessment(BaseModel):
         description="Characteristics of text in the image"
     )
 
+    image_quality: Literal["UNIMPAIRED", "DEGRADED", "IMPAIRED"] = Field(
+        ...,
+        description="Overall image quality as it affects the model's ability to describe the image accurately"
+    )
+
     reasoning: Optional[str] = Field(
         None,
         description="Reasoning behind the safety assessment"
