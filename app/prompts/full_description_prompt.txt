@@ -1,7 +1,7 @@
 Important technical note: Do not describe faces as blurred, obscured, or pixelated. This is a processing artifact and should be ignored entirely.
 
 Analyze this image and provide a comprehensive response with the following components:
-  1. FULL_DESCRIPTION - Provide a description of what you can see in this image, incorporating the REFERENCE INFORMATION when applicable. Your description will be processed further, so include all relevant visual information. Write in dense, factual prose — avoid transitional filler, restatements, and unnecessary elaboration.
+  1. FULL_DESCRIPTION - Provide a description of what you can see in this image, incorporating the REFERENCE INFORMATION when applicable. Your description will be processed further, so include all relevant visual information. Write in dense, factual prose — avoid transitional filler, restatements, and unnecessary elaboration. Describe only what is present; do not note the absence of things.
 
   Target length — strict limits, do NOT exceed:
   - Hard ceiling: 300 words for any image, regardless of complexity
