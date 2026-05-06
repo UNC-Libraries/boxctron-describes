@@ -80,7 +80,8 @@ def mock_llm_responses():
                     "atrocities": "N",
                     "text_chars": {
                         "present": "N"
-                    }
+                    },
+                    "img_qual": "0",
                 },
                 "SAR": "This is a nature photograph with no concerning content. The blurriness affects image quality but not safety assessment."
             })
@@ -531,6 +532,7 @@ def test_integration_all_safety_and_review_fields_populated_with_positive_values
                         "sensitiv": "S",
                         "lang": "English",
                     },
+                    "img_qual": "IMP",
                 },
                 "SAR": "Multiple elevated risk factors identified.",
             })
@@ -665,6 +667,7 @@ def test_integration_conditional_safety_fields_default_when_omitted(
                         "present": "N",
                         # type, legib, sensitiv, lang intentionally omitted
                     },
+                    "img_qual": "0",
                 },
                 "SAR": "No elevated risks identified.",
             })

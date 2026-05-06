@@ -93,7 +93,8 @@ def mock_llm_responses():
                     "atrocities": "N",
                     "text_chars": {
                         "present": "N"
-                    }
+                    },
+                    "img_qual": "0",
                 },
                 "SAR": "Test reasoning"
             })

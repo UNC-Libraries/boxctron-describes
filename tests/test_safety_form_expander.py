@@ -22,7 +22,8 @@ def short_form_no_concerns():
         "atrocities": "N",
         "text_chars": {
             "present": "N"
-        }
+        },
+        "img_qual": "0"
     }
 
 
@@ -52,7 +53,8 @@ def short_form_with_concerns():
             "legib": "DIF",
             "sensitiv": "S",
             "lang": "English"
-        }
+        },
+        "img_qual": "DGR"
     }
 
 

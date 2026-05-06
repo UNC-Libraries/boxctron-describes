@@ -56,6 +56,11 @@ SAFETY_FIELD_WEIGHTS: dict[str, dict[str, int]] = {
         "NO": 0,
         "YES": 10,
     },
+    "image_quality": {
+        "UNIMPAIRED": 0,
+        "DEGRADED": 5,
+        "IMPAIRED": 15,
+    },
 
 }
 

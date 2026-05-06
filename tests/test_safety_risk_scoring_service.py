@@ -37,6 +37,7 @@ def make_assessment(**overrides) -> SafetyAssessment:
             legibility="N/A",
             sensitivity="N/A",
         ),
+        image_quality="UNIMPAIRED",
         reasoning=None,
     )
     defaults.update(overrides)
@@ -83,6 +84,7 @@ def test_score_is_100_for_all_maximum_risk_values():
             legibility="DIFFICULT",
             sensitivity="SENSITIVE",
         ),
+        image_quality="IMPAIRED",
     )
     assert calculate_risk_score(assessment) == 100
 

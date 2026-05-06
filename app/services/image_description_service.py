@@ -278,6 +278,10 @@ class ImageDescriptionService:
                                     },
                                     "required": ["present"],
                                     "additionalProperties": False
+                                },
+                                "img_qual": {
+                                    "type": "string",
+                                    "enum": ["0", "DGR", "IMP"]
                                 }
                             },
                             "required": [
@@ -289,7 +293,8 @@ class ImageDescriptionService:
                                 "symbols",
                                 "stereotyping",
                                 "atrocities",
-                                "text_chars"
+                                "text_chars",
+                                "img_qual"
                             ],
                             "additionalProperties": False
                         },
@@ -322,7 +327,7 @@ class ImageDescriptionService:
         safety_form = response["SAF"]
         always_required = [
             "people", "violence", "racial_viol", "nudity", "sexual",
-            "symbols", "stereotyping", "atrocities", "text_chars",
+            "symbols", "stereotyping", "atrocities", "text_chars", "img_qual",
         ]
         for field in always_required:
             if field not in safety_form:

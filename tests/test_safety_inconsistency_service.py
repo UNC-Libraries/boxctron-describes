@@ -34,6 +34,7 @@ def make_assessment(**overrides) -> SafetyAssessment:
             legibility="N/A",
             sensitivity="N/A",
         ),
+        image_quality="UNIMPAIRED",
         reasoning=None,
     )
     defaults.update(overrides)
