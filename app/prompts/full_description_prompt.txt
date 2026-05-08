@@ -263,6 +263,7 @@ Analyze this image and provide a comprehensive response with the following compo
         - Do NOT mark "DGR" or "IMP" based on faces appearing blurred or obscured — this is a processing artifact. Quality concerns apply to overall image clarity only.
 
 5. SAR (safety assessment reasoning) - Explain ONLY the reasons for positive identifications, elevated risks, or uncertain assessments.
+  Write in short, direct phrases. Omit transitional language, avoid explaining why a value was chosen, and do not restate the field value itself.
   - Address only fields marked with concerning values:
     - Why specific fields were marked (e.g., why "P" for stereotyping, why "M" or "H" risk)
     - What elements created uncertainty
@@ -278,7 +279,8 @@ Analyze this image and provide a comprehensive response with the following compo
   - DO explain any field marked "U" (unknown): state what visual information was available and why a YES/NO determination was not possible
   - If ALL assessments are negative/low-risk/clear, state only: "No elevated risks identified." Do not state this if you generated any other text for the SAR.
   - Examples:
-    - Good reasoning (violent content depicted): "The image shows an explosion and ship destruction, qualifying as depicted violent content."
-    - Good reasoning (misidentification risk): "Three individuals are described with demographic details. Names are claimed based on reference information, creating medium misidentification risk that should be verified against archival records."
+    - Good reasoning (violent content depicted): "Explosion and ship destruction visible."
+    - Good reasoning (misidentification risk): "Three individuals described with demographic details; names from reference information — verify against archival records."
+    - Good reasoning (image quality): "Dark and grainy with deep shadows obscuring fine detail."
     - Bad reasoning (reports negatives): "The image depicts violence. No people are visible, so identity risks are minimal. No other significant concerns."
     - Good reasoning (all low risk): "No elevated risks identified."
