@@ -94,6 +94,26 @@ def test_format_content_for_review(service, sample_safety_assessment):
     # Verify safety assessment is formatted as JSON
     assert '"people_visible": "YES"' in result
 
+    # Verify no REFERENCE_INFORMATION section when context is absent
+    assert "REFERENCE_INFORMATION:" not in result
+
+
+def test_format_content_for_review_with_context(service, sample_safety_assessment):
+    """Test that REFERENCE_INFORMATION is included when context is provided."""
+    result = service._format_content_for_review(
+        "A detailed description",
+        "Some transcript",
+        sample_safety_assessment,
+        "Safe",
+        "Alt text",
+        context="Reference context about the image"
+    )
+
+    assert "REFERENCE_INFORMATION:" in result
+    assert "Reference context about the image" in result
+    # Verify REFERENCE_INFORMATION appears before FULL_DESCRIPTION
+    assert result.index("REFERENCE_INFORMATION:") < result.index("FULL_DESCRIPTION:")
+
 
 @patch("app.services.review_assessment_service.completion")
 def test_generate_review_assessment_success(mock_completion, service, mock_settings, sample_safety_assessment):
@@ -148,6 +168,35 @@ def test_generate_review_assessment_success(mock_completion, service, mock_setti
     assert messages[0]["role"] == "system"
     assert "content quality reviewer" in messages[0]["content"]
     assert messages[1]["role"] == "user"
+
+
+@patch("app.services.review_assessment_service.completion")
+def test_generate_review_assessment_with_context(mock_completion, service, mock_settings, sample_safety_assessment):
+    """Test that context is included in the user message when provided."""
+    mock_response = Mock()
+    mock_response.choices = [Mock()]
+    mock_response.choices[0].message.content = json.dumps({
+        "bias": "N", "stereo": "N", "val_judg": "N",
+        "contra_btwn": "N", "contra_within": "N", "offensive": "N",
+        "incon_demog": "N", "euphemism": "N", "ppl_first": "NA",
+        "unsup_infer": "N", "safety_consist": "CON", "concerns": [],
+        "src_warn": []
+    })
+    mock_completion.return_value = mock_response
+
+    service.generate_review_assessment(
+        full_description="A person standing in a field",
+        transcript="No text visible",
+        safety_assessment=sample_safety_assessment,
+        safety_assessment_reasoning="Image appears safe",
+        alt_text="Person in field",
+        context="Photograph from the 1920s of John Smith"
+    )
+
+    messages = mock_completion.call_args[1]["messages"]
+    user_message = messages[1]["content"]
+    assert "REFERENCE_INFORMATION:" in user_message
+    assert "Photograph from the 1920s of John Smith" in user_message
 
 
 @patch("app.services.review_assessment_service.completion")
