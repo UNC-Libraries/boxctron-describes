@@ -108,7 +108,8 @@ class DescribeImageWorkflow:
                 transcript,
                 safety_form,
                 safety_reasoning,
-                alt_text
+                alt_text,
+                context
             )
             review_duration = (datetime.now(timezone.utc) - review_start).total_seconds() * 1000
             review_assessment = self._parse_review_assessment(review_assessment_result)

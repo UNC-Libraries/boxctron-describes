@@ -3,6 +3,7 @@ You will be provided with:
 2. An ALT_TEXT summary derived from that description
 3. A SAFETY_ASSESSMENT_FORM from the initial image analysis
 4. SAFETY_ASSESSMENT_REASONING explaining the safety assessment
+5. REFERENCE_INFORMATION (optional) — contextual information that was provided to the description model before it generated the output
 
 Your job is to identify problems with the language and content of these texts - NOT to verify factual accuracy against the original image.
 
@@ -120,7 +121,7 @@ Mark YES or POSSIBLY if the model makes claims beyond what can be observed.
 
 **Flag:** emotions beyond visible expressions ("is happy" vs "smiling"), assumed relationships ("a family" vs "two adults and children"), purpose without evidence ("built as a fortress" vs "stone fortification"), causation without visible evidence.
 
-**Acceptable:** "appears to be," "suggests," "possibly," qualified or conditional statements.
+**Acceptable:** "appears to be," "suggests," "possibly," qualified or conditional statements. If REFERENCE_INFORMATION is provided, claims directly supported by it are also acceptable — do not flag these as unsupported inferential claims.
 
 ### safety_assessment_consistency
 Mark INCONSISTENT if the description contradicts the safety form or reasoning:
@@ -143,7 +144,7 @@ Report: offensive or racist text visible in the image, stereotypical illustratio
 Format: array of strings, e.g. `["Contains historically dated racial language in printed text"]` or `[]` if none.
 
 ### concerns_for_review
-List specific model language issues found. Be specific about what the problem is and whether it appears in the full description or alt text. If safety_assessment_consistency is marked as INCONSISTENT, list the reasons for it.
+List specific model language issues found. Write in short, direct phrases. Be specific about what the problem is and whether it appears in the full description or alt text. If safety_assessment_consistency is marked as INCONSISTENT, list the reasons for it.
 
 Format: array of strings, e.g. `["Inconsistent demographics: race mentioned only for Black individuals", "Value judgment in alt text: describes person as 'well-dressed'"]` or `[]` if none.
 

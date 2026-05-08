@@ -2,7 +2,7 @@
 import json
 import logging
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 from litellm import completion
 
@@ -44,7 +44,8 @@ class ReviewAssessmentService:
         transcript: str,
         safety_assessment: Dict[str, Any],
         safety_assessment_reasoning: str,
-        alt_text: str
+        alt_text: str,
+        context: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Generate a review assessment for all generated content.
@@ -55,6 +56,7 @@ class ReviewAssessmentService:
             safety_assessment: The safety assessment form data
             safety_assessment_reasoning: The reasoning for the safety assessment
             alt_text: The generated alt text
+            context: Optional reference information provided to the description model
 
         Returns:
             Dictionary containing review assessment fields
@@ -70,7 +72,8 @@ class ReviewAssessmentService:
             transcript,
             safety_assessment,
             safety_assessment_reasoning,
-            alt_text
+            alt_text,
+            context
         )
 
         # Build messages
@@ -146,7 +149,8 @@ class ReviewAssessmentService:
         transcript: str,
         safety_assessment: Dict[str, Any],
         safety_assessment_reasoning: str,
-        alt_text: str
+        alt_text: str,
+        context: Optional[str] = None
     ) -> str:
         """
         Format all content pieces with labels for review.
@@ -157,6 +161,7 @@ class ReviewAssessmentService:
             safety_assessment: The safety assessment form
             safety_assessment_reasoning: The safety reasoning
             alt_text: The generated alt text
+            context: Optional reference information provided to the description model
 
         Returns:
             Formatted string with labeled content
@@ -164,20 +169,15 @@ class ReviewAssessmentService:
         # Convert safety assessment to formatted JSON string
         safety_assessment_str = json.dumps(safety_assessment, indent=2)
 
-        return f"""FULL_DESCRIPTION:
-{full_description}
-
-TRANSCRIPT:
-{transcript}
-
-SAFETY_ASSESSMENT_FORM:
-{safety_assessment_str}
-
-SAFETY_ASSESSMENT_REASONING:
-{safety_assessment_reasoning}
-
-ALT_TEXT:
-{alt_text}"""
+        parts = []
+        if context:
+            parts.append(f"REFERENCE_INFORMATION:\n{context}")
+        parts.append(f"FULL_DESCRIPTION:\n{full_description}")
+        parts.append(f"TRANSCRIPT:\n{transcript}")
+        parts.append(f"SAFETY_ASSESSMENT_FORM:\n{safety_assessment_str}")
+        parts.append(f"SAFETY_ASSESSMENT_REASONING:\n{safety_assessment_reasoning}")
+        parts.append(f"ALT_TEXT:\n{alt_text}")
+        return "\n\n".join(parts)
 
     def _get_response_format(self) -> Dict[str, Any]:
         """
