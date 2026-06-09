@@ -26,6 +26,10 @@ class ImageDescriptionService:
             settings: Application settings containing LLM configuration
         """
         self.settings = settings
+        self.model = settings.litellm_full_desc_model
+        self.temperature = settings.litellm_full_desc_temperature
+        self.max_tokens = settings.litellm_full_desc_max_tokens
+        self.reasoning_effort = settings.litellm_full_desc_reasoning_effort
 
         # Load the task prompt template
         prompt_path = Path(__file__).parent.parent / "prompts" / "full_description_prompt.txt"
@@ -39,6 +43,16 @@ class ImageDescriptionService:
             "Your descriptions are well-structured and prioritize factual documentation over stylistic concerns.\n"
             "You also generate concise, screen-reader-friendly alt text by selecting only the most contextually relevant elements from what you observe."
         )
+
+    @classmethod
+    def for_transcribe(cls, settings: Settings) -> "ImageDescriptionService":
+        """Create an instance configured with the LITELLM_TRANSCRIBE_* settings."""
+        instance = cls(settings)
+        instance.model = settings.litellm_transcribe_model
+        instance.temperature = settings.litellm_transcribe_temperature
+        instance.max_tokens = settings.litellm_transcribe_max_tokens
+        instance.reasoning_effort = settings.litellm_transcribe_reasoning_effort
+        return instance
 
     def generate_description(
         self,
@@ -108,17 +122,17 @@ class ImageDescriptionService:
         try:
             # Build completion parameters
             completion_params = {
-                "model": self.settings.litellm_full_desc_model,
+                "model": self.model,
                 "messages": messages,
-                "temperature": self.settings.litellm_full_desc_temperature,
-                "max_tokens": self.settings.litellm_full_desc_max_tokens,
+                "temperature": self.temperature,
+                "max_tokens": self.max_tokens,
                 "response_format": response_format,
                 "num_retries": self.settings.litellm_num_retries
             }
 
             # Specify reasoning effort for models that support it
-            if self.settings.litellm_full_desc_reasoning_effort:
-                completion_params["reasoning_effort"] = self.settings.litellm_full_desc_reasoning_effort
+            if self.reasoning_effort:
+                completion_params["reasoning_effort"] = self.reasoning_effort
 
             last_exc: Exception = ValueError("No attempts made")
             for attempt in range(1, self._MAX_PARSE_RETRIES + 1):

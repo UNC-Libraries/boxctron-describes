@@ -219,9 +219,9 @@ class ReviewAssessment(BaseModel):
 class StepOutcome(BaseModel):
     """Outcome information for a single processing step."""
 
-    status: Literal["success", "skipped"] = Field(
+    status: Literal["success", "skipped", "superseded"] = Field(
         ...,
-        description="Whether the step completed successfully or was skipped"
+        description="Whether the step completed successfully, was skipped, or was superseded by a subsequent step"
     )
 
     model: Optional[str] = Field(
