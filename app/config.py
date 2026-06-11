@@ -46,6 +46,8 @@ class Settings(BaseSettings):
     litellm_transcribe_temperature: float = 0.3
     litellm_transcribe_max_tokens: int = 1000
     litellm_transcribe_reasoning_effort: Optional[str] = None
+    litellm_transcribe_api_base: Optional[str] = None  # Custom endpoint (e.g. LiteLLM proxy)
+    litellm_transcribe_api_key: Optional[str] = None   # API key for the custom endpoint
 
     # File Upload Configuration
     max_upload_size: int = 10 * 1024 * 1024  # 10 MB
