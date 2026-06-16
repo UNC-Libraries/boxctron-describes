@@ -116,13 +116,14 @@ def _build_workflow(settings, normalizer, desc_service, review_service, transcri
 # Transcribe step triggers correctly
 # ---------------------------------------------------------------------------
 
+@pytest.mark.parametrize("legibility", ["PARTIALLY_CLEAR", "DIFFICULT", "ILLEGIBLE"])
 @pytest.mark.asyncio
 async def test_transcribe_step_runs_for_significant_difficult(
-    settings, mock_normalizer, mock_desc_service, mock_review_service, mock_transcribe_service
+    legibility, settings, mock_normalizer, mock_desc_service, mock_review_service, mock_transcribe_service
 ):
-    """Transcribe step runs when text_present=SIGNIFICANT and legibility=DIFFICULT."""
+    """Transcribe step runs when text_present=SIGNIFICANT and legibility is PARTIALLY_CLEAR, DIFFICULT, or ILLEGIBLE."""
     mock_desc_service.generate_description.return_value = _make_desc_result(
-        text_present="SIGNIFICANT", legibility="DIFFICULT"
+        text_present="SIGNIFICANT", legibility=legibility
     )
 
     workflow = _build_workflow(settings, mock_normalizer, mock_desc_service, mock_review_service, mock_transcribe_service)
@@ -134,24 +135,6 @@ async def test_transcribe_step_runs_for_significant_difficult(
     assert result.steps["full_desc"].model == "azure/gpt-4o"
     assert result.steps["transcribe"].status == "success"
     assert result.steps["transcribe"].model == "gemini/gemini-1.5-pro"
-
-
-@pytest.mark.asyncio
-async def test_transcribe_step_runs_for_significant_illegible(
-    settings, mock_normalizer, mock_desc_service, mock_review_service, mock_transcribe_service
-):
-    """Transcribe step runs when text_present=SIGNIFICANT and legibility=ILLEGIBLE."""
-    mock_desc_service.generate_description.return_value = _make_desc_result(
-        text_present="SIGNIFICANT", legibility="ILLEGIBLE"
-    )
-
-    workflow = _build_workflow(settings, mock_normalizer, mock_desc_service, mock_review_service, mock_transcribe_service)
-    result = await workflow.process_image(Path("/tmp/img.jpg"), "img.jpg", "image/jpeg")
-
-    mock_transcribe_service.generate_description.assert_called_once()
-    assert result.steps["full_desc"].status == "superseded"
-    assert "transcribe" in result.steps
-    assert result.steps["transcribe"].status == "success"
 
 
 @pytest.mark.asyncio
@@ -224,13 +207,14 @@ async def test_transcribe_step_skipped_when_text_is_none(
     assert "transcribe" not in result.steps
 
 
+@pytest.mark.parametrize("legibility", ["CLEAR", "N/A"])
 @pytest.mark.asyncio
 async def test_transcribe_step_skipped_when_legibility_is_clear(
-    settings, mock_normalizer, mock_desc_service, mock_review_service, mock_transcribe_service
+    legibility, settings, mock_normalizer, mock_desc_service, mock_review_service, mock_transcribe_service
 ):
-    """Transcribe step is absent when text is SIGNIFICANT but legibility is CLEAR."""
+    """Transcribe step is absent when text is SIGNIFICANT but legibility is CLEAR or N/A."""
     mock_desc_service.generate_description.return_value = _make_desc_result(
-        text_present="SIGNIFICANT", legibility="CLEAR"
+        text_present="SIGNIFICANT", legibility=legibility
     )
 
     workflow = _build_workflow(settings, mock_normalizer, mock_desc_service, mock_review_service, mock_transcribe_service)
@@ -238,22 +222,6 @@ async def test_transcribe_step_skipped_when_legibility_is_clear(
 
     mock_transcribe_service.generate_description.assert_not_called()
     assert result.steps["full_desc"].status == "success"
-    assert "transcribe" not in result.steps
-
-
-@pytest.mark.asyncio
-async def test_transcribe_step_skipped_when_legibility_is_partially_clear(
-    settings, mock_normalizer, mock_desc_service, mock_review_service, mock_transcribe_service
-):
-    """Transcribe step is absent when text is SIGNIFICANT but legibility is PARTIALLY_CLEAR."""
-    mock_desc_service.generate_description.return_value = _make_desc_result(
-        text_present="SIGNIFICANT", legibility="PARTIALLY_CLEAR"
-    )
-
-    workflow = _build_workflow(settings, mock_normalizer, mock_desc_service, mock_review_service, mock_transcribe_service)
-    result = await workflow.process_image(Path("/tmp/img.jpg"), "img.jpg", "image/jpeg")
-
-    mock_transcribe_service.generate_description.assert_not_called()
     assert "transcribe" not in result.steps
 
 

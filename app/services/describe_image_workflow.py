@@ -167,7 +167,7 @@ class DescribeImageWorkflow:
         tc = safety_assessment.text_characteristics
         return (
             tc.text_present == "SIGNIFICANT"
-            and tc.legibility in ("DIFFICULT", "ILLEGIBLE")
+            and tc.legibility in ("DIFFICULT", "ILLEGIBLE", "PARTIALLY_CLEAR")
         )
 
     def _parse_safety_assessment(self, full_desc_result: dict) -> SafetyAssessment:
