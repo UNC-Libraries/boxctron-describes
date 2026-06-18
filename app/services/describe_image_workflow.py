@@ -81,7 +81,7 @@ class DescribeImageWorkflow:
         steps: Dict[str, StepOutcome] = {}
 
         # Run a second transcription pass when the text is significant but hard to read
-        if self.transcribe_service is not None and self._needs_transcribe(safety_assessment):
+        if self.transcribe_service is not None and self._needs_transcribe_step(safety_assessment):
             logger.info(f"File {filename} requires additional transcript processing")
             logger.debug(f"Discarding full_desc_result from first pass: {full_desc_result}")
 
@@ -162,7 +162,7 @@ class DescribeImageWorkflow:
             )
         )
 
-    def _needs_transcribe(self, safety_assessment: SafetyAssessment) -> bool:
+    def _needs_transcribe_step(self, safety_assessment: SafetyAssessment) -> bool:
         """Return True when the image has significant but hard-to-read text."""
         tc = safety_assessment.text_characteristics
         return (
