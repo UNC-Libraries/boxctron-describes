@@ -35,6 +35,18 @@ def get_image_description_service() -> ImageDescriptionService:
     """
     return ImageDescriptionService(settings)
 
+def get_transcribe_description_service() -> Optional[ImageDescriptionService]:
+    """
+    Provide an ImageDescriptionService configured for the transcription pass, or None
+    if LITELLM_TRANSCRIBE_MODEL is not set.
+
+    Returns:
+        ImageDescriptionService or None
+    """
+    if not settings.litellm_transcribe_model:
+        return None
+    return ImageDescriptionService.for_transcribe(settings)
+
 def get_review_assessment_service() -> ReviewAssessmentService:
     """
     Provide a ReviewAssessmentService instance.
@@ -47,7 +59,8 @@ def get_review_assessment_service() -> ReviewAssessmentService:
 def get_describe_workflow(
     normalizer: ImageNormalizer = Depends(get_image_normalizer),
     image_description_service: ImageDescriptionService = Depends(get_image_description_service),
-    review_service: ReviewAssessmentService = Depends(get_review_assessment_service)
+    review_service: ReviewAssessmentService = Depends(get_review_assessment_service),
+    transcribe_service: Optional[ImageDescriptionService] = Depends(get_transcribe_description_service)
 ) -> DescribeImageWorkflow:
     """
     Provide a DescribeImageWorkflow instance with dependencies.
@@ -56,11 +69,12 @@ def get_describe_workflow(
         normalizer: Image normalizer service
         image_description_service: Image description service
         review_service: Review assessment service
+        transcribe_service: Optional transcription-quality description service
 
     Returns:
         DescribeImageWorkflow: Configured workflow service
     """
-    return DescribeImageWorkflow(settings, normalizer, image_description_service, review_service)
+    return DescribeImageWorkflow(settings, normalizer, image_description_service, review_service, transcribe_service)
 
 
 def get_authentication_service() -> AuthenticationService:

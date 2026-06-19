@@ -1,6 +1,6 @@
 """Image description workflow service."""
 from pathlib import Path
-from typing import Optional
+from typing import Optional, Dict
 from datetime import datetime, timezone
 import logging
 
@@ -23,7 +23,8 @@ class DescribeImageWorkflow:
         settings: Settings,
         image_normalizer: ImageNormalizer,
         image_description_service: ImageDescriptionService,
-        review_service: ReviewAssessmentService
+        review_service: ReviewAssessmentService,
+        transcribe_service: Optional[ImageDescriptionService] = None
     ):
         """
         Initialize the DescribeImageWorkflow.
@@ -33,11 +34,13 @@ class DescribeImageWorkflow:
             image_normalizer: Service for normalizing images
             image_description_service: Service for generating image descriptions
             review_service: Service for reviewing generated content
+            transcribe_service: Optional service for a second high-quality transcript pass
         """
         self.settings = settings
         self.image_normalizer = image_normalizer
         self.image_description_service = image_description_service
         self.review_service = review_service
+        self.transcribe_service = transcribe_service
 
     async def process_image(
         self,
@@ -75,19 +78,42 @@ class DescribeImageWorkflow:
         # Parse safety assessment from LLM response
         safety_assessment = self._parse_safety_assessment(full_desc_result)
 
+        steps: Dict[str, StepOutcome] = {}
+
+        # Run a second transcription pass when the text is significant but hard to read
+        if self.transcribe_service is not None and self._needs_transcribe_step(safety_assessment):
+            logger.info(f"File {filename} requires additional transcript processing")
+            logger.debug(f"Discarding full_desc_result from first pass: {full_desc_result}")
+
+            steps["full_desc"] = StepOutcome(
+                status="superseded",
+                model=self.image_description_service.model,
+                duration_ms=full_desc_duration
+            )
+
+            transcribe_start = datetime.now(timezone.utc)
+            full_desc_result = self.transcribe_service.generate_description(base64_image, context)
+            transcribe_duration = (datetime.now(timezone.utc) - transcribe_start).total_seconds() * 1000
+
+            safety_assessment = self._parse_safety_assessment(full_desc_result)
+
+            steps["transcribe"] = StepOutcome(
+                status="success",
+                model=self.transcribe_service.model,
+                duration_ms=transcribe_duration
+            )
+        else:
+            steps["full_desc"] = StepOutcome(
+                status="success",
+                model=self.image_description_service.model,
+                duration_ms=full_desc_duration
+            )
+
         full_description = full_desc_result.get("FULL_DESCRIPTION", "")
         alt_text = full_desc_result.get("ALT_TEXT", "")
         transcript = full_desc_result.get("TRANSCRIPT", "")
         safety_form = full_desc_result.get("SAFETY_ASSESSMENT_FORM", {})
         safety_reasoning = full_desc_result.get("SAFETY_ASSESSMENT_REASONING", "")
-
-        steps = {
-            "full_desc": StepOutcome(
-                    status="success",
-                    model=self.settings.litellm_full_desc_model,
-                    duration_ms=full_desc_duration
-                )
-        }
 
         # Generate review assessment
         review_assessment = None
@@ -98,9 +124,9 @@ class DescribeImageWorkflow:
                 f"{safety_assessment.risk_score} is below threshold {threshold}"
             )
             steps["review"] = StepOutcome(
-                    status="skipped",
-                    reason=f"safety_risk_score below threshold {threshold}"
-                )
+                status="skipped",
+                reason=f"safety_risk_score below threshold {threshold}"
+            )
         else:
             review_start = datetime.now(timezone.utc)
             review_assessment_result = self.review_service.generate_review_assessment(
@@ -114,10 +140,10 @@ class DescribeImageWorkflow:
             review_duration = (datetime.now(timezone.utc) - review_start).total_seconds() * 1000
             review_assessment = self._parse_review_assessment(review_assessment_result)
             steps["review"] = StepOutcome(
-                    status="success",
-                    model=self.settings.litellm_review_model,
-                    duration_ms=review_duration
-                )
+                status="success",
+                model=self.settings.litellm_review_model,
+                duration_ms=review_duration
+            )
 
         scores = [s for s in [safety_assessment.risk_score, review_assessment.risk_score if review_assessment else None] if s is not None]
         overall_risk_score = round(sum(scores) / len(scores)) if scores else None
@@ -134,6 +160,14 @@ class DescribeImageWorkflow:
                 version=self.settings.app_version,
                 timestamp=datetime.now(timezone.utc).isoformat()
             )
+        )
+
+    def _needs_transcribe_step(self, safety_assessment: SafetyAssessment) -> bool:
+        """Return True when the image has significant but hard-to-read text."""
+        tc = safety_assessment.text_characteristics
+        return (
+            tc.text_present == "SIGNIFICANT"
+            and tc.legibility in ("DIFFICULT", "ILLEGIBLE", "PARTIALLY_CLEAR")
         )
 
     def _parse_safety_assessment(self, full_desc_result: dict) -> SafetyAssessment:

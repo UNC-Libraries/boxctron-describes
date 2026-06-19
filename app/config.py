@@ -41,6 +41,14 @@ class Settings(BaseSettings):
     litellm_review_reasoning_effort: Optional[str] = None
     review_skip_threshold: Optional[int] = None  # Skip review if safety risk score is below this value (0-100); None means always review
 
+    # Transcript-quality LLM pass (triggered when text is SIGNIFICANT and DIFFICULT/ILLEGIBLE)
+    litellm_transcribe_model: Optional[str] = None  # None disables the transcribe step
+    litellm_transcribe_temperature: float = 0.3
+    litellm_transcribe_max_tokens: int = 1000
+    litellm_transcribe_reasoning_effort: Optional[str] = None
+    litellm_transcribe_api_base: Optional[str] = None  # Custom endpoint (e.g. LiteLLM proxy)
+    litellm_transcribe_api_key: Optional[str] = None   # API key for the custom endpoint
+
     # File Upload Configuration
     max_upload_size: int = 10 * 1024 * 1024  # 10 MB
 

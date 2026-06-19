@@ -26,6 +26,13 @@ class ImageDescriptionService:
             settings: Application settings containing LLM configuration
         """
         self.settings = settings
+        self.model = settings.litellm_full_desc_model
+        self.temperature = settings.litellm_full_desc_temperature
+        self.max_tokens = settings.litellm_full_desc_max_tokens
+        self.reasoning_effort = settings.litellm_full_desc_reasoning_effort
+        self.api_base: Optional[str] = None
+        self.api_key: Optional[str] = None
+        self.step_name = "image description"
 
         # Load the task prompt template
         prompt_path = Path(__file__).parent.parent / "prompts" / "full_description_prompt.txt"
@@ -39,6 +46,19 @@ class ImageDescriptionService:
             "Your descriptions are well-structured and prioritize factual documentation over stylistic concerns.\n"
             "You also generate concise, screen-reader-friendly alt text by selecting only the most contextually relevant elements from what you observe."
         )
+
+    @classmethod
+    def for_transcribe(cls, settings: Settings) -> "ImageDescriptionService":
+        """Create an instance configured with the LITELLM_TRANSCRIBE_* settings."""
+        instance = cls(settings)
+        instance.model = settings.litellm_transcribe_model
+        instance.temperature = settings.litellm_transcribe_temperature
+        instance.max_tokens = settings.litellm_transcribe_max_tokens
+        instance.reasoning_effort = settings.litellm_transcribe_reasoning_effort
+        instance.api_base = settings.litellm_transcribe_api_base
+        instance.api_key = settings.litellm_transcribe_api_key
+        instance.step_name = "transcription"
+        return instance
 
     def generate_description(
         self,
@@ -62,7 +82,7 @@ class ImageDescriptionService:
         Raises:
             Exception: If LLM call fails or response is invalid
         """
-        logger.info("Generating image description via LLM")
+        logger.info(f"Generating {self.step_name} via LLM")
 
         # Build messages
         messages = [
@@ -108,17 +128,20 @@ class ImageDescriptionService:
         try:
             # Build completion parameters
             completion_params = {
-                "model": self.settings.litellm_full_desc_model,
+                "model": self.model,
                 "messages": messages,
-                "temperature": self.settings.litellm_full_desc_temperature,
-                "max_tokens": self.settings.litellm_full_desc_max_tokens,
+                "temperature": self.temperature,
+                "max_tokens": self.max_tokens,
                 "response_format": response_format,
                 "num_retries": self.settings.litellm_num_retries
             }
 
-            # Specify reasoning effort for models that support it
-            if self.settings.litellm_full_desc_reasoning_effort:
-                completion_params["reasoning_effort"] = self.settings.litellm_full_desc_reasoning_effort
+            if self.reasoning_effort:
+                completion_params["reasoning_effort"] = self.reasoning_effort
+            if self.api_base:
+                completion_params["api_base"] = self.api_base
+            if self.api_key:
+                completion_params["api_key"] = self.api_key
 
             last_exc: Exception = ValueError("No attempts made")
             for attempt in range(1, self._MAX_PARSE_RETRIES + 1):
@@ -139,9 +162,9 @@ class ImageDescriptionService:
                     result["SAFETY_ASSESSMENT_REASONING"] = result.pop("SAR")
                     result["ALT_TEXT"] = result.pop("ALT_TEXT")
 
-                    log_token_usage(logger, "image description", response.usage)
+                    log_token_usage(logger, self.step_name, response.usage)
 
-                    logger.info("Successfully generated image description")
+                    logger.info(f"Successfully generated {self.step_name}")
                     return result
 
                 except (ValueError, json.JSONDecodeError) as e:
