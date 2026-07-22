@@ -1,6 +1,7 @@
 """Tests for ImageDescriptionService."""
-from unittest.mock import Mock, patch
 import json
+import logging
+from unittest.mock import Mock, patch
 import pytest
 
 from app.services.image_description_service import ImageDescriptionService
@@ -275,3 +276,24 @@ def test_non_parse_error_is_not_retried(mock_completion, mock_settings):
         service.generate_description("data:image/jpeg;base64,abc123")
 
     assert mock_completion.call_count == 1
+
+
+@patch("app.services.image_description_service.completion")
+def test_invalid_json_logs_response_preview(mock_completion, mock_settings, caplog):
+    """Test malformed JSON logs the model response preview without request payloads."""
+    mock_response = Mock()
+    mock_response.model = "gemini/gemini-3.1-pro-preview"
+    mock_response.choices = [Mock()]
+    mock_response.choices[0].finish_reason = "stop"
+    mock_response.choices[0].message.content = '{"FULL_DESCRIPTION": "unterminated'
+    mock_completion.return_value = mock_response
+
+    service = ImageDescriptionService(mock_settings)
+
+    with caplog.at_level(logging.WARNING, logger="app.services.image_description_service"):
+        with pytest.raises(json.JSONDecodeError):
+            service.generate_description("data:image/jpeg;base64,abc123")
+
+    assert 'content_preview="{\\"FULL_DESCRIPTION\\": \\"unterminated"' in caplog.text
+    assert "model=gemini/gemini-3.1-pro-preview" in caplog.text
+    assert "data:image/jpeg;base64,abc123" not in caplog.text

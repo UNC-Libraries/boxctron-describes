@@ -8,7 +8,7 @@ from litellm import completion
 
 from app.config import Settings
 from app.services.review_form_expander import expand_review_form, REVIEW_KEY_MAP
-from app.utils.llm_utils import log_token_usage
+from app.utils.llm_utils import format_llm_response_diagnostics, log_token_usage
 
 logger = logging.getLogger(__name__)
 
@@ -108,6 +108,7 @@ class ReviewAssessmentService:
                 completion_params["reasoning_effort"] = self.settings.litellm_review_reasoning_effort
 
             last_exc: Exception = ValueError("No attempts made")
+            response = None
             for attempt in range(1, self._MAX_PARSE_RETRIES + 1):
                 try:
                     response = completion(**completion_params)
@@ -131,10 +132,18 @@ class ReviewAssessmentService:
 
                 except (ValueError, json.JSONDecodeError) as e:
                     last_exc = e
+                    response_diagnostics = format_llm_response_diagnostics(response)
                     if attempt < self._MAX_PARSE_RETRIES:
                         logger.warning(
                             f"Attempt {attempt}/{self._MAX_PARSE_RETRIES} failed with "
-                            f"parse/validation error, retrying: {e}"
+                            f"parse/validation error, retrying: {e}. "
+                            f"Response diagnostics: {response_diagnostics}"
+                        )
+                    else:
+                        logger.error(
+                            f"Attempt {attempt}/{self._MAX_PARSE_RETRIES} failed with "
+                            f"parse/validation error: {e}. "
+                            f"Response diagnostics: {response_diagnostics}"
                         )
 
             raise last_exc

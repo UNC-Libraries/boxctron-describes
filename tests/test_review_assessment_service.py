@@ -1,7 +1,9 @@
 """Tests for the ReviewAssessmentService."""
 import json
-import pytest
+import logging
 from unittest.mock import Mock, patch
+
+import pytest
 
 from app.services.review_assessment_service import ReviewAssessmentService
 from app.config import Settings
@@ -432,3 +434,27 @@ def test_non_parse_error_is_not_retried(mock_completion, service, sample_safety_
         )
 
     assert mock_completion.call_count == 1
+
+
+@patch("app.services.review_assessment_service.completion")
+def test_invalid_json_logs_response_preview(mock_completion, service, sample_safety_assessment, caplog):
+    """Test malformed JSON logs a response preview for debugging."""
+    mock_response = Mock()
+    mock_response.model = "gemini/gemini-3.1-pro-preview"
+    mock_response.choices = [Mock()]
+    mock_response.choices[0].finish_reason = "stop"
+    mock_response.choices[0].message.content = '{"bias": "unterminated'
+    mock_completion.return_value = mock_response
+
+    with caplog.at_level(logging.WARNING, logger="app.services.review_assessment_service"):
+        with pytest.raises(json.JSONDecodeError):
+            service.generate_review_assessment(
+                full_description="Test",
+                transcript="Test",
+                safety_assessment=sample_safety_assessment,
+                safety_assessment_reasoning="Test",
+                alt_text="Test"
+            )
+
+    assert 'content_preview="{\\"bias\\": \\"unterminated"' in caplog.text
+    assert "model=gemini/gemini-3.1-pro-preview" in caplog.text
