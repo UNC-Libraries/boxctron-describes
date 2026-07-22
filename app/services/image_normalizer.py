@@ -22,6 +22,8 @@ class ImageNormalizer:
         """
         self.settings = settings
         self.max_dimension = settings.image_max_dimension
+        self.max_pixels = settings.image_max_pixels
+        Image.MAX_IMAGE_PIXELS = self.max_pixels
 
     def normalize_image(self, image_path: Path) -> str:
         """
