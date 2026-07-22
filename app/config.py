@@ -54,6 +54,7 @@ class Settings(BaseSettings):
 
     # Image Processing Configuration
     image_max_dimension: int = 1600
+    image_max_pixels: Optional[int] = 500_000_000  # Increase PIL decompression-bomb threshold for large archival images; set to None to disable
 
     # Authentication Configuration
     auth_enabled: bool = False  # Set to False in dev/test environments
