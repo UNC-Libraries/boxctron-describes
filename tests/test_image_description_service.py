@@ -152,6 +152,40 @@ def test_reasoning_effort_not_set_when_none(mock_completion, mock_settings, samp
 
 
 @patch("app.services.image_description_service.completion")
+def test_timeout_not_set_for_full_description_by_default(mock_completion, mock_settings, sample_llm_response):
+    """Test that timeout is omitted on the normal description path by default."""
+    mock_response = Mock()
+    mock_response.choices = [Mock()]
+    mock_response.choices[0].message.content = json.dumps(sample_llm_response)
+    mock_completion.return_value = mock_response
+
+    service = ImageDescriptionService(mock_settings)
+    service.generate_description("data:image/jpeg;base64,abc123")
+
+    call_kwargs = mock_completion.call_args[1]
+    assert "timeout" not in call_kwargs
+
+
+@patch("app.services.image_description_service.completion")
+def test_transcribe_timeout_is_passed_when_configured(mock_completion, mock_settings, sample_llm_response):
+    """Test that transcription calls include the configured LiteLLM timeout."""
+    mock_response = Mock()
+    mock_response.choices = [Mock()]
+    mock_response.choices[0].message.content = json.dumps(sample_llm_response)
+    mock_completion.return_value = mock_response
+
+    mock_settings.litellm_transcribe_model = "gemini/gemini-3.1-pro-preview"
+    mock_settings.litellm_transcribe_timeout = 120.0
+
+    service = ImageDescriptionService.for_transcribe(mock_settings)
+    service.generate_description("data:image/jpeg;base64,abc123")
+
+    call_kwargs = mock_completion.call_args[1]
+    assert call_kwargs["model"] == "gemini/gemini-3.1-pro-preview"
+    assert call_kwargs["timeout"] == 120.0
+
+
+@patch("app.services.image_description_service.completion")
 def test_empty_response_raises_error(mock_completion, mock_settings):
     """Test that empty LLM response raises ValueError."""
     # Setup mock response with no content
