@@ -31,6 +31,7 @@ class ImageDescriptionService:
         self.max_tokens = settings.litellm_full_desc_max_tokens
         self.reasoning_effort = settings.litellm_full_desc_reasoning_effort
         self.timeout: Optional[float] = None
+        self.media_resolution: Optional[str] = None
         self.api_base: Optional[str] = None
         self.api_key: Optional[str] = None
         self.step_name = "image description"
@@ -56,6 +57,7 @@ class ImageDescriptionService:
         instance.temperature = settings.litellm_transcribe_temperature
         instance.max_tokens = settings.litellm_transcribe_max_tokens
         instance.timeout = settings.litellm_transcribe_timeout
+        instance.media_resolution = settings.litellm_transcribe_media_resolution
         instance.reasoning_effort = settings.litellm_transcribe_reasoning_effort
         instance.api_base = settings.litellm_transcribe_api_base
         instance.api_key = settings.litellm_transcribe_api_key
@@ -142,6 +144,8 @@ class ImageDescriptionService:
                 completion_params["reasoning_effort"] = self.reasoning_effort
             if self.timeout is not None:
                 completion_params["timeout"] = self.timeout
+            if self.media_resolution:
+                completion_params["media_resolution"] = self.media_resolution
             if self.api_base:
                 completion_params["api_base"] = self.api_base
             if self.api_key:
