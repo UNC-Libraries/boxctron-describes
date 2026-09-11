@@ -145,7 +145,8 @@ class DescribeImageWorkflow:
                 duration_ms=review_duration
             )
 
-        scores = [s for s in [safety_assessment.risk_score, review_assessment.risk_score if review_assessment else None] if s is not None]
+        # A skipped review contributes zero so scores remain comparable to reviewed results.
+        scores = [s for s in [safety_assessment.risk_score, review_assessment.risk_score if review_assessment else 0] if s is not None]
         overall_risk_score = round(sum(scores) / len(scores)) if scores else None
 
         return DescriptionResult(
