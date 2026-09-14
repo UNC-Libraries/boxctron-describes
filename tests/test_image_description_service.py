@@ -13,6 +13,7 @@ def mock_settings():
     """Create mock settings for testing."""
     settings = Settings()
     settings.litellm_full_desc_model = "azure/gpt-4o"
+    settings.litellm_full_desc_base_model = None
     settings.litellm_full_desc_temperature = 0.7
     settings.litellm_full_desc_max_tokens = 1000
     settings.litellm_full_desc_reasoning_effort = "low"
