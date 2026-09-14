@@ -446,7 +446,7 @@ def test_integration_review_skipped_when_below_threshold(client, blurry_owl_data
     - review_skip_threshold setting is respected
     - review step outcome reports status=skipped with a reason
     - review_assessment is absent from result
-    - overall_risk_score is derived from safety only
+    - overall_risk_score averages safety with a zero review score
     - review LLM service is never called
     """
     from app.config import settings
@@ -472,8 +472,8 @@ def test_integration_review_skipped_when_below_threshold(client, blurry_owl_data
         assert steps["review"]["status"] == "skipped"
         assert "30" in steps["review"]["reason"]  # threshold value appears in reason
 
-        # overall_risk_score should be the safety score alone (0)
-        assert result_data["overall_risk_score"] == result_data["safety_assessment"]["risk_score"]
+        # A skipped review contributes a zero score.
+        assert result_data["overall_risk_score"] == round(result_data["safety_assessment"]["risk_score"] / 2)
 
         # Review LLM should not have been called
         image_desc_llm_mock, review_llm_mock = mock_llm_responses

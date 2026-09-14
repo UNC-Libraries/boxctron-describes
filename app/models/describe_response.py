@@ -289,7 +289,7 @@ class DescriptionResult(BaseModel):
 
     overall_risk_score: Optional[int] = Field(
         None,
-        description="Average of all available risk scores (safety and review), normalized to 0-100"
+        description="Average of safety and review risk scores, with a skipped review scored as 0, normalized to 0-100"
     )
 
     version: VersionInfo = Field(

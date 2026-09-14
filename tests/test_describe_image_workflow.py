@@ -240,3 +240,26 @@ async def test_normal_path_has_single_full_desc_step(
     assert result.steps["full_desc"].status == "success"
     assert result.steps["full_desc"].model == "azure/gpt-4o"
     assert "transcribe" not in result.steps
+
+# ---------------------------------------------------------------------------
+# Ensure score normalized correctly when the review step is skipped
+# ---------------------------------------------------------------------------
+
+@pytest.mark.asyncio
+async def test_skipped_review_contributes_zero_to_overall_risk_score(
+    settings, mock_normalizer, mock_desc_service, mock_review_service
+):
+    """A skipped review is included as a zero when calculating the overall score."""
+    settings.review_skip_threshold = 100
+    description_result = _make_desc_result()
+    description_result["SAFETY_ASSESSMENT_FORM"]["people_visible"] = "YES"
+    mock_desc_service.generate_description.return_value = description_result
+
+    workflow = _build_workflow(settings, mock_normalizer, mock_desc_service, mock_review_service)
+    result = await workflow.process_image(Path("/tmp/img.jpg"), "img.jpg", "image/jpeg")
+
+    assert result.safety_assessment.risk_score > 0
+    assert result.review_assessment is None
+    assert result.steps["review"].status == "skipped"
+    assert result.overall_risk_score == round(result.safety_assessment.risk_score / 2)
+    mock_review_service.generate_review_assessment.assert_not_called()
