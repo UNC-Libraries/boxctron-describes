@@ -28,6 +28,7 @@ class Settings(BaseSettings):
 
     # LiteLLM Configuration
     litellm_full_desc_model: str = "azure/gpt-4o"
+    litellm_full_desc_base_model: Optional[str] = None  # Canonical model name when MODEL is a custom Azure deployment
     litellm_full_desc_temperature: float = 0.7
     litellm_full_desc_max_tokens: int = 1000
     litellm_full_desc_reasoning_effort: str = "low"
@@ -36,6 +37,7 @@ class Settings(BaseSettings):
 
     # Review Assessment Configuration
     litellm_review_model: str = "azure/gpt-4o"
+    litellm_review_base_model: Optional[str] = None  # Canonical model name when MODEL is a custom Azure deployment
     litellm_review_temperature: float = 0.3
     litellm_review_max_tokens: int = 500
     litellm_review_reasoning_effort: Optional[str] = None
@@ -43,6 +45,7 @@ class Settings(BaseSettings):
 
     # Transcript-quality LLM pass (triggered when text is SIGNIFICANT and DIFFICULT/ILLEGIBLE)
     litellm_transcribe_model: Optional[str] = None  # None disables the transcribe step
+    litellm_transcribe_base_model: Optional[str] = None  # Canonical model name when MODEL is a custom deployment
     litellm_transcribe_temperature: float = 0.3
     litellm_transcribe_max_tokens: int = 1000
     litellm_transcribe_timeout: Optional[float] = None  # Override LiteLLM request timeout for the transcription pass only

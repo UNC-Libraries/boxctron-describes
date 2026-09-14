@@ -70,6 +70,7 @@ def test_generate_description_without_context(mock_completion, mock_settings, sa
     assert call_kwargs["max_tokens"] == 1000
     assert call_kwargs["num_retries"] == 3
     assert call_kwargs["reasoning_effort"] == "low"
+    assert "base_model" not in call_kwargs
     assert "response_format" in call_kwargs
 
     # Verify messages structure
@@ -187,6 +188,21 @@ def test_transcribe_timeout_is_passed_when_configured(mock_completion, mock_sett
     assert call_kwargs["max_tokens"] == 2400
     assert call_kwargs["timeout"] == 120.0
     assert call_kwargs["media_resolution"] == "high"
+
+
+@patch("app.services.image_description_service.completion")
+def test_base_model_is_passed_when_configured(mock_completion, mock_settings, sample_llm_response):
+    """Test that custom deployment calls retain their canonical model for LiteLLM lookup."""
+    mock_response = Mock()
+    mock_response.choices = [Mock()]
+    mock_response.choices[0].message.content = json.dumps(sample_llm_response)
+    mock_completion.return_value = mock_response
+    mock_settings.litellm_full_desc_model = "azure/describes"
+    mock_settings.litellm_full_desc_base_model = "gpt-5.6-terra"
+
+    ImageDescriptionService(mock_settings).generate_description("data:image/jpeg;base64,abc123")
+
+    assert mock_completion.call_args[1]["base_model"] == "gpt-5.6-terra"
 
 
 @patch("app.services.image_description_service.completion")

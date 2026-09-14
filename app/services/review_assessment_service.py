@@ -106,6 +106,8 @@ class ReviewAssessmentService:
             # Specify reasoning effort for models that support it
             if self.settings.litellm_review_reasoning_effort:
                 completion_params["reasoning_effort"] = self.settings.litellm_review_reasoning_effort
+            if self.settings.litellm_review_base_model:
+                completion_params["base_model"] = self.settings.litellm_review_base_model
 
             last_exc: Exception = ValueError("No attempts made")
             response = None

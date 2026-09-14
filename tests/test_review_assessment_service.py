@@ -14,6 +14,7 @@ def mock_settings():
     """Provide mock settings for testing."""
     settings = Mock(spec=Settings)
     settings.litellm_review_model = "azure/gpt-4o"
+    settings.litellm_review_base_model = None
     settings.litellm_review_temperature = 0.3
     settings.litellm_review_max_tokens = 500
     settings.litellm_review_reasoning_effort = "low"
@@ -162,6 +163,7 @@ def test_generate_review_assessment_success(mock_completion, service, mock_setti
     assert call_args["max_tokens"] == mock_settings.litellm_review_max_tokens
     assert call_args["reasoning_effort"] == mock_settings.litellm_review_reasoning_effort
     assert call_args["num_retries"] == mock_settings.litellm_num_retries
+    assert "base_model" not in call_args
     assert "response_format" in call_args
 
     # Verify messages structure
