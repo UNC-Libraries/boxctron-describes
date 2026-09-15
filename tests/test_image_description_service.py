@@ -13,6 +13,7 @@ def mock_settings():
     """Create mock settings for testing."""
     settings = Settings()
     settings.litellm_full_desc_model = "azure/gpt-4o"
+    settings.litellm_full_desc_base_model = None
     settings.litellm_full_desc_temperature = 0.7
     settings.litellm_full_desc_max_tokens = 1000
     settings.litellm_full_desc_reasoning_effort = "low"
@@ -70,6 +71,7 @@ def test_generate_description_without_context(mock_completion, mock_settings, sa
     assert call_kwargs["max_tokens"] == 1000
     assert call_kwargs["num_retries"] == 3
     assert call_kwargs["reasoning_effort"] == "low"
+    assert "base_model" not in call_kwargs
     assert "response_format" in call_kwargs
 
     # Verify messages structure
@@ -167,8 +169,8 @@ def test_timeout_not_set_for_full_description_by_default(mock_completion, mock_s
 
 
 @patch("app.services.image_description_service.completion")
-def test_transcribe_timeout_is_passed_when_configured(mock_completion, mock_settings, sample_llm_response):
-    """Test that transcription calls include transcribe-specific LiteLLM settings."""
+def test_transcribe_media_resolution_is_set_on_image(mock_completion, mock_settings, sample_llm_response):
+    """Test that Gemini media resolution uses the per-image LiteLLM parameter."""
     mock_response = Mock()
     mock_response.choices = [Mock()]
     mock_response.choices[0].message.content = json.dumps(sample_llm_response)
@@ -177,7 +179,7 @@ def test_transcribe_timeout_is_passed_when_configured(mock_completion, mock_sett
     mock_settings.litellm_transcribe_model = "gemini/gemini-3.1-pro-preview"
     mock_settings.litellm_transcribe_max_tokens = 2400
     mock_settings.litellm_transcribe_timeout = 120.0
-    mock_settings.litellm_transcribe_media_resolution = "high"
+    mock_settings.litellm_transcribe_media_resolution = "ultra_high"
 
     service = ImageDescriptionService.for_transcribe(mock_settings)
     service.generate_description("data:image/jpeg;base64,abc123")
@@ -186,12 +188,29 @@ def test_transcribe_timeout_is_passed_when_configured(mock_completion, mock_sett
     assert call_kwargs["model"] == "gemini/gemini-3.1-pro-preview"
     assert call_kwargs["max_tokens"] == 2400
     assert call_kwargs["timeout"] == 120.0
-    assert call_kwargs["media_resolution"] == "high"
+    assert "media_resolution" not in call_kwargs
+    image_url = call_kwargs["messages"][1]["content"][-1]["image_url"]
+    assert image_url["detail"] == "ultra_high"
+
+
+@patch("app.services.image_description_service.completion")
+def test_base_model_is_passed_when_configured(mock_completion, mock_settings, sample_llm_response):
+    """Test that custom deployment calls retain their canonical model for LiteLLM lookup."""
+    mock_response = Mock()
+    mock_response.choices = [Mock()]
+    mock_response.choices[0].message.content = json.dumps(sample_llm_response)
+    mock_completion.return_value = mock_response
+    mock_settings.litellm_full_desc_model = "azure/describes"
+    mock_settings.litellm_full_desc_base_model = "gpt-5.6-terra"
+
+    ImageDescriptionService(mock_settings).generate_description("data:image/jpeg;base64,abc123")
+
+    assert mock_completion.call_args[1]["base_model"] == "gpt-5.6-terra"
 
 
 @patch("app.services.image_description_service.completion")
 def test_transcribe_media_resolution_omitted_when_unset(mock_completion, mock_settings, sample_llm_response):
-    """Test that media_resolution is omitted when not configured for transcription."""
+    """Test that image detail is omitted when media resolution is not configured."""
     mock_response = Mock()
     mock_response.choices = [Mock()]
     mock_response.choices[0].message.content = json.dumps(sample_llm_response)
@@ -205,6 +224,8 @@ def test_transcribe_media_resolution_omitted_when_unset(mock_completion, mock_se
 
     call_kwargs = mock_completion.call_args[1]
     assert "media_resolution" not in call_kwargs
+    image_url = call_kwargs["messages"][1]["content"][-1]["image_url"]
+    assert "detail" not in image_url
 
 
 @patch("app.services.image_description_service.completion")

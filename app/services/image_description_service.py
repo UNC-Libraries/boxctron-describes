@@ -27,6 +27,7 @@ class ImageDescriptionService:
         """
         self.settings = settings
         self.model = settings.litellm_full_desc_model
+        self.base_model = settings.litellm_full_desc_base_model
         self.temperature = settings.litellm_full_desc_temperature
         self.max_tokens = settings.litellm_full_desc_max_tokens
         self.reasoning_effort = settings.litellm_full_desc_reasoning_effort
@@ -54,6 +55,7 @@ class ImageDescriptionService:
         """Create an instance configured with the LITELLM_TRANSCRIBE_* settings."""
         instance = cls(settings)
         instance.model = settings.litellm_transcribe_model
+        instance.base_model = settings.litellm_transcribe_base_model
         instance.temperature = settings.litellm_transcribe_temperature
         instance.max_tokens = settings.litellm_transcribe_max_tokens
         instance.timeout = settings.litellm_transcribe_timeout
@@ -113,12 +115,11 @@ class ImageDescriptionService:
             })
 
         # Add image
-        user_content.append({
-            "type": "image_url",
-            "image_url": {
-                "url": base64_image
-            }
-        })
+        image_url: Dict[str, str] = {"url": base64_image}
+        if self.media_resolution:
+            # LiteLLM maps image detail to Gemini 3's per-media resolution enum.
+            image_url["detail"] = self.media_resolution
+        user_content.append({"type": "image_url", "image_url": image_url})
 
         messages.append({
             "role": "user",
@@ -142,10 +143,10 @@ class ImageDescriptionService:
 
             if self.reasoning_effort:
                 completion_params["reasoning_effort"] = self.reasoning_effort
+            if self.base_model:
+                completion_params["base_model"] = self.base_model
             if self.timeout is not None:
                 completion_params["timeout"] = self.timeout
-            if self.media_resolution:
-                completion_params["media_resolution"] = self.media_resolution
             if self.api_base:
                 completion_params["api_base"] = self.api_base
             if self.api_key:
