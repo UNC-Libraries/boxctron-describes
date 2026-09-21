@@ -59,7 +59,8 @@ class Settings(BaseSettings):
     max_upload_size: int = 10 * 1024 * 1024  # 10 MB
 
     # Image Processing Configuration
-    image_max_dimension: int = 1600
+    image_full_desc_max_dimension: int = 1600
+    image_transcribe_max_dimension: int = 2240
     image_max_pixels: Optional[int] = 500_000_000  # Increase PIL decompression-bomb threshold for large archival images; set to None to disable
 
     # Authentication Configuration

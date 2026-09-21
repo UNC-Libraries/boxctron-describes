@@ -1,6 +1,6 @@
 """Unit tests for DescribeImageWorkflow, focused on the transcribe step."""
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 import pytest
 
 from app.config import Settings
@@ -20,6 +20,8 @@ def settings():
     s.litellm_full_desc_model = "azure/gpt-4o"
     s.litellm_review_model = "azure/gpt-4o"
     s.litellm_transcribe_model = "gemini/gemini-1.5-pro"
+    s.image_full_desc_max_dimension = 1600
+    s.image_transcribe_max_dimension = 2240
     s.review_skip_threshold = None
     return s
 
@@ -130,6 +132,10 @@ async def test_transcribe_step_runs_for_significant_difficult(
     result = await workflow.process_image(Path("/tmp/img.jpg"), "img.jpg", "image/jpeg")
 
     mock_transcribe_service.generate_description.assert_called_once()
+    mock_normalizer.normalize_image.assert_has_calls([
+        call(Path("/tmp/img.jpg"), 1600),
+        call(Path("/tmp/img.jpg"), 2240),
+    ])
 
     assert result.steps["full_desc"].status == "superseded"
     assert result.steps["full_desc"].model == "azure/gpt-4o"
@@ -240,6 +246,7 @@ async def test_normal_path_has_single_full_desc_step(
     assert result.steps["full_desc"].status == "success"
     assert result.steps["full_desc"].model == "azure/gpt-4o"
     assert "transcribe" not in result.steps
+    mock_normalizer.normalize_image.assert_called_once_with(Path("/tmp/img.jpg"), 1600)
 
 # ---------------------------------------------------------------------------
 # Ensure score normalized correctly when the review step is skipped

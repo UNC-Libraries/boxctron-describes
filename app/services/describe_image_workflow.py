@@ -67,7 +67,9 @@ class DescribeImageWorkflow:
         """
         logger.info(f"Processing image {image_path}")
         # Normalize image
-        base64_image = self.image_normalizer.normalize_image(image_path)
+        base64_image = self.image_normalizer.normalize_image(
+            image_path, self.settings.image_full_desc_max_dimension
+        )
 
         # Generate full description, transcript, and safety assessment
         full_desc_start = datetime.now(timezone.utc)
@@ -92,7 +94,10 @@ class DescribeImageWorkflow:
             )
 
             transcribe_start = datetime.now(timezone.utc)
-            full_desc_result = self.transcribe_service.generate_description(base64_image, context)
+            transcribe_image = self.image_normalizer.normalize_image(
+                image_path, self.settings.image_transcribe_max_dimension
+            )
+            full_desc_result = self.transcribe_service.generate_description(transcribe_image, context)
             transcribe_duration = (datetime.now(timezone.utc) - transcribe_start).total_seconds() * 1000
 
             safety_assessment = self._parse_safety_assessment(full_desc_result)
