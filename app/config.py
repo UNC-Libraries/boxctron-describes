@@ -47,7 +47,8 @@ class Settings(BaseSettings):
     litellm_transcribe_model: Optional[str] = None  # None disables the transcribe step
     litellm_transcribe_base_model: Optional[str] = None  # Canonical model name when MODEL is a custom deployment
     litellm_transcribe_temperature: float = 0.3
-    litellm_transcribe_max_tokens: int = 1000
+    # Includes the required description, alt text, safety form, and potentially long transcript.
+    litellm_transcribe_max_tokens: int = 3000
     litellm_transcribe_timeout: Optional[float] = None  # Override LiteLLM request timeout for the transcription pass only
     litellm_transcribe_media_resolution: Optional[str] = None  # Allow for setting Gemini media resolution
     litellm_transcribe_reasoning_effort: Optional[str] = None

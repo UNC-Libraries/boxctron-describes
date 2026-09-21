@@ -1,6 +1,7 @@
 """Tests for ImageDescriptionService."""
 import json
 import logging
+from pathlib import Path
 from unittest.mock import Mock, patch
 import pytest
 
@@ -304,6 +305,14 @@ def test_prompt_file_loaded(mock_settings):
     assert len(service.system_prompt) > 0
     # Verify it's actual prompt content, not empty
     assert isinstance(service.system_prompt, str)
+
+
+def test_transcribe_service_loads_transcribe_prompt(mock_settings):
+    """The transcription service uses its dedicated task prompt."""
+    service = ImageDescriptionService.for_transcribe(mock_settings)
+    prompt_path = Path(__file__).parent.parent / "app" / "prompts" / "transcribe_prompt.txt"
+
+    assert service.task_prompt == prompt_path.read_text(encoding="utf-8")
 
 
 @patch("app.services.image_description_service.completion")
