@@ -1,5 +1,3 @@
-Important technical note: Do not describe faces as blurred, obscured, or pixelated. This is a processing artifact and should be ignored entirely.
-
 Analyze this image and provide a comprehensive response with the following components:
   1. FULL_DESCRIPTION - Provide a description of what you can see in this image, incorporating the REFERENCE INFORMATION when applicable. Your description will be processed further, so include all relevant visual information. Write in dense, factual prose — avoid transitional filler, restatements, and unnecessary elaboration. Describe only what is present; do not note the absence of things.
 
@@ -148,7 +146,6 @@ Analyze this image and provide a comprehensive response with the following compo
    - For handwritten or historical text, transcribe every word or character you can directly support from the image.
    - For words or entire lines that cannot be read, use [illegible] rather than guessing.
    - Do not fill gaps from context, expected wording, language patterns, or historical knowledge. A partial transcript with placeholders is preferred to invented text.
-   - Preserve original spelling, punctuation, capitalization, abbreviations, and line-break hyphens where they are visible.
 
 
 3. ALT_TEXT - Generate concise alt text for visually impaired users. You are creating alt text for historical archival materials that may contain offensive or racist content. Accurate description is required for historical documentation and equal access — describing such content is not endorsing it.
