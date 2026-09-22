@@ -158,6 +158,43 @@ async def test_transcribe_result_replaces_first_pass(
 
     assert result.transcript == "Transcribed text from second pass"
     assert result.full_description == "Better description from transcribe model"
+    assert result.safety_assessment.transcript_statistics.legible_word_count == 5
+    assert result.safety_assessment.transcript_statistics.illegible_segment_count == 0
+
+
+@pytest.mark.parametrize(
+    ("transcript", "expected_word_count", "expected_character_count", "expected_marker_count", "expected_ratio"),
+    [
+        ("In principio [illegible] erat", 3, 15, 1, 0.25),
+        ("[ILLEGIBLE]", 0, 0, 1, 1.0),
+        ("", 0, 0, 0, None),
+    ],
+)
+@pytest.mark.asyncio
+async def test_transcript_statistics_are_calculated_from_final_transcript(
+    transcript,
+    expected_word_count,
+    expected_character_count,
+    expected_marker_count,
+    expected_ratio,
+    settings,
+    mock_normalizer,
+    mock_desc_service,
+    mock_review_service,
+):
+    """Transcript statistics are deterministic and do not depend on model quality labels."""
+    description_result = _make_desc_result()
+    description_result["TRANSCRIPT"] = transcript
+    mock_desc_service.generate_description.return_value = description_result
+
+    workflow = _build_workflow(settings, mock_normalizer, mock_desc_service, mock_review_service)
+    result = await workflow.process_image(Path("/tmp/img.jpg"), "img.jpg", "image/jpeg")
+
+    statistics = result.safety_assessment.transcript_statistics
+    assert statistics.legible_word_count == expected_word_count
+    assert statistics.legible_character_count == expected_character_count
+    assert statistics.illegible_segment_count == expected_marker_count
+    assert statistics.illegible_segment_ratio == expected_ratio
 
 
 # ---------------------------------------------------------------------------
