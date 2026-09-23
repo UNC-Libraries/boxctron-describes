@@ -162,6 +162,11 @@ class SafetyAssessment(BaseModel):
         description="Deterministic statistics calculated from the generated transcript"
     )
 
+    full_description_transcript_statistics: TranscriptStatistics = Field(
+        default_factory=TranscriptStatistics,
+        description="Deterministic statistics calculated from the first full-description pass transcript"
+    )
+
     risk_score: Optional[int] = Field(
         None,
         description="Normalized risk score from 0 to 100 derived from safety assessment field weights"

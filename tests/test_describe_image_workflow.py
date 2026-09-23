@@ -160,6 +160,7 @@ async def test_transcribe_result_replaces_first_pass(
     assert result.full_description == "Better description from transcribe model"
     assert result.safety_assessment.transcript_statistics.legible_word_count == 5
     assert result.safety_assessment.transcript_statistics.illegible_segment_count == 0
+    assert result.safety_assessment.full_description_transcript_statistics.legible_word_count == 2
 
 
 @pytest.mark.parametrize(
@@ -195,6 +196,7 @@ async def test_transcript_statistics_are_calculated_from_final_transcript(
     assert statistics.legible_character_count == expected_character_count
     assert statistics.illegible_segment_count == expected_marker_count
     assert statistics.illegible_segment_ratio == expected_ratio
+    assert result.safety_assessment.full_description_transcript_statistics == statistics
 
 
 # ---------------------------------------------------------------------------

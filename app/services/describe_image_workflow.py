@@ -77,6 +77,7 @@ class DescribeImageWorkflow:
         full_desc_start = datetime.now(timezone.utc)
         full_desc_result = self.image_description_service.generate_description(base64_image, context)
         full_desc_duration = (datetime.now(timezone.utc) - full_desc_start).total_seconds() * 1000
+        full_description_transcript = full_desc_result.get("TRANSCRIPT", "") or ""
         logger.info(f"Generated description for {filename}")
 
         # Parse safety assessment from LLM response
@@ -122,6 +123,9 @@ class DescribeImageWorkflow:
         safety_form = full_desc_result.get("SAFETY_ASSESSMENT_FORM", {})
         safety_reasoning = full_desc_result.get("SAFETY_ASSESSMENT_REASONING", "")
         safety_assessment.transcript_statistics = self._calculate_transcript_statistics(transcript)
+        safety_assessment.full_description_transcript_statistics = self._calculate_transcript_statistics(
+            full_description_transcript
+        )
 
         # Generate review assessment
         review_assessment = None
