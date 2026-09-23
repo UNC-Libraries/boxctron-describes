@@ -84,11 +84,13 @@ class DescribeImageWorkflow:
         safety_assessment = self._parse_safety_assessment(full_desc_result)
 
         steps: Dict[str, StepOutcome] = {}
+        transcription_ran = False
 
         # Run a second transcription pass when the text is significant but hard to read
         if self.transcribe_service is not None and self._needs_transcribe_step(safety_assessment):
             logger.info(f"File {filename} requires additional transcript processing")
             logger.debug(f"Discarding full_desc_result from first pass: {full_desc_result}")
+            transcription_ran = True
 
             steps["full_desc"] = StepOutcome(
                 status="superseded",
@@ -123,9 +125,10 @@ class DescribeImageWorkflow:
         safety_form = full_desc_result.get("SAFETY_ASSESSMENT_FORM", {})
         safety_reasoning = full_desc_result.get("SAFETY_ASSESSMENT_REASONING", "")
         safety_assessment.transcript_statistics = self._calculate_transcript_statistics(transcript)
-        safety_assessment.full_description_transcript_statistics = self._calculate_transcript_statistics(
-            full_description_transcript
-        )
+        if transcription_ran:
+            safety_assessment.full_description_transcript_statistics = self._calculate_transcript_statistics(
+                full_description_transcript
+            )
 
         # Generate review assessment
         review_assessment = None

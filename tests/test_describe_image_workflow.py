@@ -196,7 +196,7 @@ async def test_transcript_statistics_are_calculated_from_final_transcript(
     assert statistics.legible_character_count == expected_character_count
     assert statistics.illegible_segment_count == expected_marker_count
     assert statistics.illegible_segment_ratio == expected_ratio
-    assert result.safety_assessment.full_description_transcript_statistics == statistics
+    assert result.safety_assessment.full_description_transcript_statistics is None
 
 
 # ---------------------------------------------------------------------------
