@@ -18,7 +18,7 @@ class ImageDescriptionService:
 
     _MAX_PARSE_RETRIES = 3
 
-    def __init__(self, settings: Settings):
+    def __init__(self, settings: Settings, prompt_filename: str = "full_description_prompt.txt"):
         """
         Initialize the ImageDescriptionService.
 
@@ -38,7 +38,7 @@ class ImageDescriptionService:
         self.step_name = "image description"
 
         # Load the task prompt template
-        prompt_path = Path(__file__).parent.parent / "prompts" / "full_description_prompt.txt"
+        prompt_path = Path(__file__).parent.parent / "prompts" / prompt_filename
         with open(prompt_path, 'r', encoding='utf-8') as f:
             self.task_prompt = f.read()
 
@@ -53,7 +53,7 @@ class ImageDescriptionService:
     @classmethod
     def for_transcribe(cls, settings: Settings) -> "ImageDescriptionService":
         """Create an instance configured with the LITELLM_TRANSCRIBE_* settings."""
-        instance = cls(settings)
+        instance = cls(settings, "transcribe_prompt.txt")
         instance.model = settings.litellm_transcribe_model
         instance.base_model = settings.litellm_transcribe_base_model
         instance.temperature = settings.litellm_transcribe_temperature

@@ -3,6 +3,7 @@ from pathlib import Path
 from typing import Optional, Dict
 from datetime import datetime, timezone
 import logging
+import re
 
 from app.services.image_normalizer import ImageNormalizer
 from app.services.image_description_service import ImageDescriptionService
@@ -10,10 +11,11 @@ from app.services.review_assessment_service import ReviewAssessmentService
 from app.services.safety_risk_scoring_service import calculate_risk_score
 from app.services.safety_inconsistency_service import count_safety_inconsistencies
 from app.services.review_risk_scoring_service import calculate_review_risk_score
-from app.models import DescriptionResult, SafetyAssessment, ReviewAssessment, VersionInfo, SymbolsPresent, TextCharacteristics, StepOutcome
+from app.models import DescriptionResult, SafetyAssessment, ReviewAssessment, VersionInfo, SymbolsPresent, TextCharacteristics, TranscriptStatistics, StepOutcome
 from app.config import Settings
 
 logger = logging.getLogger(__name__)
+_ILLEGIBLE_MARKER_PATTERN = re.compile(r"\[illegible\]", re.IGNORECASE)
 
 class DescribeImageWorkflow:
     """Service orchestrating the image description workflow."""
@@ -67,23 +69,28 @@ class DescribeImageWorkflow:
         """
         logger.info(f"Processing image {image_path}")
         # Normalize image
-        base64_image = self.image_normalizer.normalize_image(image_path)
+        base64_image = self.image_normalizer.normalize_image(
+            image_path, self.settings.image_full_desc_max_dimension
+        )
 
         # Generate full description, transcript, and safety assessment
         full_desc_start = datetime.now(timezone.utc)
         full_desc_result = self.image_description_service.generate_description(base64_image, context)
         full_desc_duration = (datetime.now(timezone.utc) - full_desc_start).total_seconds() * 1000
+        full_description_transcript = full_desc_result.get("TRANSCRIPT", "") or ""
         logger.info(f"Generated description for {filename}")
 
         # Parse safety assessment from LLM response
         safety_assessment = self._parse_safety_assessment(full_desc_result)
 
         steps: Dict[str, StepOutcome] = {}
+        transcription_ran = False
 
         # Run a second transcription pass when the text is significant but hard to read
         if self.transcribe_service is not None and self._needs_transcribe_step(safety_assessment):
             logger.info(f"File {filename} requires additional transcript processing")
             logger.debug(f"Discarding full_desc_result from first pass: {full_desc_result}")
+            transcription_ran = True
 
             steps["full_desc"] = StepOutcome(
                 status="superseded",
@@ -92,7 +99,10 @@ class DescribeImageWorkflow:
             )
 
             transcribe_start = datetime.now(timezone.utc)
-            full_desc_result = self.transcribe_service.generate_description(base64_image, context)
+            transcribe_image = self.image_normalizer.normalize_image(
+                image_path, self.settings.image_transcribe_max_dimension
+            )
+            full_desc_result = self.transcribe_service.generate_description(transcribe_image, context)
             transcribe_duration = (datetime.now(timezone.utc) - transcribe_start).total_seconds() * 1000
 
             safety_assessment = self._parse_safety_assessment(full_desc_result)
@@ -111,9 +121,14 @@ class DescribeImageWorkflow:
 
         full_description = full_desc_result.get("FULL_DESCRIPTION", "")
         alt_text = full_desc_result.get("ALT_TEXT", "")
-        transcript = full_desc_result.get("TRANSCRIPT", "")
+        transcript = full_desc_result.get("TRANSCRIPT", "") or ""
         safety_form = full_desc_result.get("SAFETY_ASSESSMENT_FORM", {})
         safety_reasoning = full_desc_result.get("SAFETY_ASSESSMENT_REASONING", "")
+        safety_assessment.transcript_statistics = self._calculate_transcript_statistics(transcript)
+        if transcription_ran:
+            safety_assessment.full_description_transcript_statistics = self._calculate_transcript_statistics(
+                full_description_transcript
+            )
 
         # Generate review assessment
         review_assessment = None
@@ -169,6 +184,22 @@ class DescribeImageWorkflow:
         return (
             tc.text_present == "SIGNIFICANT"
             and tc.legibility in ("DIFFICULT", "ILLEGIBLE", "PARTIALLY_CLEAR")
+        )
+
+    @staticmethod
+    def _calculate_transcript_statistics(transcript: str) -> TranscriptStatistics:
+        """Calculate deterministic transcript metrics after the final transcription pass."""
+        illegible_segment_count = len(_ILLEGIBLE_MARKER_PATTERN.findall(transcript))
+        legible_text = _ILLEGIBLE_MARKER_PATTERN.sub("", transcript)
+        legible_word_count = len(re.findall(r"\b\w+\b", legible_text))
+        legible_character_count = sum(not character.isspace() for character in legible_text)
+        total_segments = legible_word_count + illegible_segment_count
+
+        return TranscriptStatistics(
+            legible_word_count=legible_word_count,
+            legible_character_count=legible_character_count,
+            illegible_segment_count=illegible_segment_count,
+            illegible_segment_ratio=(illegible_segment_count / total_segments) if total_segments else None,
         )
 
     def _parse_safety_assessment(self, full_desc_result: dict) -> SafetyAssessment:

@@ -1,6 +1,6 @@
 """Unit tests for DescribeImageWorkflow, focused on the transcribe step."""
 from pathlib import Path
-from unittest.mock import Mock
+from unittest.mock import Mock, call
 import pytest
 
 from app.config import Settings
@@ -20,6 +20,8 @@ def settings():
     s.litellm_full_desc_model = "azure/gpt-4o"
     s.litellm_review_model = "azure/gpt-4o"
     s.litellm_transcribe_model = "gemini/gemini-1.5-pro"
+    s.image_full_desc_max_dimension = 1600
+    s.image_transcribe_max_dimension = 2240
     s.review_skip_threshold = None
     return s
 
@@ -130,6 +132,10 @@ async def test_transcribe_step_runs_for_significant_difficult(
     result = await workflow.process_image(Path("/tmp/img.jpg"), "img.jpg", "image/jpeg")
 
     mock_transcribe_service.generate_description.assert_called_once()
+    mock_normalizer.normalize_image.assert_has_calls([
+        call(Path("/tmp/img.jpg"), 1600),
+        call(Path("/tmp/img.jpg"), 2240),
+    ])
 
     assert result.steps["full_desc"].status == "superseded"
     assert result.steps["full_desc"].model == "azure/gpt-4o"
@@ -152,6 +158,45 @@ async def test_transcribe_result_replaces_first_pass(
 
     assert result.transcript == "Transcribed text from second pass"
     assert result.full_description == "Better description from transcribe model"
+    assert result.safety_assessment.transcript_statistics.legible_word_count == 5
+    assert result.safety_assessment.transcript_statistics.illegible_segment_count == 0
+    assert result.safety_assessment.full_description_transcript_statistics.legible_word_count == 2
+
+
+@pytest.mark.parametrize(
+    ("transcript", "expected_word_count", "expected_character_count", "expected_marker_count", "expected_ratio"),
+    [
+        ("In principio [illegible] erat", 3, 15, 1, 0.25),
+        ("[ILLEGIBLE]", 0, 0, 1, 1.0),
+        ("", 0, 0, 0, None),
+    ],
+)
+@pytest.mark.asyncio
+async def test_transcript_statistics_are_calculated_from_final_transcript(
+    transcript,
+    expected_word_count,
+    expected_character_count,
+    expected_marker_count,
+    expected_ratio,
+    settings,
+    mock_normalizer,
+    mock_desc_service,
+    mock_review_service,
+):
+    """Transcript statistics are deterministic and do not depend on model quality labels."""
+    description_result = _make_desc_result()
+    description_result["TRANSCRIPT"] = transcript
+    mock_desc_service.generate_description.return_value = description_result
+
+    workflow = _build_workflow(settings, mock_normalizer, mock_desc_service, mock_review_service)
+    result = await workflow.process_image(Path("/tmp/img.jpg"), "img.jpg", "image/jpeg")
+
+    statistics = result.safety_assessment.transcript_statistics
+    assert statistics.legible_word_count == expected_word_count
+    assert statistics.legible_character_count == expected_character_count
+    assert statistics.illegible_segment_count == expected_marker_count
+    assert statistics.illegible_segment_ratio == expected_ratio
+    assert result.safety_assessment.full_description_transcript_statistics is None
 
 
 # ---------------------------------------------------------------------------
@@ -240,6 +285,7 @@ async def test_normal_path_has_single_full_desc_step(
     assert result.steps["full_desc"].status == "success"
     assert result.steps["full_desc"].model == "azure/gpt-4o"
     assert "transcribe" not in result.steps
+    mock_normalizer.normalize_image.assert_called_once_with(Path("/tmp/img.jpg"), 1600)
 
 # ---------------------------------------------------------------------------
 # Ensure score normalized correctly when the review step is skipped

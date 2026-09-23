@@ -302,6 +302,13 @@ def _assert_default_response_populated(response, expected_filename):
     assert safety["symbols_present"]["names"] == []
     assert safety["text_characteristics"]["text_present"] == "NONE"
     assert safety["text_characteristics"]["text_type"] == "N/A"
+    assert safety["transcript_statistics"] == {
+        "legible_word_count": 0,
+        "legible_character_count": 0,
+        "illegible_segment_count": 0,
+        "illegible_segment_ratio": None,
+    }
+    assert safety["full_description_transcript_statistics"] is None
     assert safety["risk_score"] == 0
     assert safety["inconsistency_count"] == 0
 
