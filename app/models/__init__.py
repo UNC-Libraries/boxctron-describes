@@ -7,6 +7,7 @@ from app.models.describe_response import (
     ReviewAssessment,
     SymbolsPresent,
     TextCharacteristics,
+    TranscriptStatistics,
     StepOutcome,
     VersionInfo
 )
@@ -24,6 +25,7 @@ __all__ = [
     "ReviewAssessment",
     "SymbolsPresent",
     "TextCharacteristics",
+    "TranscriptStatistics",
     "StepOutcome",
     "VersionInfo",
     "ValidationErrorResponse",

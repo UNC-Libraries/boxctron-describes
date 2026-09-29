@@ -21,4 +21,7 @@ def test_settings_defaults(monkeypatch):
     assert settings.host == "0.0.0.0"
     assert settings.port == 8000
     assert settings.litellm_full_desc_model == "azure/gpt-4o"
+    assert settings.litellm_transcribe_max_tokens == 3000
+    assert settings.image_full_desc_max_dimension == 1600
+    assert settings.image_transcribe_max_dimension == 2240
     assert settings.max_upload_size == 10 * 1024 * 1024

@@ -53,6 +53,32 @@ class TextCharacteristics(BaseModel):
     )
 
 
+class TranscriptStatistics(BaseModel):
+    """Deterministic statistics calculated from the generated transcript."""
+
+    legible_word_count: int = Field(
+        0,
+        ge=0,
+        description="Number of word-like tokens remaining after [illegible] markers are removed"
+    )
+    legible_character_count: int = Field(
+        0,
+        ge=0,
+        description="Number of non-whitespace characters remaining after [illegible] markers are removed"
+    )
+    illegible_segment_count: int = Field(
+        0,
+        ge=0,
+        description="Number of [illegible] markers in the transcript"
+    )
+    illegible_segment_ratio: Optional[float] = Field(
+        None,
+        ge=0,
+        le=1,
+        description="[illegible] markers divided by readable word-like tokens plus markers; null when neither exists"
+    )
+
+
 class SafetyAssessment(BaseModel):
     """Safety assessment of the image content."""
 
@@ -129,6 +155,16 @@ class SafetyAssessment(BaseModel):
     reasoning: Optional[str] = Field(
         None,
         description="Reasoning behind the safety assessment"
+    )
+
+    transcript_statistics: TranscriptStatistics = Field(
+        default_factory=TranscriptStatistics,
+        description="Deterministic statistics calculated from the generated transcript"
+    )
+
+    full_description_transcript_statistics: Optional[TranscriptStatistics] = Field(
+        None,
+        description="Deterministic statistics from the superseded first full-description pass transcript, when a transcription pass ran"
     )
 
     risk_score: Optional[int] = Field(
