@@ -30,7 +30,7 @@ def make_assessment(**overrides) -> SafetyAssessment:
             misidentification_risk="LOW",
         ),
         stereotyping_present="NO",
-        atrocities_depicted="NO",
+        atrocities="NONE",
         text_characteristics=TextCharacteristics(
             text_present="NONE",
             text_type="N/A",
@@ -77,7 +77,7 @@ def test_score_is_100_for_all_maximum_risk_values():
             misidentification_risk="HIGH",
         ),
         stereotyping_present="YES",
-        atrocities_depicted="YES",
+        atrocities="DEPICTED",
         text_characteristics=TextCharacteristics(
             text_present="SIGNIFICANT",
             text_type="HANDWRITTEN_CURSIVE",
@@ -146,7 +146,7 @@ def test_high_risk_score_for_violent_image_with_minors():
         violent_content="DEPICTED",
         racial_violence_oppression="DEPICTED",
         stereotyping_present="YES",
-        atrocities_depicted="YES",
+        atrocities="DEPICTED",
         symbols_present=SymbolsPresent(
             types=["HATE"],
             names=[],
@@ -157,6 +157,16 @@ def test_high_risk_score_for_violent_image_with_minors():
     assert score > HIGH_SCORE_THRESHOLD, (
         f"Expected high score (> {HIGH_SCORE_THRESHOLD}), got {score}"
     )
+
+
+def test_atrocities_scores_reflect_context_severity():
+    """References and descriptions score lower than visual depictions."""
+    none = calculate_risk_score(make_assessment(atrocities="NONE"))
+    referenced = calculate_risk_score(make_assessment(atrocities="REFERENCED"))
+    described = calculate_risk_score(make_assessment(atrocities="DESCRIBED"))
+    depicted = calculate_risk_score(make_assessment(atrocities="DEPICTED"))
+
+    assert none < referenced < described < depicted
 
 
 # ---------------------------------------------------------------------------
@@ -288,7 +298,7 @@ def test_score_is_always_within_valid_range():
                 types=["HATE"], names=[], misidentification_risk="HIGH"
             ),
             stereotyping_present="YES",
-            atrocities_depicted="YES",
+            atrocities="DEPICTED",
             text_characteristics=TextCharacteristics(
                 text_present="SIGNIFICANT", text_type="HANDWRITTEN_CURSIVE", legibility="DIFFICULT",
                 sensitivity="SENSITIVE"

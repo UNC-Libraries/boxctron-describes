@@ -40,7 +40,7 @@ def sample_llm_response():
                 "misid_risk": "L"
             },
             "stereotyping": "N",
-            "atrocities": "N",
+            "atrocities": "0",
             "text_chars": {
                 "present": "N"
             },
