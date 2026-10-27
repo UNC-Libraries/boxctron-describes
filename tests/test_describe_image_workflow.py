@@ -51,7 +51,7 @@ def _make_desc_result(text_present="NONE", legibility="N/A"):
             "sexual_content": "NONE",
             "symbols_present": {"types": ["NONE"], "names": [], "misidentification_risk": "LOW"},
             "stereotyping_present": "NO",
-            "atrocities_depicted": "NO",
+            "atrocities": "NONE",
             "text_characteristics": {
                 "text_present": text_present,
                 "text_type": "N/A",

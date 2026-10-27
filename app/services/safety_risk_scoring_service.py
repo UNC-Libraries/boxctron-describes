@@ -52,9 +52,11 @@ SAFETY_FIELD_WEIGHTS: dict[str, dict[str, int]] = {
         "POSSIBLY": 5,
         "YES": 10,
     },
-    "atrocities_depicted": {
-        "NO": 0,
-        "YES": 10,
+    "atrocities": {
+        "NONE": 0,
+        "REFERENCED": 2,
+        "DESCRIBED": 5,
+        "DEPICTED": 10,
     },
     "image_quality": {
         "UNIMPAIRED": 0,

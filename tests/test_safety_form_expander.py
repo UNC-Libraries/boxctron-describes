@@ -19,7 +19,7 @@ def short_form_no_concerns():
             "misid_risk": "L"
         },
         "stereotyping": "N",
-        "atrocities": "N",
+        "atrocities": "0",
         "text_chars": {
             "present": "N"
         },
@@ -46,7 +46,7 @@ def short_form_with_concerns():
             "misid_risk": "M"
         },
         "stereotyping": "P",
-        "atrocities": "Y",
+        "atrocities": "DEP",
         "text_chars": {
             "present": "SIG",
             "type": "HWCU",
@@ -77,7 +77,7 @@ def test_expand_no_concerns(short_form_no_concerns):
         "misidentification_risk": "LOW"
     }
     assert result["stereotyping_present"] == "NO"
-    assert result["atrocities_depicted"] == "NO"
+    assert result["atrocities"] == "NONE"
     assert result["text_characteristics"] == {
         "text_present": "NONE",
         "text_type": "N/A",
@@ -106,7 +106,7 @@ def test_expand_with_concerns(short_form_with_concerns):
         "misidentification_risk": "MEDIUM"
     }
     assert result["stereotyping_present"] == "POSSIBLY"
-    assert result["atrocities_depicted"] == "YES"
+    assert result["atrocities"] == "DEPICTED"
     assert result["text_characteristics"] == {
         "text_present": "SIGNIFICANT",
         "text_type": "HANDWRITTEN_CURSIVE",
@@ -116,6 +116,21 @@ def test_expand_with_concerns(short_form_with_concerns):
     }
 
 
+@pytest.mark.parametrize(
+    ("short_value", "expanded_value"),
+    [
+        ("0", "NONE"),
+        ("REF", "REFERENCED"),
+        ("DSC", "DESCRIBED"),
+        ("DEP", "DEPICTED"),
+    ],
+)
+def test_expand_atrocities_values(short_form_no_concerns, short_value, expanded_value):
+    """Each compact atrocities value expands to its public enum value."""
+    result = expand_safety_form({**short_form_no_concerns, "atrocities": short_value})
+    assert result["atrocities"] == expanded_value
+
+
 def test_expand_text_present_values():
     """Each text_chars.present abbreviation maps correctly to the new three-value enum."""
     base = {
@@ -123,7 +138,7 @@ def test_expand_text_present_values():
         "named_indiv": "N", "violence": "0", "racial_viol": "0",
         "nudity": "0", "sexual": "0",
         "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
-        "stereotyping": "N", "atrocities": "N",
+        "stereotyping": "N", "atrocities": "0",
     }
 
     present_map = {
@@ -147,7 +162,7 @@ def test_expand_all_text_types():
         "named_indiv": "N", "violence": "0", "racial_viol": "0",
         "nudity": "0", "sexual": "0",
         "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
-        "stereotyping": "N", "atrocities": "N",
+        "stereotyping": "N", "atrocities": "0",
     }
 
     type_map = {
@@ -167,7 +182,7 @@ def test_expand_all_legibility_values():
         "named_indiv": "N", "violence": "0", "racial_viol": "0",
         "nudity": "0", "sexual": "0",
         "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
-        "stereotyping": "N", "atrocities": "N",
+        "stereotyping": "N", "atrocities": "0",
     }
 
     legib_map = {
@@ -185,7 +200,7 @@ def test_expand_all_symbol_types():
         "people": "N", "demog": "N", "misid_risk": "L", "minors": "N",
         "named_indiv": "N", "violence": "0", "racial_viol": "0",
         "nudity": "0", "sexual": "0", "stereotyping": "N",
-        "atrocities": "N",
+        "atrocities": "0",
         "text_chars": {"present": "N", "type": "NA", "legib": "NA", "sensitiv": "NA"},
     }
 
@@ -206,7 +221,7 @@ def test_expand_nudity_full():
         "named_indiv": "N", "violence": "0", "racial_viol": "0",
         "nudity": "FULL", "sexual": "EXP",
         "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
-        "stereotyping": "N", "atrocities": "N",
+        "stereotyping": "N", "atrocities": "0",
         "text_chars": {"present": "N", "type": "NA", "legib": "NA", "sensitiv": "NA"},
     }
     result = expand_safety_form(base)
@@ -226,7 +241,7 @@ def test_people_n_fills_conditional_defaults():
         "people": "N",
         "violence": "0", "racial_viol": "0", "nudity": "0", "sexual": "0",
         "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
-        "stereotyping": "N", "atrocities": "N",
+        "stereotyping": "N", "atrocities": "0",
         "text_chars": {"present": "N"},
     }
     result = expand_safety_form(form)
@@ -242,7 +257,7 @@ def test_text_chars_present_n_fills_conditional_defaults():
         "people": "N",
         "violence": "0", "racial_viol": "0", "nudity": "0", "sexual": "0",
         "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
-        "stereotyping": "N", "atrocities": "N",
+        "stereotyping": "N", "atrocities": "0",
         "text_chars": {"present": "N"},
     }
     result = expand_safety_form(form)
@@ -265,7 +280,7 @@ def test_people_not_n_explicit_fields_not_overridden():
         "named_indiv": "Y",
         "violence": "0", "racial_viol": "0", "nudity": "0", "sexual": "0",
         "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
-        "stereotyping": "N", "atrocities": "N",
+        "stereotyping": "N", "atrocities": "0",
         "text_chars": {"present": "N"},
     }
     result = expand_safety_form(form)
@@ -284,7 +299,7 @@ def test_expand_unknown_top_level_value_raises():
             "named_indiv": "N", "violence": "0", "racial_viol": "0",
             "nudity": "0", "sexual": "0",
             "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
-            "stereotyping": "N", "atrocities": "N",
+            "stereotyping": "N", "atrocities": "0",
             "text_chars": {"present": "N", "type": "NA", "legib": "NA", "sensitiv": "NA"},
         })
 
@@ -297,7 +312,7 @@ def test_expand_people_unknown():
         "named_indiv": "N", "violence": "0", "racial_viol": "0",
         "nudity": "0", "sexual": "0",
         "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
-        "stereotyping": "N", "atrocities": "N",
+        "stereotyping": "N", "atrocities": "0",
         "text_chars": {"present": "N", "type": "NA", "legib": "NA", "sensitiv": "NA"},
     })
     assert result["people_visible"] == "UNKNOWN"
@@ -312,7 +327,7 @@ def test_expand_unknown_symbol_type_raises():
             "named_indiv": "N", "violence": "0", "racial_viol": "0",
             "nudity": "0", "sexual": "0",
             "symbols": {"types": ["UNKNOWN"], "names": [], "misid_risk": "L"},
-            "stereotyping": "N", "atrocities": "N",
+            "stereotyping": "N", "atrocities": "0",
             "text_chars": {"present": "N", "type": "NA", "legib": "NA", "sensitiv": "NA"},
         })
 
@@ -325,7 +340,7 @@ def test_expand_unknown_text_chars_value_raises():
             "named_indiv": "N", "violence": "0", "racial_viol": "0",
             "nudity": "0", "sexual": "0",
             "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
-            "stereotyping": "N", "atrocities": "N",
+            "stereotyping": "N", "atrocities": "0",
             "text_chars": {"present": "SIG", "type": "PR", "legib": "UNCLEAR", "sensitiv": "0"},
         })
 
@@ -341,7 +356,7 @@ def test_expand_preserves_names_list():
             "names": ["Star of David", "Menorah"],
             "misid_risk": "M"
         },
-        "stereotyping": "N", "atrocities": "N",
+        "stereotyping": "N", "atrocities": "0",
         "text_chars": {"present": "N", "type": "NA", "legib": "NA", "sensitiv": "NA"},
     }
     result = expand_safety_form(base)
@@ -356,7 +371,7 @@ def test_expand_all_text_sensitivity_values():
         "named_indiv": "N", "violence": "0", "racial_viol": "0",
         "nudity": "0", "sexual": "0",
         "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
-        "stereotyping": "N", "atrocities": "N",
+        "stereotyping": "N", "atrocities": "0",
     }
     sensitiv_map = {"NA": "N/A", "0": "NONE", "S": "SENSITIVE"}
     for short, full in sensitiv_map.items():
@@ -376,7 +391,7 @@ def test_expand_unknown_sensitivity_value_raises():
             "named_indiv": "N", "violence": "0", "racial_viol": "0",
             "nudity": "0", "sexual": "0",
             "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
-            "stereotyping": "N", "atrocities": "N",
+            "stereotyping": "N", "atrocities": "0",
             "text_chars": {"present": "SIG", "type": "PR", "legib": "CL", "sensitiv": "MAYBE"},
         })
 
@@ -385,7 +400,7 @@ _TEXT_BASE = {
     "people": "N",
     "violence": "0", "racial_viol": "0", "nudity": "0", "sexual": "0",
     "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
-    "stereotyping": "N", "atrocities": "N",
+    "stereotyping": "N", "atrocities": "0",
 }
 
 

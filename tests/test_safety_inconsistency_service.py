@@ -27,7 +27,7 @@ def make_assessment(**overrides) -> SafetyAssessment:
             misidentification_risk="LOW",
         ),
         stereotyping_present="NO",
-        atrocities_depicted="NO",
+        atrocities="NONE",
         text_characteristics=TextCharacteristics(
             text_present="NONE",
             text_type="N/A",

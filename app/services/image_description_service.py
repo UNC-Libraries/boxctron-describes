@@ -292,7 +292,7 @@ class ImageDescriptionService:
                                 },
                                 "atrocities": {
                                     "type": "string",
-                                    "enum": ["N", "Y"]
+                                    "enum": ["0", "REF", "DSC", "DEP"]
                                 },
                                 "text_chars": {
                                     "type": "object",

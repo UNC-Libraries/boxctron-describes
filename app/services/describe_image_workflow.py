@@ -231,7 +231,7 @@ class DescribeImageWorkflow:
                 misidentification_risk=symbols_data.get("misidentification_risk", "UNKNOWN")
             ),
             stereotyping_present=safety_form.get("stereotyping_present", "UNKNOWN"),
-            atrocities_depicted=safety_form.get("atrocities_depicted", "UNKNOWN"),
+            atrocities=safety_form.get("atrocities", "NONE"),
             text_characteristics=TextCharacteristics(
                 text_present=safety_form.get("text_characteristics", {}).get("text_present", "UNKNOWN"),
                 text_type=safety_form.get("text_characteristics", {}).get("text_type", "N/A"),

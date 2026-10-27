@@ -20,7 +20,7 @@ SAFETY_FORM_KEY_MAP: Dict[str, str] = {
     "sexual": "sexual_content",
     "symbols": "symbols_present",
     "stereotyping": "stereotyping_present",
-    "atrocities": "atrocities_depicted",
+    "atrocities": "atrocities",
     "text_chars": "text_characteristics",
     "img_qual": "image_quality",
 }
@@ -88,6 +88,13 @@ SEXUAL_VALUE_MAP: Dict[str, str] = {
     "EXP": "EXPLICIT",
 }
 
+ATROCITIES_VALUE_MAP: Dict[str, str] = {
+    "0": "NONE",
+    "REF": "REFERENCED",
+    "DSC": "DESCRIBED",
+    "DEP": "DEPICTED",
+}
+
 SYMBOL_TYPE_VALUE_MAP: Dict[str, str] = {
     "0": "NONE",
     "CUL": "CULTURAL",
@@ -143,7 +150,7 @@ _FIELD_VALUE_MAPS: Dict[str, Dict[str, str]] = {
     "nudity": NUDITY_VALUE_MAP,
     "sexual": SEXUAL_VALUE_MAP,
     "stereotyping": TERNARY_NPY_VALUE_MAP,
-    "atrocities": BINARY_VALUE_MAP,
+    "atrocities": ATROCITIES_VALUE_MAP,
     "img_qual": IMAGE_QUALITY_VALUE_MAP,
 }
 

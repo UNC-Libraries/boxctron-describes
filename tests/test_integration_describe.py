@@ -77,7 +77,7 @@ def mock_llm_responses():
                         "misid_risk": "L"
                     },
                     "stereotyping": "N",
-                    "atrocities": "N",
+                    "atrocities": "0",
                     "text_chars": {
                         "present": "N"
                     },
@@ -524,7 +524,7 @@ def test_integration_all_safety_and_review_fields_populated_with_positive_values
                         "misid_risk": "M",
                     },
                     "stereotyping": "P",
-                    "atrocities": "Y",
+                    "atrocities": "DEP",
                     "text_chars": {
                         "present": "SIG",
                         "type": "HWCU",
@@ -593,7 +593,7 @@ def test_integration_all_safety_and_review_fields_populated_with_positive_values
     assert symbols["misidentification_risk"] == "MEDIUM"
 
     assert safety["stereotyping_present"] == "POSSIBLY"
-    assert safety["atrocities_depicted"] == "YES"
+    assert safety["atrocities"] == "DEPICTED"
     assert isinstance(safety["reasoning"], str)
     assert isinstance(safety["risk_score"], int)
     assert isinstance(safety["inconsistency_count"], int)
@@ -662,7 +662,7 @@ def test_integration_conditional_safety_fields_default_when_omitted(
                     "sexual": "0",
                     "symbols": {"types": ["0"], "names": [], "misid_risk": "L"},
                     "stereotyping": "N",
-                    "atrocities": "N",
+                    "atrocities": "0",
                     "text_chars": {
                         "present": "N",
                         # type, legib, sensitiv, lang intentionally omitted

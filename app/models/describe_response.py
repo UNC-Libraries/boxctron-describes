@@ -137,9 +137,9 @@ class SafetyAssessment(BaseModel):
         description="Whether stereotyping is present"
     )
 
-    atrocities_depicted: Literal["NO", "YES"] = Field(
+    atrocities: Literal["NONE", "REFERENCED", "DESCRIBED", "DEPICTED"] = Field(
         ...,
-        description="Whether atrocities are depicted"
+        description="Whether atrocities are referenced, described in text, or visually depicted"
     )
 
     text_characteristics: TextCharacteristics = Field(
@@ -383,7 +383,7 @@ class DescribeResponse(BaseModel):
                             "misidentification_risk": "LOW"
                         },
                         "stereotyping_present": "NO",
-                        "atrocities_depicted": "NO",
+                        "atrocities": "NONE",
                         "text_characteristics": {
                             "text_present": "NONE",
                             "text_type": "N/A",

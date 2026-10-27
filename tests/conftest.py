@@ -61,7 +61,7 @@ def mock_description_result():
                 misidentification_risk="LOW"
             ),
             stereotyping_present="NO",
-            atrocities_depicted="NO",
+            atrocities="NONE",
             text_characteristics=TextCharacteristics(
                 text_present="NONE",
                 text_type="N/A",

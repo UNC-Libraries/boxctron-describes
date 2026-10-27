@@ -47,7 +47,7 @@ def sample_safety_assessment():
             "misidentification_risk": "LOW"
         },
         "stereotyping_present": "NO",
-        "atrocities_depicted": "NO",
+        "atrocities": "NONE",
         "text_characteristics": {
             "text_present": "NONE",
             "text_type": "N/A",
