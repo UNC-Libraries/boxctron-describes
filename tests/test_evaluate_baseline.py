@@ -1,10 +1,17 @@
 from pathlib import Path
 
 import json
+import argparse
 
 import pytest
 
-from evaluate_baseline import build_api_url, get_comparable_result, get_image_paths, load_baseline_result
+from evaluate_baseline import (
+    build_api_url,
+    get_comparable_result,
+    get_image_paths,
+    load_baseline_result,
+    positive_integer,
+)
 
 
 def test_build_api_url_uses_configured_host_and_port():
@@ -21,6 +28,20 @@ def test_get_image_paths_skips_hidden_files_and_directories(tmp_path: Path):
     (tmp_path / "nested").mkdir()
 
     assert get_image_paths(tmp_path) == [visible_image]
+
+
+def test_get_image_paths_applies_limit_in_filename_order(tmp_path: Path):
+    first_image = tmp_path / "a.jpg"
+    first_image.touch()
+    (tmp_path / "b.jpg").touch()
+
+    assert get_image_paths(tmp_path, limit=1) == [first_image]
+
+
+def test_positive_integer_rejects_zero_and_negative_values():
+    assert positive_integer("1") == 1
+    with pytest.raises(argparse.ArgumentTypeError, match="greater than zero"):
+        positive_integer("0")
 
 
 def test_load_baseline_result_extracts_comparison_fields(tmp_path: Path):

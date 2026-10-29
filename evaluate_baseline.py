@@ -33,11 +33,20 @@ def build_api_url(host: str, port: str) -> str:
     return f"{parsed_host.scheme}://{parsed_host.hostname}:{port}/api/v1/describe/upload"
 
 
-def get_image_paths(images_directory: Path) -> list[Path]:
+def get_image_paths(images_directory: Path, limit: int | None = None) -> list[Path]:
     """Return the non-hidden files directly within an images directory."""
-    return sorted(
+    image_paths = sorted(
         path for path in images_directory.iterdir() if path.is_file() and not path.name.startswith(".")
     )
+    return image_paths[:limit]
+
+
+def positive_integer(value: str) -> int:
+    """Parse a command-line argument that must be greater than zero."""
+    number = int(value)
+    if number <= 0:
+        raise argparse.ArgumentTypeError("must be greater than zero")
+    return number
 
 
 def get_comparable_result(response: dict) -> dict:
@@ -91,6 +100,11 @@ def parse_args() -> argparse.Namespace:
         "--suffix",
         help="Optional label appended to the timestamped output directory name.",
     )
+    parser.add_argument(
+        "--limit",
+        type=positive_integer,
+        help="Process only the first N images in filename order.",
+    )
     return parser.parse_args()
 
 
@@ -128,7 +142,7 @@ def main() -> int:
         run_id = f"{run_id}_{args.suffix}"
     output_directory = PROJECT_ROOT / "output" / run_id
 
-    image_paths = get_image_paths(images_directory)
+    image_paths = get_image_paths(images_directory, args.limit)
     if not image_paths:
         print(f"No images found in: {images_directory}", file=sys.stderr)
         return 1
