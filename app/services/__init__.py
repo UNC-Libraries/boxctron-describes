@@ -4,11 +4,13 @@ from app.services.describe_image_workflow import DescribeImageWorkflow
 from app.services.image_description_service import ImageDescriptionService
 from app.services.review_assessment_service import ReviewAssessmentService
 from app.services.authentication_service import AuthenticationService
+from app.services.evaluation_service import EvaluationService
 
 __all__ = [
     "ImageNormalizer",
     "DescribeImageWorkflow",
     "ImageDescriptionService",
     "ReviewAssessmentService",
-    "AuthenticationService"
+    "AuthenticationService",
+    "EvaluationService",
 ]

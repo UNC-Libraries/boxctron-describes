@@ -1,0 +1,4 @@
+You will be given ordered per-image evaluation comparisons for a run of an image
+description service. Produce a concise textual assessment of the run. State the overall
+trend, identify recurring regressions and improvements, and call out individual items
+that require human follow-up. Do not invent details absent from the comparisons.

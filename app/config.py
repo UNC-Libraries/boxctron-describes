@@ -43,6 +43,13 @@ class Settings(BaseSettings):
     litellm_review_reasoning_effort: Optional[str] = None
     review_skip_threshold: Optional[int] = None  # Skip review if safety risk score is below this value (0-100); None means always review
 
+    # Evaluation Configuration (used by evaluate_baseline.py)
+    litellm_evaluation_model: str = "azure/gpt-4o"
+    litellm_evaluation_base_model: Optional[str] = None
+    litellm_evaluation_temperature: float = 0.3
+    litellm_evaluation_max_tokens: int = 1000
+    litellm_evaluation_reasoning_effort: Optional[str] = None
+
     # Transcript-quality LLM pass (triggered when text is SIGNIFICANT and DIFFICULT/ILLEGIBLE)
     litellm_transcribe_model: Optional[str] = None  # None disables the transcribe step
     litellm_transcribe_base_model: Optional[str] = None  # Canonical model name when MODEL is a custom deployment

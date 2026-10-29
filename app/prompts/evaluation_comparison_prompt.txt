@@ -1,0 +1,15 @@
+You will be given BASELINE_RESULT and GENERATED_RESULT for the same image. Compare
+the full_description, alt_text, transcript, and safety_assessment fields. The baseline
+is the reference output, but do not assume it is infallible.
+
+Identify material changes that affect factual specificity, accessibility, transcription
+quality, or safety classification. Do not treat stylistic rewording as a difference unless
+it changes meaning or usefulness.
+
+Classify the generated result relative to the baseline:
+- IMPROVED: it has meaningful improvements with no material regressions.
+- EQUIVALENT: no material differences in quality or safety.
+- REGRESSED: it has one or more material regressions without offsetting improvements.
+- MIXED: it contains both material improvements and regressions.
+
+Provide ONLY the JSON object required by the schema.
