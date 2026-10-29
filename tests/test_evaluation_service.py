@@ -30,11 +30,11 @@ def test_compare_results_returns_structured_assessment(mock_completion):
     mock_completion.return_value = mock_response(
         json.dumps(
             {
-                "summary": "The generated description is equally useful.",
+                "summary": "The generated description matches the baseline.",
                 "regressions": [],
                 "improvements": [],
                 "notable_differences": [],
-                "verdict": "EQUIVALENT",
+                "verdict": "MATCHES_BASELINE",
             }
         )
     )
@@ -45,7 +45,7 @@ def test_compare_results_returns_structured_assessment(mock_completion):
         {"full_description": "Generated", "alt_text": "Generated", "transcript": "", "safety_assessment": {}},
     )
 
-    assert result["verdict"] == "EQUIVALENT"
+    assert result["verdict"] == "MATCHES_BASELINE"
     call_args = mock_completion.call_args.kwargs
     assert call_args["model"] == "azure/gpt-4o"
     assert "response_format" in call_args
@@ -58,7 +58,9 @@ def test_generate_overall_assessment_returns_model_text(mock_completion):
     mock_completion.return_value = mock_response("The results are broadly equivalent.")
     service = EvaluationService(build_settings())
 
-    result = service.generate_overall_assessment([{"filename": "image.jpg", "verdict": "EQUIVALENT"}])
+    result = service.generate_overall_assessment(
+        [{"filename": "image.jpg", "verdict": "MATCHES_BASELINE"}]
+    )
 
     assert result == "The results are broadly equivalent."
     call_args = mock_completion.call_args.kwargs

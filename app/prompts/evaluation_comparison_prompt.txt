@@ -2,14 +2,23 @@ You will be given BASELINE_RESULT and GENERATED_RESULT for the same image. Compa
 the full_description, alt_text, transcript, and safety_assessment fields. The baseline
 is the reference output, but do not assume it is infallible.
 
-Identify material changes that affect factual specificity, accessibility, transcription
-quality, or safety classification. Do not treat stylistic rewording as a difference unless
-it changes meaning or usefulness.
+Evaluate material differences in this priority order:
+1. Factual faithfulness: flag unsupported assertions or hallucinated details relative to
+   the baseline.
+2. Completeness: flag omission of important information present in the baseline.
+3. Interpretation: flag changed interpretations of people, events, text, objects, or
+   safety-relevant content.
+4. Quality: assess accessibility, transcription quality, safety classification, conciseness,
+   and wording after the higher-priority concerns.
+
+Do not treat stylistic rewording as a difference unless it changes meaning or usefulness.
+Without the source image, assess deviation from the baseline rather than factual truth.
 
 Classify the generated result relative to the baseline:
-- IMPROVED: it has meaningful improvements with no material regressions.
-- EQUIVALENT: no material differences in quality or safety.
-- REGRESSED: it has one or more material regressions without offsetting improvements.
-- MIXED: it contains both material improvements and regressions.
+- MATCHES_BASELINE: No material loss or unsupported deviation.
+- MINOR_DIFFERENCES: Differences are present but appear non-material.
+- POTENTIAL_REGRESSION: Omission, unsupported assertion, interpretation change, or safety mismatch.
+- MIXED: Both meaningful gains and potential regressions.
+- NEEDS_HUMAN_REVIEW: The comparison cannot determine whether a material difference is correct.
 
 Provide ONLY the JSON object required by the schema.

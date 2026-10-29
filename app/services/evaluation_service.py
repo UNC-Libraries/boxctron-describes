@@ -108,7 +108,13 @@ class EvaluationService:
         missing = required_fields - result.keys()
         if missing:
             raise ValueError(f"Missing required fields: {', '.join(sorted(missing))}")
-        if result["verdict"] not in {"IMPROVED", "EQUIVALENT", "REGRESSED", "MIXED"}:
+        if result["verdict"] not in {
+            "MATCHES_BASELINE",
+            "MINOR_DIFFERENCES",
+            "POTENTIAL_REGRESSION",
+            "MIXED",
+            "NEEDS_HUMAN_REVIEW",
+        }:
             raise ValueError("Invalid verdict")
 
     @staticmethod
@@ -127,7 +133,13 @@ class EvaluationService:
                         "notable_differences": {"type": "array", "items": {"type": "string"}},
                         "verdict": {
                             "type": "string",
-                            "enum": ["IMPROVED", "EQUIVALENT", "REGRESSED", "MIXED"],
+                            "enum": [
+                                "MATCHES_BASELINE",
+                                "MINOR_DIFFERENCES",
+                                "POTENTIAL_REGRESSION",
+                                "MIXED",
+                                "NEEDS_HUMAN_REVIEW",
+                            ],
                         },
                     },
                     "required": [
