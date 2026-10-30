@@ -4,13 +4,12 @@ Main application entry point for boxctron-describes.
 A FastAPI microservice for generating descriptive information from images.
 """
 import logging
-import os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-import litellm
 
 from app.config import settings
+from app.litellm_config import configure_litellm
 from app.logging_config import setup_logging
 from app.api.routes import describe_router, health_router
 from app.exception_handlers import register_exception_handlers
@@ -19,22 +18,7 @@ from app.exception_handlers import register_exception_handlers
 setup_logging(settings)
 logger = logging.getLogger(__name__)
 
-# Configure LiteLLM
-litellm.drop_params = settings.litellm_drop_params
-
-# Set environment variables that LiteLLM expects for Azure OpenAI
-if settings.azure_openai_api_key:
-    os.environ["AZURE_API_KEY"] = settings.azure_openai_api_key
-if settings.azure_openai_endpoint:
-    os.environ["AZURE_API_BASE"] = settings.azure_openai_endpoint
-if settings.azure_openai_api_version:
-    os.environ["AZURE_API_VERSION"] = settings.azure_openai_api_version
-
-# Set environment variables for other providers
-if settings.google_api_key:
-    os.environ["GOOGLE_API_KEY"] = settings.google_api_key
-if settings.anthropic_api_key:
-    os.environ["ANTHROPIC_API_KEY"] = settings.anthropic_api_key
+configure_litellm(settings)
 
 
 @asynccontextmanager

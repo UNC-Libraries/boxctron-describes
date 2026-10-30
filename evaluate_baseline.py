@@ -15,6 +15,7 @@ from dotenv import dotenv_values
 
 from app.config import Settings
 from app.services.evaluation_service import EvaluationService
+from app.litellm_config import configure_litellm
 
 
 PROJECT_ROOT = Path(__file__).resolve().parent
@@ -201,7 +202,9 @@ def main() -> int:
     failures = 0
     completed_comparisons = []
     comparisons_updated = False
-    evaluation_service = EvaluationService(Settings(_env_file=PROJECT_ROOT / ".env"))
+    evaluation_settings = Settings(_env_file=PROJECT_ROOT / ".env")
+    configure_litellm(evaluation_settings)
+    evaluation_service = EvaluationService(evaluation_settings)
     with httpx.Client(timeout=None, headers={"X-API-Key": api_key}) as client:
         for image_path in image_paths:
             output_path = output_directory / f"{image_path.name}.json"
