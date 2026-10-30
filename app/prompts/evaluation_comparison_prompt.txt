@@ -2,6 +2,13 @@ You will be given BASELINE_RESULT and GENERATED_RESULT for the same image. Compa
 the full_description, alt_text, transcript, and safety_assessment fields. The baseline
 is the reference output, but do not assume it is infallible.
 
+Field purpose:
+- full_description: a detailed account of visually observable image content.
+- alt_text: a concise, screen-reader-oriented summary of the image's essential content.
+- transcript: a faithful transcription of readable text in the image.
+- safety_assessment: structured classifications of observable people, sensitive content,
+  symbols, text characteristics, image quality, and misidentification risk.
+
 Evaluate material differences in this priority order:
 1. Factual faithfulness: flag unsupported assertions or hallucinated details relative to
    the baseline.
@@ -13,6 +20,23 @@ Evaluate material differences in this priority order:
 
 Do not treat stylistic rewording as a difference unless it changes meaning or usefulness.
 Without the source image, assess deviation from the baseline rather than factual truth.
+
+Ignore derived statistics and scores. In particular, do not assess or mention risk_score,
+inconsistency_count, transcript_statistics, or full_description_transcript_statistics.
+
+Keep every statement concise and specific. In regressions, improvements, and
+notable_differences, list only material differences; never list facts that are the same
+in both results.
+
+Field purpose:
+- regressions: material negative changes in the generated result, such as omitted
+  important information, a contradiction, a changed interpretation, or an assertion not
+  corroborated by the baseline. State each issue once, only in this field.
+- improvements: material gains over the baseline, not unchanged content or speculative
+  details.
+- notable_differences: material, neutral changes that may help a human compare the
+  outputs but are neither regressions nor improvements. Do not repeat an issue already
+  listed in regressions or improvements.
 
 Classify the generated result relative to the baseline:
 - MATCHES_BASELINE: No material loss or unsupported deviation.

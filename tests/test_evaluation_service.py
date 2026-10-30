@@ -86,3 +86,12 @@ def test_completion_params_passes_configured_api_key():
     params = EvaluationService(settings)._completion_params([])
 
     assert params["api_key"] == "custom-key"
+
+
+def test_comparison_prompt_excludes_derived_statistics_and_unchanged_content():
+    prompt = EvaluationService(build_settings()).comparison_prompt
+
+    assert "transcript_statistics" in prompt
+    assert "never list facts that are the same" in prompt
+    assert "full_description: a detailed account" in prompt
+    assert "Do not repeat an issue already" in prompt
