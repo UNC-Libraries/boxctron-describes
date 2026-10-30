@@ -85,6 +85,37 @@ def write_json(path: Path, content: dict) -> None:
     path.write_text(json.dumps(content, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
 
 
+def load_json(path: Path) -> dict | None:
+    """Load a JSON object, returning None when the artifact is missing or invalid."""
+    try:
+        with path.open(encoding="utf-8") as output_file:
+            content = json.load(output_file)
+    except (OSError, json.JSONDecodeError):
+        return None
+    return content if isinstance(content, dict) else None
+
+
+def load_completed_comparison(comparison_path: Path) -> dict | None:
+    """Return a successful comparison artifact, if one is available."""
+    comparison = load_json(comparison_path)
+    required_fields = {
+        "filename",
+        "status",
+        "summary",
+        "regressions",
+        "improvements",
+        "notable_differences",
+        "verdict",
+    }
+    if (
+        comparison
+        and comparison.get("status") == "success"
+        and required_fields.issubset(comparison)
+    ):
+        return comparison
+    return None
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Submit fixture images to a running boxctron-describes instance."
@@ -96,9 +127,15 @@ def parse_args() -> argparse.Namespace:
         default=DEFAULT_FIXTURES_PROJECT,
         help=f"Fixtures project path (default: {DEFAULT_FIXTURES_PROJECT})",
     )
-    parser.add_argument(
+    output_options = parser.add_mutually_exclusive_group()
+    output_options.add_argument(
         "--suffix",
         help="Optional label appended to the timestamped output directory name.",
+    )
+    output_options.add_argument(
+        "--resume",
+        type=Path,
+        help="Resume a prior output directory, retrying only incomplete or failed work.",
     )
     parser.add_argument(
         "--limit",
@@ -137,69 +174,95 @@ def main() -> int:
         print(str(error), file=sys.stderr)
         return 1
 
-    run_id = datetime.now().strftime("%Y%m%d%H%M%S")
-    if args.suffix:
-        run_id = f"{run_id}_{args.suffix}"
-    output_directory = PROJECT_ROOT / "output" / run_id
-
     image_paths = get_image_paths(images_directory, args.limit)
     if not image_paths:
         print(f"No images found in: {images_directory}", file=sys.stderr)
         return 1
 
-    if output_directory.exists():
-        print(f"Output directory already exists: {output_directory}", file=sys.stderr)
-        return 1
-    output_directory.mkdir(parents=True)
+    if args.resume:
+        output_directory = args.resume
+        if not output_directory.is_dir():
+            print(f"Output directory does not exist: {output_directory}", file=sys.stderr)
+            return 1
+    else:
+        run_id = datetime.now().strftime("%Y%m%d%H%M%S")
+        if args.suffix:
+            run_id = f"{run_id}_{args.suffix}"
+        output_directory = PROJECT_ROOT / "output" / run_id
+        if output_directory.exists():
+            print(f"Output directory already exists: {output_directory}", file=sys.stderr)
+            return 1
+        output_directory.mkdir(parents=True)
+
     comparisons_directory = output_directory / "comparisons"
-    comparisons_directory.mkdir()
+    comparisons_directory.mkdir(exist_ok=True)
 
     api_key = api_keys.split(",", maxsplit=1)[0].strip()
     failures = 0
     completed_comparisons = []
+    comparisons_updated = False
     evaluation_service = EvaluationService(Settings(_env_file=PROJECT_ROOT / ".env"))
     with httpx.Client(timeout=None, headers={"X-API-Key": api_key}) as client:
         for image_path in image_paths:
-            print(f"Describing {image_path.name}")
             output_path = output_directory / f"{image_path.name}.json"
             comparison_path = comparisons_directory / f"{image_path.name}.json"
-            # Submit image for generation of description using current boxctron-describes states
+            # Use the previously successfully generated output if resuming and available
+            content = load_json(output_path) if args.resume else None
             try:
-                with image_path.open("rb") as image_file:
-                    response = client.post(
-                        api_url,
-                        files={"file": (image_path.name, image_file)},
+                get_comparable_result(content) if content else None
+            except ValueError:
+                content = None
+
+            description_updated = content is None
+            comparisons_updated = comparisons_updated or description_updated
+            if content is None:
+                # Submit image for generation of description using current boxctron-describes states
+                print(f"Describing {image_path.name}")
+                try:
+                    with image_path.open("rb") as image_file:
+                        response = client.post(
+                            api_url,
+                            files={"file": (image_path.name, image_file)},
+                        )
+                except httpx.HTTPError as error:
+                    failures += 1
+                    error_message = f"Upload failed: {error}"
+                    write_json(output_path, {"error": error_message})
+                    write_json(
+                        comparison_path,
+                        {"filename": image_path.name, "status": "error", "error": error_message},
                     )
-            except httpx.HTTPError as error:
-                failures += 1
-                error_message = f"Upload failed: {error}"
-                write_json(output_path, {"error": error_message})
-                write_json(
-                    comparison_path,
-                    {"filename": image_path.name, "status": "error", "error": error_message},
-                )
-                print(f"  {error_message}", file=sys.stderr)
+                    print(f"  {error_message}", file=sys.stderr)
+                    continue
+
+                try:
+                    content = response.json()
+                except json.JSONDecodeError:
+                    content = {"status_code": response.status_code, "response_text": response.text}
+                write_json(output_path, content)
+
+                if response.is_error:
+                    failures += 1
+                    error_message = f"API returned HTTP {response.status_code}"
+                    write_json(
+                        comparison_path,
+                        {"filename": image_path.name, "status": "error", "error": error_message},
+                    )
+                    print(f"  {error_message}", file=sys.stderr)
+                    continue
+            else:
+                print(f"Reusing description for {image_path.name}")
+
+            comparison_record = (
+                load_completed_comparison(comparison_path)
+                if args.resume and not description_updated
+                else None
+            )
+            if comparison_record:
+                completed_comparisons.append(comparison_record)
+                print(f"  Reusing comparison: {comparison_record.get('verdict', 'unknown verdict')}")
                 continue
 
-            try:
-                content = response.json()
-            except json.JSONDecodeError:
-                content = {"status_code": response.status_code, "response_text": response.text}
-
-            output_path = output_path
-            write_json(output_path, content)
-
-            if response.is_error:
-                failures += 1
-                error_message = f"API returned HTTP {response.status_code}"
-                write_json(
-                    comparison_path,
-                    {"filename": image_path.name, "status": "error", "error": error_message},
-                )
-                print(f"  {error_message}", file=sys.stderr)
-                continue
-
-            # Load the baseline description and generate a comparison between it and the new output
             try:
                 baseline_result = load_baseline_result(baseline_directory / f"{image_path.name}.json")
                 generated_result = get_comparable_result(content)
@@ -217,19 +280,29 @@ def main() -> int:
             comparison_record = {"filename": image_path.name, "status": "success", **comparison}
             write_json(comparison_path, comparison_record)
             completed_comparisons.append(comparison_record)
+            comparisons_updated = True
             print(f"  {comparison['verdict']}: {comparison['summary']}")
 
     overall_assessment_path = output_directory / "overall_assessment.txt"
+    should_generate_overall = (
+        not args.resume
+        or comparisons_updated
+        or not overall_assessment_path.is_file()
+        or overall_assessment_path.read_text(encoding="utf-8").startswith("Overall assessment model failed:")
+    )
     if completed_comparisons:
-        try:
-            overall_assessment = evaluation_service.generate_overall_assessment(completed_comparisons)
-            overall_assessment_path.write_text(overall_assessment + "\n", encoding="utf-8")
-            print("\nOverall assessment:\n" + overall_assessment)
-        except Exception as error:
-            failures += 1
-            error_message = f"Overall assessment model failed: {error}"
-            overall_assessment_path.write_text(error_message + "\n", encoding="utf-8")
-            print(error_message, file=sys.stderr)
+        if should_generate_overall:
+            try:
+                overall_assessment = evaluation_service.generate_overall_assessment(completed_comparisons)
+                overall_assessment_path.write_text(overall_assessment + "\n", encoding="utf-8")
+                print("\nOverall assessment:\n" + overall_assessment)
+            except Exception as error:
+                failures += 1
+                error_message = f"Overall assessment model failed: {error}"
+                overall_assessment_path.write_text(error_message + "\n", encoding="utf-8")
+                print(error_message, file=sys.stderr)
+        else:
+            print("\nOverall assessment:\n" + overall_assessment_path.read_text(encoding="utf-8").rstrip())
     else:
         overall_assessment_path.write_text("No successful comparisons were generated.\n", encoding="utf-8")
 

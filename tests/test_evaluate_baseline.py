@@ -9,6 +9,7 @@ from evaluate_baseline import (
     build_api_url,
     get_comparable_result,
     get_image_paths,
+    load_completed_comparison,
     load_baseline_result,
     positive_integer,
 )
@@ -80,3 +81,28 @@ def test_get_comparable_result_rejects_missing_fields():
                 }
             }
         )
+
+
+def test_load_completed_comparison_rejects_error_and_incomplete_artifacts(tmp_path: Path):
+    comparison_path = tmp_path / "image.jpg.json"
+    comparison_path.write_text('{"status": "error"}', encoding="utf-8")
+    assert load_completed_comparison(comparison_path) is None
+
+    comparison_path.write_text('{"status": "success", "filename": "image.jpg"}', encoding="utf-8")
+    assert load_completed_comparison(comparison_path) is None
+
+    comparison_path.write_text(
+        json.dumps(
+            {
+                "filename": "image.jpg",
+                "status": "success",
+                "summary": "No material difference.",
+                "regressions": [],
+                "improvements": [],
+                "notable_differences": [],
+                "verdict": "MATCHES_BASELINE",
+            }
+        ),
+        encoding="utf-8",
+    )
+    assert load_completed_comparison(comparison_path) is not None

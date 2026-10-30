@@ -205,6 +205,12 @@ Use `--limit` for a smaller smoke test, or provide a different fixtures project 
 venv/bin/python evaluate_baseline.py /path/to/fixtures --limit 2 --suffix smoke_test
 ```
 
+Resume a prior run to retry only failed or missing descriptions and comparisons:
+
+```bash
+venv/bin/python evaluate_baseline.py --resume output/20261030092816_smoke_test
+```
+
 The script uses `HOST`, `PORT`, `API_KEYS`, and `LITELLM_EVALUATION_*` from `.env`.
 It writes generated responses, per-image comparisons, and an overall assessment beneath
 `output/<run_id>/`.
