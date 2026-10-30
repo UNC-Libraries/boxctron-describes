@@ -11,6 +11,7 @@ def build_settings() -> Mock:
     settings.litellm_evaluation_model = "azure/gpt-4o"
     settings.litellm_evaluation_base_model = None
     settings.litellm_evaluation_api_base = None
+    settings.litellm_evaluation_api_key = None
     settings.litellm_evaluation_temperature = 0.3
     settings.litellm_evaluation_max_tokens = 1000
     settings.litellm_evaluation_reasoning_effort = None
@@ -76,3 +77,12 @@ def test_completion_params_passes_configured_api_base():
     params = EvaluationService(settings)._completion_params([])
 
     assert params["api_base"] == "https://litellm.example"
+
+
+def test_completion_params_passes_configured_api_key():
+    settings = build_settings()
+    settings.litellm_evaluation_api_key = "custom-key"
+
+    params = EvaluationService(settings)._completion_params([])
+
+    assert params["api_key"] == "custom-key"

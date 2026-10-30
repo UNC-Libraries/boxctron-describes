@@ -110,6 +110,8 @@ class ReviewAssessmentService:
                 completion_params["base_model"] = self.settings.litellm_review_base_model
             if self.settings.litellm_review_api_base:
                 completion_params["api_base"] = self.settings.litellm_review_api_base
+            if self.settings.litellm_review_api_key:
+                completion_params["api_key"] = self.settings.litellm_review_api_key
 
             last_exc: Exception = ValueError("No attempts made")
             response = None

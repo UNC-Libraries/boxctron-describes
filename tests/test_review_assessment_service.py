@@ -16,6 +16,7 @@ def mock_settings():
     settings.litellm_review_model = "azure/gpt-4o"
     settings.litellm_review_base_model = None
     settings.litellm_review_api_base = None
+    settings.litellm_review_api_key = None
     settings.litellm_review_temperature = 0.3
     settings.litellm_review_max_tokens = 500
     settings.litellm_review_reasoning_effort = "low"
@@ -199,6 +200,32 @@ def test_generate_review_assessment_passes_configured_api_base(
     )
 
     assert mock_completion.call_args[1]["api_base"] == "https://litellm.example"
+
+
+@patch("app.services.review_assessment_service.completion")
+def test_generate_review_assessment_passes_configured_api_key(
+    mock_completion, service, mock_settings, sample_safety_assessment
+):
+    mock_response = Mock()
+    mock_response.choices = [Mock()]
+    mock_response.choices[0].message.content = json.dumps({
+        "bias": "N", "stereo": "N", "val_judg": "N", "contra_btwn": "N",
+        "contra_within": "N", "offensive": "N", "incon_demog": "N", "euphemism": "N",
+        "ppl_first": "NA", "unsup_infer": "N", "safety_consist": "CON",
+        "concerns": [], "src_warn": [],
+    })
+    mock_completion.return_value = mock_response
+    mock_settings.litellm_review_api_key = "custom-key"
+
+    service.generate_review_assessment(
+        full_description="Description",
+        transcript="",
+        safety_assessment=sample_safety_assessment,
+        safety_assessment_reasoning="",
+        alt_text="Alt text",
+    )
+
+    assert mock_completion.call_args[1]["api_key"] == "custom-key"
 
 
 @patch("app.services.review_assessment_service.completion")

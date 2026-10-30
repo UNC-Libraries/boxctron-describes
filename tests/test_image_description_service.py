@@ -16,6 +16,7 @@ def mock_settings():
     settings.litellm_full_desc_model = "azure/gpt-4o"
     settings.litellm_full_desc_base_model = None
     settings.litellm_full_desc_api_base = None
+    settings.litellm_full_desc_api_key = None
     settings.litellm_full_desc_temperature = 0.7
     settings.litellm_full_desc_max_tokens = 1000
     settings.litellm_full_desc_reasoning_effort = "low"
@@ -222,6 +223,20 @@ def test_api_base_is_passed_when_configured(mock_completion, mock_settings, samp
     ImageDescriptionService(mock_settings).generate_description("data:image/jpeg;base64,abc123")
 
     assert mock_completion.call_args[1]["api_base"] == "https://litellm.example"
+
+
+@patch("app.services.image_description_service.completion")
+def test_api_key_is_passed_when_configured(mock_completion, mock_settings, sample_llm_response):
+    """Test that the full-description call can use a custom endpoint API key."""
+    mock_response = Mock()
+    mock_response.choices = [Mock()]
+    mock_response.choices[0].message.content = json.dumps(sample_llm_response)
+    mock_completion.return_value = mock_response
+    mock_settings.litellm_full_desc_api_key = "custom-key"
+
+    ImageDescriptionService(mock_settings).generate_description("data:image/jpeg;base64,abc123")
+
+    assert mock_completion.call_args[1]["api_key"] == "custom-key"
 
 
 @patch("app.services.image_description_service.completion")

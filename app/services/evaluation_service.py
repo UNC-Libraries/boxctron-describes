@@ -96,6 +96,8 @@ class EvaluationService:
             params["base_model"] = self.settings.litellm_evaluation_base_model
         if self.settings.litellm_evaluation_api_base:
             params["api_base"] = self.settings.litellm_evaluation_api_base
+        if self.settings.litellm_evaluation_api_key:
+            params["api_key"] = self.settings.litellm_evaluation_api_key
         return params
 
     @staticmethod

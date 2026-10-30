@@ -34,7 +34,7 @@ class ImageDescriptionService:
         self.timeout: Optional[float] = None
         self.media_resolution: Optional[str] = None
         self.api_base = settings.litellm_full_desc_api_base
-        self.api_key: Optional[str] = None
+        self.api_key = settings.litellm_full_desc_api_key
         self.step_name = "image description"
 
         # Load the task prompt template
