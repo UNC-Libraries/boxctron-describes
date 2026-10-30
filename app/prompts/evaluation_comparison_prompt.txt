@@ -19,6 +19,9 @@ Evaluate material differences in this priority order:
    and wording after the higher-priority concerns.
 
 Do not treat stylistic rewording as a difference unless it changes meaning or usefulness.
+For transcripts, ignore non-semantic formatting differences such as line breaks,
+whitespace, and punctuation unless they change meaning, readability, or the transcription
+of a word or number.
 Without the source image, assess deviation from the baseline rather than factual truth.
 
 Ignore derived statistics and scores. In particular, do not assess or mention risk_score,

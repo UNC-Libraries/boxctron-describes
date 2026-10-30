@@ -95,3 +95,4 @@ def test_comparison_prompt_excludes_derived_statistics_and_unchanged_content():
     assert "never list facts that are the same" in prompt
     assert "full_description: a detailed account" in prompt
     assert "Do not repeat an issue already" in prompt
+    assert "ignore non-semantic formatting differences" in prompt
