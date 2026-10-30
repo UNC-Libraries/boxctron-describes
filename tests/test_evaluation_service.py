@@ -10,6 +10,7 @@ def build_settings() -> Mock:
     settings = Mock(spec=Settings)
     settings.litellm_evaluation_model = "azure/gpt-4o"
     settings.litellm_evaluation_base_model = None
+    settings.litellm_evaluation_api_base = None
     settings.litellm_evaluation_temperature = 0.3
     settings.litellm_evaluation_max_tokens = 1000
     settings.litellm_evaluation_reasoning_effort = None
@@ -66,3 +67,12 @@ def test_generate_overall_assessment_returns_model_text(mock_completion):
     call_args = mock_completion.call_args.kwargs
     assert "response_format" not in call_args
     assert '"filename": "image.jpg"' in call_args["messages"][1]["content"]
+
+
+def test_completion_params_passes_configured_api_base():
+    settings = build_settings()
+    settings.litellm_evaluation_api_base = "https://litellm.example"
+
+    params = EvaluationService(settings)._completion_params([])
+
+    assert params["api_base"] == "https://litellm.example"

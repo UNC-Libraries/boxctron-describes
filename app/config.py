@@ -29,6 +29,7 @@ class Settings(BaseSettings):
     # LiteLLM Configuration
     litellm_full_desc_model: str = "azure/gpt-4o"
     litellm_full_desc_base_model: Optional[str] = None  # Canonical model name when MODEL is a custom Azure deployment
+    litellm_full_desc_api_base: Optional[str] = None  # Custom endpoint (e.g. LiteLLM proxy)
     litellm_full_desc_temperature: float = 0.7
     litellm_full_desc_max_tokens: int = 1000
     litellm_full_desc_reasoning_effort: str = "low"
@@ -38,6 +39,7 @@ class Settings(BaseSettings):
     # Review Assessment Configuration
     litellm_review_model: str = "azure/gpt-4o"
     litellm_review_base_model: Optional[str] = None  # Canonical model name when MODEL is a custom Azure deployment
+    litellm_review_api_base: Optional[str] = None  # Custom endpoint (e.g. LiteLLM proxy)
     litellm_review_temperature: float = 0.3
     litellm_review_max_tokens: int = 500
     litellm_review_reasoning_effort: Optional[str] = None
@@ -46,6 +48,7 @@ class Settings(BaseSettings):
     # Evaluation Configuration (used by evaluate_baseline.py)
     litellm_evaluation_model: str = "azure/gpt-4o"
     litellm_evaluation_base_model: Optional[str] = None
+    litellm_evaluation_api_base: Optional[str] = None  # Custom endpoint (e.g. LiteLLM proxy)
     litellm_evaluation_temperature: float = 0.3
     litellm_evaluation_max_tokens: int = 1000
     litellm_evaluation_reasoning_effort: Optional[str] = None

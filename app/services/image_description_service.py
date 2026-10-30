@@ -33,7 +33,7 @@ class ImageDescriptionService:
         self.reasoning_effort = settings.litellm_full_desc_reasoning_effort
         self.timeout: Optional[float] = None
         self.media_resolution: Optional[str] = None
-        self.api_base: Optional[str] = None
+        self.api_base = settings.litellm_full_desc_api_base
         self.api_key: Optional[str] = None
         self.step_name = "image description"
 

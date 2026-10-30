@@ -94,6 +94,8 @@ class EvaluationService:
             params["reasoning_effort"] = self.settings.litellm_evaluation_reasoning_effort
         if self.settings.litellm_evaluation_base_model:
             params["base_model"] = self.settings.litellm_evaluation_base_model
+        if self.settings.litellm_evaluation_api_base:
+            params["api_base"] = self.settings.litellm_evaluation_api_base
         return params
 
     @staticmethod
